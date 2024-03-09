@@ -8,8 +8,8 @@
 	<a href="https://github.com/TheCodeRaccoons/WebflowTrickery/graphs/contributors">
 		<img alt="GitHub contributors" src="https://img.shields.io/github/contributors-anon/TheCodeRaccoons/WebflowTrickery?color=%2360be86&style=for-the-badge">
 	</a>
-	<a href="https://github.com/TheCodeRaccoons/WebflowTrickery/issues?q=is%3Aopen+is%3Aissue+label%3Arequest%3Aicon">
-		<img alt="GitHub issues by-label" src="https://img.shields.io/github/issues/TheCodeRaccoons/WebflowTrickery/request:icon?color=%2360be86&label=icon%20requests&style=for-the-badge">
+	<a href="https://github.com/TheCodeRaccoons/WebflowTrickery/issues/new?assignees=&labels=Functionality+Request&projects=&template=request-functionality.yml&title=%5BFUNCTIONALITY+REQUEST%5D%3A+request+name">
+		<img alt="GitHub issues by-label" src="https://img.shields.io/github/issues/TheCodeRaccoons/WebflowTrickery/request:feature?color=%2360be86&label=feature%20requests&style=for-the-badge">
 	</a>
 	<a href="https://github.com/TheCodeRaccoons/WebflowTrickery/stargazers">
 		<img alt="GitHub repository stars" src="https://img.shields.io/github/stars/TheCodeRaccoons/WebflowTrickery?color=%2360be86&label=github%20stars&style=for-the-badge">
@@ -42,7 +42,6 @@ All of the documentation is explained by functionality in <a href="https://coder
     <li><a href="#discord-community">Discord Community</a></li>
     <li><a href="#develop-vs-master"><code>develop</code> vs <code>master</code></a></li>
     <li><a href="#stale-prs">Stale Pull Requests</a></li>
-    <li><a href="#building-devicon">Building Devicon</a></li>
 </ol>
 
 <h2 id="about">About the Project</h2>
@@ -67,12 +66,12 @@ All of the documentation is explained by functionality in <a href="https://coder
     
 <h2 id="request-functionality">Requesting a functionality</h2>
 <p>
-    When you want to request an icon please feel free to create an issue. Check out our <a href="https://github.com/devicons/devicon/wiki/Requesting-an-Icon">Wiki</a> for more information.
+    When you want to request a new functionality please feel free to create an issue. Check out our <a href="https://github.com/TheCodeRaccoons/WebflowTrickery/wiki/Requesting-a-Finctionality">Wiki</a> for more information.
 </p>
 
 <h2 id="contribute">Contributing</h2>
 <p>
-    We are happy with every contribution, whether it's new icons, features, or maintainers. Please have a look at our <a href="https://github.com/devicons/devicon/wiki">Wiki</a> to see how you can contribute to this project.
+    We are happy with every contribution, whether it's new functionalities, fixes, features, or maintainers. Please have a look at our <a href="https://github.com/TheCodeRaccoons/WebflowTrickery/wiki">Wiki</a> to see how you can contribute to this project.
 </p>
 
 <h2 id="discord-community">Discord community</h2>
