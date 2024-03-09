@@ -1,6 +1,6 @@
 ---
 name: Request a functionality
-about: Suggest a functionality that is missing or improve over an existing functionality.
+description: Suggest a functionality that is missing or improve over an existing functionality.
 title: '[FUNCTIONALITY REQUEST]: request name'
 labels: Functionality Request
 body:
