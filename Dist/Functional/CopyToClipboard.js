@@ -1,11 +1,3 @@
-/*
- * Trigger element  = wt-copycb-element="trigger"
- * Target element   = wt-copycb-element="target"
- * textTarget       = wt-copycb-element="textTarget"
- * copiedMsg        = wt-copycb-copiedMsg
- * activeClass      = wt-copycb-activeClass
- */
-
 'use strict'
 
 const UpdateTriggerDisplay = (_txt, _target, _trigger, _class ) => {
