@@ -5,7 +5,6 @@ const UpdateTriggerDisplay = (_txt, _target, _trigger, _class ) => {
         if(_target) _target.innerText = _txt;
         else _trigger.innerHTML = _txt;
     } 
-
     if (_class) _trigger.classList.toggle(_class);
 }
 
