@@ -99,38 +99,3 @@
 [wt-tooltip-content]:not([wt-tooltip-content=""])[wt-tooltip-position~=align-right][wt-tooltip-position~=bottom]::after {
     transform-origin: right top;
 }
-
-.svg-symbols {
-    display: none;
-}
-
-body {
-    margin: 0;
-    font-family: lato, sans-serif;
-    font-size: 16px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    height: 100vh;
-    background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/436544/wyperfeld.jpg);
-    background-size: cover;
-    background-position: center top;
-}
-
-.example-element {
-    height: 36px;
-    width: 36px;
-    margin: 6px;
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.example-element:hover {
-    color: white;
-}
-
-.example-element svg {
-    height: 100%;
-    width: 100%;
-    fill: currentColor;
-}
