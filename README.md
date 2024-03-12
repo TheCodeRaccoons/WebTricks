@@ -14,6 +14,9 @@
 	<a href="https://github.com/TheCodeRaccoons/WebflowTrickery/stargazers">
 		<img alt="GitHub repository stars" src="https://img.shields.io/github/stars/TheCodeRaccoons/WebflowTrickery?color=%2360be86&label=github%20stars&style=for-the-badge">
 	</a>
+	<a href="#">
+		<img alt="GitHub License" src="https://img.shields.io/github/license/TheCodeRaccoons/WebflowTrickery?color=%2360be86&style=for-the-badge">
+	</a>
 </p>
 <br />
 <div align="center">
