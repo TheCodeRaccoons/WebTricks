@@ -5,8 +5,6 @@
 - [ ] PR name matches the format *[ feature ]: <i>Feature Name</i> (<i>versions separated by comma</i>)*. More details [here](https://github.com/TheCodeRaccoons/WebflowTrickery/wiki/Overview-on-Submitting-Features)
 - [ ] PR's base is the `develop` branch.
 - [ ] Your Feature matches the standards laid out [here](https://github.com/TheCodeRaccoons/WebflowTrickery/wiki/Programming-Standards)
-- [ ] A new object is added in the `webflowTrickery.json` file at the correct alphabetic position as seen [here](https://github.com/TheCodeRaccoons/WebflowTrickery/wiki/Updating-%60webflowTrickery.json)
-
 
 <!-- Refer to the [contributing](https://github.com/TheCodeRaccoons/WebflowTrickery/wiki/Contributing) guidelines for more details. -->
 
