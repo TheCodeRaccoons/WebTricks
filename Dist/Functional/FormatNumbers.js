@@ -9,12 +9,14 @@
  * currency uses regular notation for them.
  */
 
+'use strict'
 
 let FormatNo = (element, locales, number, options) => {
     let final = Intl.NumberFormat(locales, options).format(number);
     if (!final) return;
     element.innerHTML = final;
 }
+
 const InitializeFormatNumbers = () => {
     let numbersToFormat = document.querySelectorAll('[wt-formatnumber-element="number"]');
 
