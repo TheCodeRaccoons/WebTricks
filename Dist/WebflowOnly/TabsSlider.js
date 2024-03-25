@@ -1,6 +1,9 @@
 'use strict'
 
-var Webflow = Webflow || [];
+if(!Webflow) {
+    var Webflow = Webflow || [];
+}
+
 Webflow.push(function () {
     //Allow site to load in case there's any extra integrations that require it
     setTimeout(function () {

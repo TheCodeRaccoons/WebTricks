@@ -17,7 +17,43 @@ let FormatNo = (element, locales, number, options) => {
     element.innerHTML = final;
 }
 
+let GetFormatStyle = (_style, _currency, _unit) => {
+    let _options = null;
+
+    if (_style) {
+        switch (_style) {
+            case 'currency':
+                if (!_currency) return;
+                _options = {
+                    style: _style,
+                    currency: _currency
+                }
+                break;
+            case 'decimal':
+                _options = {
+                    style: _style
+                };
+                break;
+            case 'percent':
+                _options = {
+                    style: _style
+                };
+                break;
+            case 'unit':
+                _options = {
+                    style: _style,
+                    unit: _unit
+                };
+                break;
+            default:
+                return null;
+        }
+        return _options
+    }
+}
+
 const InitializeFormatNumbers = () => {
+
     let numbersToFormat = document.querySelectorAll('[wt-formatnumber-element="number"]');
 
     if(!numbersToFormat || numbersToFormat.length === 0) return;
@@ -27,47 +63,20 @@ const InitializeFormatNumbers = () => {
         let style       = numberContainer.getAttribute("wt-formatnumber-style");
         let currency    = numberContainer.getAttribute("wt-formatnumber-currency");
         let unit        = numberContainer.getAttribute("wt-formatnumber-unit");
-        let options     = null;
+        let options     = GetFormatStyle(style, currency, unit);
+        
+        if(!options) return;
 
-        if (style) {
-            switch (style) {
-                case 'currency':
-                    if (!currency) return;
-                    options = {
-                        style: style,
-                        currency: currency
-                    }
-                    break;
-                case 'decimal':
-                    options = {
-                        style: style
-                    };
-                    break;
-                case 'percent':
-                    options = {
-                        style: style
-                    };
-                    break;
-                case 'unit':
-                    options = {
-                        style: style,
-                        unit: unit
-                    };
-                    break;
-                default:
-                    console.log(`undefined`);
-            }
-        }
-    
-        let value = numberContainer.textContent
+        let value = numberContainer.textContent;
+
         if (!value) return;
     
         try {
             FormatNo(numberContainer, locales, value, options);
         } catch (error) {
-            numberContainer.innerHTML = `there was an error processing the format, ${error}`;
+            console.error(`there was an error processing the format, ${error}`);
         }
     }
 }
 
-window.addEventListener('DOMContentLoaded', InitializeFormatNumbers())
+window.addEventListener('DOMContentLoaded', InitializeFormatNumbers());

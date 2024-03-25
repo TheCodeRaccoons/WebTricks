@@ -26,13 +26,11 @@ const SetCopyToClipboard = () => {
                 let timeOut     = _trigger.getAttribute('wt-copycb-timeout') || 2000;
                 let _defaultTxt = _trigger.innerText;
                 let textTarget  = document.querySelector(`[wt-copycb-element="textTarget${index}"]`);
-    
+
                 UpdateTriggerDisplay(copiedTxt, textTarget, _trigger, activeClass);
-    
                 setTimeout(() => {
                     UpdateTriggerDisplay(_defaultTxt, textTarget, _trigger, activeClass);
                 }, timeOut);
-    
                 navigator.clipboard.writeText(textToCopy);
             });
         }
