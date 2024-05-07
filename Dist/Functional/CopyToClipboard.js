@@ -21,11 +21,11 @@ const SetCopyToClipboard = () => {
         if(_target) {
             _trigger.addEventListener('click', () => {
                 let textToCopy  = _target.innerText;
-                let copiedTxt   = _trigger.getAttribute("wt-copycb-copiedMsg");
-                let activeClass = _trigger.getAttribute('wt-copycb-activeClass');
+                let copiedTxt   = _trigger.getAttribute("wt-copycb-message");
+                let activeClass = _trigger.getAttribute('wt-copycb-active');
                 let timeOut     = _trigger.getAttribute('wt-copycb-timeout') || 2000;
                 let _defaultTxt = _trigger.innerText;
-                let textTarget  = document.querySelector(`[wt-copycb-element="textTarget${index}"]`);
+                let textTarget  = document.querySelector(`[wt-copycb-element="text-target${index}"]`);
 
                 UpdateTriggerDisplay(copiedTxt, textTarget, _trigger, activeClass);
                 setTimeout(() => {
