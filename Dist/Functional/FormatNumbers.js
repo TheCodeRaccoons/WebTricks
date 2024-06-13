@@ -1,14 +1,3 @@
-/*
- * Number formating using Intl.NumberFormat.
- * Requirements: 
- * Element with custom attribute fn-formatnumber="true"
- * A Style in the same element to format choosing between "Currency", "decimal", "percent", "unit"
- * In case of the element being "Currency" or "Unit" the sent "fn-formatnumber-currency" or "fn-formatnumber-unit" option
- * Optional: set locales for the formatting
- * list of units can be found here for now: https://tc39.es/proposal-unified-intl-numberformat/section6/locales-currencies-tz_proposed_out.html#sec-issanctionedsimpleunitidentifier
- * currency uses regular notation for them.
- */
-
 'use strict'
 
 let FormatNo = (element, locales, number, options) => {

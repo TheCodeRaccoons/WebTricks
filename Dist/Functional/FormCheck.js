@@ -101,7 +101,6 @@ class FormCheck {
         }
 
         this.form.reset();
-
         this.submitButton.textContent = `${this.defaultSubmitText}`;
     }
 }
