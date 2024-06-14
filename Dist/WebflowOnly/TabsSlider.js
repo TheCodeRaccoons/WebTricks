@@ -1,6 +1,9 @@
 'use strict'
 
-var Webflow = Webflow || [];
+if(!Webflow) {
+    var Webflow = Webflow || [];
+}
+
 Webflow.push(function () {
     //Allow site to load in case there's any extra integrations that require it
     setTimeout(function () {
@@ -12,7 +15,8 @@ Webflow.push(function () {
                 
                 let timeout = tabs.getAttribute("wt-tabSlider-speed") || 5000;
                 let tabBtns = tabs.querySelector("[wt-tabSlider-element='menu']");
-                var tb = Array.from(tabBtns.children);
+                var tb = Array.from(tabBtns.children); 
+                let activeElement = document.activeElement;
 
                 const tabLoop = (tm, timeout) => {
                     tabTimeout = setTimeout(setTabTimeout, timeout, tm); // 5 Second Rotation
@@ -24,6 +28,10 @@ Webflow.push(function () {
                         $next.click(); // user click resets timeout
                     } else {
                         tm.firstChild.click();
+                    }
+                    if(activeElement.nodeName === "INPUT"){
+                        activeElement.focus();
+                        activeElement.dispatchEvent(new KeyboardEvent('keydown', { keyCode: 40}));
                     }
                 }
 
