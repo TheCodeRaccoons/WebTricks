@@ -34,7 +34,6 @@ class RenderStatic {
 
         this.gap = this.gap !== 0 ? this.gap : +this.container.getAttribute("wt-renderstatic-gap") || 0;
 
-        // Stop observing to prevent the observer from reacting to clone removals
         if (this.observer) this.observer.disconnect();
 
         let childrenArray = Array.from(this.container.children);
@@ -55,8 +54,7 @@ class RenderStatic {
                 insertIndex = i + this.gap + 1;
             }
         }
-
-        // Re-observe the container
+        
         this.observeContainer();
     }
 
