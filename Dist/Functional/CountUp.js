@@ -10,7 +10,7 @@ const InitializeCountUp = () => {
         if (!target) return;
         let prefix  = c.getAttribute("wt-countup-prefix") || "";
         let suffix  = c.getAttribute("wt-countup-suffix") || "";
-        let step    = +c.getAttribute("wt-countup-step");
+        let step    = +c.getAttribute("wt-countup-step")  || 1 ;
         let speed   = +c.getAttribute("wt-countup-speed") || 10;
         let v       = 0;
 
