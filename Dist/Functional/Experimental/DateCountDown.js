@@ -14,7 +14,6 @@ const InitializeDateCountDown = () => {
 
     if (!isDateValid(countDownDate)) return;
 
-    // Update the count down every 1 second
     var x = setInterval(function () {
 
         // Get today's date and time
@@ -29,17 +28,18 @@ const InitializeDateCountDown = () => {
             document.getElementById("demo").innerHTML = "EXPIRED";
         }
 
-        const _targetYear = document.querySelector('[wt-datecount-element="target-year"]');
-        const _targetMonth = document.querySelector('[wt-datecount-element="target-month"]');
-        const _targetDay = document.querySelector('[wt-datecount-element="target-day"]');
-        const _targetHour = document.querySelector('[wt-datecount-element="target-hour"]');
-        const _targetMin = document.querySelector('[wt-datecount-element="target-minute"]');
-        const _targetSec = document.querySelector('[wt-datecount-element="target-second"]');
+        const _targetYear   = document.querySelector('[wt-datecount-element="target-year"]');
+        const _targetMonth  = document.querySelector('[wt-datecount-element="target-month"]');
+        const _targetDay    = document.querySelector('[wt-datecount-element="target-day"]');
+        const _targetHour   = document.querySelector('[wt-datecount-element="target-hour"]');
+        const _targetMin    = document.querySelector('[wt-datecount-element="target-minute"]');
+        const _targetSec    = document.querySelector('[wt-datecount-element="target-second"]');
 
         // Time calculations for days, hours, minutes and seconds
         var year    = Math.floor(distance / (1000 * 60 * 60 * 24));
         var month   = Math.floor(distance / (1000 * 60 * 60 * 24));
         var days    = Math.floor(distance / (1000 * 60 * 60 * 24));
+
         var hours   = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         var seconds = Math.floor((distance % (1000 * 60)) / 1000);
@@ -53,3 +53,5 @@ const InitializeDateCountDown = () => {
 
     }, 1000);
 }
+
+window.addEventListener('DOMContentLoaded', InitializeDateCountDown());
