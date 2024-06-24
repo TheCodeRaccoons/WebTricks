@@ -5,17 +5,13 @@ const SetHideContainers = () => {
 
     if(!containers || containers.length === 0) return;
 
-    for(let _container of containers) {
-        let _cmsList    = _container.querySelector('[wt-hidecontainer-element="list"]');
-        let _r          = _container.getAttribute('wt-hidecontainer-remove');
+    containers.forEach((cmsContainer) => {
+        let _cmsList = cmsContainer.querySelector('[wt-hidecontainer-element="list"]');
         if(!_cmsList) return;
-        if(_cmsList.classList.contains("w-dyn-empty")) {
-            if(_r) {
-                _container.remove();
-            }
-            else{
-                _container.style.display = 'none';
-            }
-        }
-    }
+        let _r = cmsContainer.getAttribute('wt-hidecontainer-remove');
+        if(_r) {if(_cmsList.classList.contains("w-dyn-empty")) cmsContainer.remove();}
+        else{if(_cmsList.classList.contains("w-dyn-empty")) cmsContainer.style.display = 'none';}
+    });
+
 }
+window.addEventListener('DOMContentLoaded', SetHideContainers());
