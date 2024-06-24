@@ -12,6 +12,12 @@ const SetHideContainers = () => {
         if(_r) {if(_cmsList.classList.contains("w-dyn-empty")) cmsContainer.remove();}
         else{if(_cmsList.classList.contains("w-dyn-empty")) cmsContainer.style.display = 'none';}
     });
-
 }
-window.addEventListener('DOMContentLoaded', SetHideContainers());
+
+if (/complete|interactive|loaded/.test(document.readyState)) {
+    SetHideContainers();
+} else { 
+    window.addEventListener('DOMContentLoaded', function () { 
+        SetHideContainers();
+    })
+}
