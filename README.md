@@ -17,6 +17,9 @@
 	<a href="#">
 		<img alt="GitHub License" src="https://img.shields.io/github/license/TheCodeRaccoons/WebflowTrickery?color=%2360be86&style=for-the-badge">
 	</a>
+	<a href="blob:https://www.jsdelivr.com/2699fbf9-afc8-4afd-9c41-fbb3e64dc1d3">
+		<img alt="jsDelivr stats" src="blob:https://www.jsdelivr.com/2699fbf9-afc8-4afd-9c41-fbb3e64dc1d3">
+	</a>
 </p>
 <br />
 <div align="center">
