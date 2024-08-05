@@ -16,4 +16,8 @@ const LimitText = () => {
     }
 }
 
-window.addEventListener('DOMContentLoaded', LimitText());
+if (/complete|interactive|loaded/.test(document.readyState)) {
+    LimitText();
+} else { 
+    window.addEventListener('DOMContentLoaded', LimitText)
+}

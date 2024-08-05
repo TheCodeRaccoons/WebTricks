@@ -68,4 +68,8 @@ const InitializeFormatNumbers = () => {
     }
 }
 
-window.addEventListener('DOMContentLoaded', InitializeFormatNumbers());
+if (/complete|interactive|loaded/.test(document.readyState)) {
+    InitializeFormatNumbers();
+} else { 
+    window.addEventListener('DOMContentLoaded', InitializeFormatNumbers)
+}
