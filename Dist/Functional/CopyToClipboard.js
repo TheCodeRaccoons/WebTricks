@@ -38,7 +38,7 @@ const initializeCopyToClipboard = () => {
     const triggers = document.querySelectorAll('[wt-copycb-element="container"]');
     triggers.forEach(trigger => {
         let instance = new CopyToClipboard(trigger);
-        window.trickeries.push({'copyToClipboard': instance});
+        window.trickeries.push({'CopyToClipboard': instance});
     });
 }
 

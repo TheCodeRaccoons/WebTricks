@@ -117,7 +117,7 @@ const initializeFormCheck = () => {
     const forms = document.querySelectorAll('[wt-formcheck-element="form"]');
     forms.forEach(form => {
         let instance = new FormCheck(form);
-        window.trickeries.push({'formCheck': instance});
+        window.trickeries.push({'FormCheck': instance});
     });
 }
 
