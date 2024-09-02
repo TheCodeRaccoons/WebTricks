@@ -23,7 +23,7 @@ const InitializeHideContainer = () => {
     if(!hcElements || hcElements.length === 0) return;
     hcElements.forEach(hcElement => {
         let instance = new HideContainer(hcElement);
-        window.trickeries.push({'CountUp': instance});
+        window.trickeries.push({'HideContainer': instance});
     });
 
 }
