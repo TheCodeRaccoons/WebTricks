@@ -1,53 +1,57 @@
-'use strict'
+'use strict';
 
-const CheckNodelist = (arr) => {
-    return (arr && arr.length !== 0);
-}
+class ShareLink {
+    constructor(element) {
+        this.element = element;
+        this.platform = element.getAttribute('wt-share-element');
+        this.title = document.title;
+        this.url = window.location.href;
+        this.encoded = this.encodeURIParams();
+        this.initializeShareLinks();
+    }
 
-const SetLinks = (_arr, link) => {
-    for(let elem of _arr) {
-        elem.setAttribute("href", link );
-        elem.setAttribute("target", '_blank');
+    encodeURIParams() {
+        let unencodedURI = `${this.url}&title='${this.title}'&description='${this.title}'`;
+        return encodeURI(unencodedURI);
     }
-}
 
-const SetShareLinks = () => {
-    let title           = document.title;
-    let url             = window.location.href;
-    let unencodedURI    = `${url}&title='${title}'&description='${title}'`;
-    let encoded         = encodeURI(unencodedURI);
+    initializeShareLinks() {
+        const socialSelectors = {
+            facebook: `https://www.facebook.com/sharer/sharer.php?u=${this.encoded}`,
+            twitter: `https://twitter.com/share?url=${this.encoded}`,
+            linkedin: `https://www.linkedin.com/shareArticle?mini=true&url='${this.encoded}`,
+            whatsapp: `https://wa.me/?text=${this.encoded}`,
+            pinterest: `http://pinterest.com/pin/create/button/?url=${this.encoded}`,
+            reddit: `http://www.reddit.com/submit?url=${this.encoded}`
+        };
 
-    let social_fb       = document.querySelectorAll('[wt-share-element="facebook"]');
-    let social_tw       = document.querySelectorAll('[wt-share-element="twitter"]');
-    let social_ln       = document.querySelectorAll('[wt-share-element="linkedin"]');
-    let social_wp       = document.querySelectorAll('[wt-share-element="whatsapp"]'); 
-    let social_pi       = document.querySelectorAll('[wt-share-element="pinterest"]'); 
-    let social_red      = document.querySelectorAll('[wt-share-element="reddit"]');  
-    let social_cp       = document.querySelectorAll('[wt-share-element="copy"]');
+        let _link = socialSelectors[this.platform];
+        if(!_link) return; // handle errors if the platform has issues
 
-    if (CheckNodelist(social_fb)) {
-        SetLinks(social_fb,`https://www.facebook.com/sharer/sharer.php?u=${encoded}`);
-    }
-    if (CheckNodelist(social_tw)) {
-        SetLinks(social_tw,`https://twitter.com/share?url=${encoded}`);
-    }
-    if (CheckNodelist(social_ln)) {
-        SetLinks(social_ln,`https://www.linkedin.com/shareArticle?mini=true&url='${encoded}`);
-    }
-    if (CheckNodelist(social_wp)) {
-        SetLinks(social_wp,`https://wa.me/?text=${encoded}`);
-    }
-    if (CheckNodelist(social_pi)) {
-        SetLinks(social_pi,`http://pinterest.com/pin/create/button/?url=${encoded}`);
-    }
-    if (CheckNodelist(social_red)) {
-        SetLinks(social_red,`http://www.reddit.com/submit?url=${encoded}`);
-    } 
-    if (CheckNodelist(social_cp)) {
-        for(let btn of social_cp) {
-            btn.addEventListener('click', () => navigator.clipboard.writeText(`${url}`));
+        if(_link === 'copy') {
+            this.element.addEventListener('click', () => navigator.clipboard.writeText(`${this.url}`));
+        }
+        else{
+            this.element.setAttribute("href", _link);
+            this.element.setAttribute("target", '_blank');
         }
     }
 }
 
-window.addEventListener('DOMContentLoaded', SetShareLinks());
+const InitializeShareLink = () => {
+    window.trickeries = window.trickeries || [];
+    let links = document.querySelectorAll("[wt-share-element]");
+    if (!links || links.length === 0) return;
+
+    links.forEach(link => {
+        let instance = new ShareLink(link);
+        window.trickeries.push({ 'ShareLink': instance });
+    });
+};
+
+// Execute InitializeShareLink when the DOM is fully loaded
+if (/complete|interactive|loaded/.test(document.readyState)) {
+    InitializeShareLink();
+} else {
+    window.addEventListener('DOMContentLoaded', InitializeShareLink);
+}

@@ -112,7 +112,17 @@ class FormCheck {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+const initializeFormCheck = () => {
+    window.trickeries = window.trickeries || [];
     const forms = document.querySelectorAll('[wt-formcheck-element="form"]');
-    forms.forEach(form => new FormCheck(form));
-});
+    forms.forEach(form => {
+        let instance = new FormCheck(form);
+        window.trickeries.push({'FormCheck': instance});
+    });
+}
+
+if (/complete|interactive|loaded/.test(document.readyState)) {
+    initializeFormCheck();
+} else { 
+    window.addEventListener('DOMContentLoaded', initializeFormCheck)
+}
