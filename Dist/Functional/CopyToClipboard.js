@@ -19,8 +19,8 @@ class CopyToClipboard {
 
     copyTextToClipboard() {
         this.updateTriggerDisplay();
-        setTimeout(() => this.resetTriggerDisplay(), this.timeOut);
         navigator.clipboard.writeText(this.textToCopy);
+        setTimeout(() => this.resetTriggerDisplay(), this.timeOut);
     }
 
     updateTriggerDisplay() {
