@@ -82,11 +82,11 @@ class FormCheck {
             e.preventDefault();
         } else {
             if(this.defaultSubmitButton){
-              this.submitButton.textContent = `${this.submitMessage}`;
-              this.defaultSubmitButton.click();
+                if(this.submitMessage) this.submitButton.textContent = `${this.submitMessage}`;
+                this.defaultSubmitButton.click();
             }
             else{
-                this.submitButton.textContent = `${this.submitMessage}`;
+                if(this.submitMessage) this.submitButton.textContent = `${this.submitMessage}`;
                 this.form.submit();
             }
         }
