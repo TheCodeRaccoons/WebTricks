@@ -390,10 +390,8 @@ class CMSFilter {
                 }
         });
     
-        // Update the active filters object by removing the specific value
         this.activeFilters[filterTag] = this.activeFilters[filterTag].filter(filter => filter !== value);
     
-        // Remove the tag from the DOM
         _tag.remove();
     
         this.ApplyFilters();
@@ -439,7 +437,6 @@ class CMSFilter {
     }
 
     ClearAllFilters() {
-        // Clear all filter inputs (checkboxes, radios, and text inputs)
         this.filterElements.forEach(element => {
             const input = (element.tagName === "INPUT") 
                 ? element 
@@ -458,26 +455,21 @@ class CMSFilter {
                     }
                 }
             
-            // Remove active filter class if present
             if (this.activeFilterClass) {
                 element.classList.remove(this.activeFilterClass);
             }
         });
     
-        // Clear active filters
         this.activeFilters = {};
     
-        // Clear all tags in the tag container
         if (this.tagTemplateContainer) {
             this.tagTemplateContainer.innerHTML = "";
         }
     
-        // Reapply filters with cleared state
         this.ApplyFilters();
     }
     
 
-    /* Get all filter data */
     GetFilterData() {
         let filterData = {
             'filters': this.filterElements,
@@ -492,13 +484,14 @@ class CMSFilter {
     }
 }
 
-// Ensure the global trickeries object exists
-if (!window.trickeries) {
-    window.trickeries = {};
+const InitializeCMSFilter = () => {
+    window.trickeries = window.trickeries || [];
+    let instance = new CMSFilter();
+    window.trickeries.push({'CMSFilter': instance});
 }
 
-// Initialize instances after the site has loaded
-document.addEventListener('DOMContentLoaded', () => {
-    const instanceId = `trickeries_${Object.keys(window.trickeries).length}`;
-    window.trickeries[instanceId] = new CMSFilter();
-});
+if (/complete|interactive|loaded/.test(document.readyState)) {
+    InitializeCMSFilter();
+} else { 
+    window.addEventListener('DOMContentLoaded', InitializeCMSFilter)
+}
