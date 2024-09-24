@@ -151,26 +151,31 @@ class CMSFilter {
 
     SortItems() {
         if(!this.sortOptions) return;
-
+    
         let [key, order] = this.sortOptions.value.split('-');
         this.filteredItems.sort((a, b) => {
             let aValue = a.dataset[key];
             let bValue = b.dataset[key];
-            
-            // If sorting by number (like price or year)
+    
+            // Handle numeric sorting (e.g., price or year)
             if (!isNaN(aValue) && !isNaN(bValue)) {
                 aValue = parseFloat(aValue);
                 bValue = parseFloat(bValue);
             }
-        
+            // Handle date sorting (convert to Date object)
+            else if (Date.parse(aValue) && Date.parse(bValue)) {
+                aValue = new Date(aValue);
+                bValue = new Date(bValue);
+            }
+    
+            // Handle alphabetical sorting or already processed values
             if (order === 'asc') {
                 return aValue > bValue ? 1 : -1;
             } else {
                 return aValue < bValue ? 1 : -1;
             }
-            });
-    }
-
+        });
+    }   
     
     ApplyFilters() {
         const filters = this.GetFilters();
