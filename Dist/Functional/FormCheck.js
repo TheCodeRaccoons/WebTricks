@@ -6,6 +6,7 @@ class FormCheck {
         this.pattern = /^[+]*[(]{0,1}[0-9]{1,3}[)]{0,1}[-\s\./0-9]*$/g;
         this.errorClass = form.getAttribute("wt-formcheck-class");
         this.submitMessage = form.getAttribute("wt-formcheck-message");
+        this.defaultSubmitButton = form.querySelector('[wt-formcheck-element="default-submit"]');
         this.requiredFields = form.querySelectorAll('[wt-formcheck-type="required"]');
         this.errorElements = form.querySelectorAll('[wt-formcheck-type="error"]');
         this.submitButton = form.querySelector('[wt-formcheck-type="submit"]');
@@ -80,8 +81,14 @@ class FormCheck {
         if (this.formErrors) {
             e.preventDefault();
         } else {
-            this.submitButton.textContent = `${this.submitMessage}`;
-            this.form.submit();
+            if(this.defaultSubmitButton){
+                if(this.submitMessage) this.submitButton.textContent = `${this.submitMessage}`;
+                this.defaultSubmitButton.click();
+            }
+            else{
+                if(this.submitMessage) this.submitButton.textContent = `${this.submitMessage}`;
+                this.form.submit();
+            }
         }
     }
 
@@ -105,7 +112,17 @@ class FormCheck {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+const initializeFormCheck = () => {
+    window.trickeries = window.trickeries || [];
     const forms = document.querySelectorAll('[wt-formcheck-element="form"]');
-    forms.forEach(form => new FormCheck(form));
-});
+    forms.forEach(form => {
+        let instance = new FormCheck(form);
+        window.trickeries.push({'FormCheck': instance});
+    });
+}
+
+if (/complete|interactive|loaded/.test(document.readyState)) {
+    initializeFormCheck();
+} else { 
+    window.addEventListener('DOMContentLoaded', initializeFormCheck)
+}

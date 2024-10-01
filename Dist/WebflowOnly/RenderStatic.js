@@ -1,35 +1,16 @@
 'use strict'
 
 class RenderStatic {
-    constructor() {
-        this.cloneables = [];
-        this.container = null;
+    constructor(_container) {
+        this.container = _container;
+        this.cloneables = document.querySelectorAll("[wt-renderstatic-element='cloneable']");
         this.gap = 0;
         this.observer = null;
+
         this.init();
     }
 
     init() {
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                this.initializeRenderStatic();
-                this.observeContainer();
-            }, 250);
-        });
-    }
-
-    insertChildAtIndex(parent, child, index = 0) {
-        if (!child) return;
-        let childClone = child.cloneNode(true);
-        if (parent) {
-            parent.insertBefore(childClone, parent.children[index]);
-        }
-    }
-
-    initializeRenderStatic() {
-        this.container = this.container || document.querySelector("[wt-renderstatic-element='container']");
-        this.cloneables = this.cloneables.length === 0 ? document.querySelectorAll("[wt-renderstatic-element='cloneable']") : this.cloneables;
-
         if (!this.container || this.cloneables.length === 0) return;
 
         this.gap = this.gap !== 0 ? this.gap : +this.container.getAttribute("wt-renderstatic-gap") || 0;
@@ -58,6 +39,14 @@ class RenderStatic {
         this.observeContainer();
     }
 
+    insertChildAtIndex(parent, child, index = 0) {
+        if (!child) return;
+        let childClone = child.cloneNode(true);
+        if (parent) {
+            parent.insertBefore(childClone, parent.children[index]);
+        }
+    }
+
     observeContainer() {
         if (!this.container) return;
 
@@ -68,7 +57,7 @@ class RenderStatic {
             });
 
             if (hasNonCloneChanges) {
-                this.initializeRenderStatic();
+                this.init();
             }
         });
 
@@ -76,4 +65,16 @@ class RenderStatic {
     }
 }
 
-new RenderStatic();
+const initializeRenderStatic = () => {
+    window.trickeries = window.trickeries || [];
+    let rsContainer = document.querySelector("[wt-renderstatic-element='container']");
+    if(!rsContainer) return;
+    let instance = new RenderStatic(rsContainer);
+    window.trickeries.push({'RenderStatic': instance});
+}
+
+if (/complete|interactive|loaded/.test(document.readyState)) {
+    initializeRenderStatic();
+} else { 
+    window.addEventListener('DOMContentLoaded',initializeRenderStatic )
+}

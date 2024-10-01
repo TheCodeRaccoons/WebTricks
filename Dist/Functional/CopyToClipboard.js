@@ -1,40 +1,56 @@
-'use strict'
+class CopyToClipboard {
+    constructor(_ctcContainer) {
+        this.ctcContainer   = _ctcContainer;
+        this.ctcTrigger     = this.ctcContainer.querySelector(`[wt-copycb-element="trigger"]`) || null;
+        this.ctcTarget      = this.ctcContainer.querySelector(`[wt-copycb-element="target"]`) || null; 
+        this.textTarget     = this.ctcTrigger.querySelector(`[wt-copycb-element="texttarget"]`) || null; 
+        this.ctcDefaultTxt  = this.ctcTrigger.innerText;
+        this.textToCopy     = this.ctcTarget.innerText;
+        this.copiedTxt      = this.ctcTrigger.getAttribute("wt-copycb-message") || null;
+        this.activeClass    = this.ctcTrigger.getAttribute('wt-copycb-active') || 'is-copy';
+        this.timeOut        = this.ctcTrigger.getAttribute('wt-copycb-timeout') || 2000;
+        this.initialize();
+    }
 
-const UpdateTriggerDisplay = (_txt, _target, _trigger, _class ) => {
-    if (_txt){ 
-        if(_target) _target.innerText = _txt;
-        else _trigger.innerHTML = _txt;
-    } 
-    if (_class) _trigger.classList.toggle(_class);
-}
+    initialize() {
+        if(!this.ctcTrigger || !this.ctcTarget) return;
+        this.ctcTrigger.addEventListener('click', () => this.copyTextToClipboard());
+    }
 
-const SetCopyToClipboard = () => {
-    const copyTriggers = document.querySelectorAll('[wt-copycb-element^="trigger-"], [wt-copycb-element="trigger"]');
+    copyTextToClipboard() {
+        this.updateTriggerDisplay();
+        navigator.clipboard.writeText(this.textToCopy);
+        setTimeout(() => this.resetTriggerDisplay(), this.timeOut);
+    }
 
-    if(!copyTriggers || copyTriggers.length === 0) return;
+    updateTriggerDisplay() {
+        if (this.copiedTxt) {
+            if(this.textTarget)this.textTarget.innerText = this.copiedTxt; 
+            else this.ctcTrigger.innerText = this.copiedTxt; 
+        } 
+        if (this.activeClass) this.ctcTrigger.classList.toggle(this.activeClass);
+    }
 
-    for(let _trigger of copyTriggers) {
-        let _triggerAttr    = _trigger.getAttribute(`wt-copycb-element`);
-        let index           = _triggerAttr.replace('trigger','');
-        let _target         = document.querySelector(`[wt-copycb-element="target${index}"]`);
-
-        if(_target) {
-            _trigger.addEventListener('click', () => {
-                let textToCopy  = _target.innerText;
-                let copiedTxt   = _trigger.getAttribute("wt-copycb-message");
-                let activeClass = _trigger.getAttribute('wt-copycb-active');
-                let timeOut     = _trigger.getAttribute('wt-copycb-timeout') || 2000;
-                let _defaultTxt = _trigger.innerText;
-                let textTarget  = document.querySelector(`[wt-copycb-element="text-target${index}"]`);
-
-                UpdateTriggerDisplay(copiedTxt, textTarget, _trigger, activeClass);
-                setTimeout(() => {
-                    UpdateTriggerDisplay(_defaultTxt, textTarget, _trigger, activeClass);
-                }, timeOut);
-                navigator.clipboard.writeText(textToCopy);
-            });
+    resetTriggerDisplay() {
+        if (this.copiedTxt) {
+            if(this.textTarget)this.textTarget.innerText = this.ctcDefaultTxt; 
+            else this.ctcTrigger.innerText = this.ctcDefaultTxt; 
         }
+        if (this.activeClass) this.ctcTrigger.classList.toggle(this.activeClass);
     }
 }
 
-window.addEventListener('DOMContentLoaded', SetCopyToClipboard());
+const initializeCopyToClipboard = () => {
+    window.trickeries = window.trickeries || [];
+    const triggers = document.querySelectorAll('[wt-copycb-element="container"]');
+    triggers.forEach(trigger => {
+        let instance = new CopyToClipboard(trigger);
+        window.trickeries.push({'CopyToClipboard': instance});
+    });
+}
+
+if (/complete|interactive|loaded/.test(document.readyState)) {
+    initializeCopyToClipboard();
+} else {
+    window.addEventListener('DOMContentLoaded', initializeCopyToClipboard);
+}
