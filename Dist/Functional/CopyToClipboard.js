@@ -3,6 +3,7 @@ class CopyToClipboard {
         this.ctcContainer   = _ctcContainer;
         this.ctcTrigger     = this.ctcContainer.querySelector(`[wt-copycb-element="trigger"]`) || null;
         this.ctcTarget      = this.ctcContainer.querySelector(`[wt-copycb-element="target"]`) || null; 
+        this.textTarget     = this.ctcTrigger.querySelector(`[wt-copycb-element="texttarget"]`) || null; 
         this.ctcDefaultTxt  = this.ctcTrigger.innerText;
         this.textToCopy     = this.ctcTarget.innerText;
         this.copiedTxt      = this.ctcTrigger.getAttribute("wt-copycb-message") || null;
@@ -18,17 +19,23 @@ class CopyToClipboard {
 
     copyTextToClipboard() {
         this.updateTriggerDisplay();
-        setTimeout(() => this.resetTriggerDisplay(), this.timeOut);
         navigator.clipboard.writeText(this.textToCopy);
+        setTimeout(() => this.resetTriggerDisplay(), this.timeOut);
     }
 
     updateTriggerDisplay() {
-        if (this.copiedTxt) this.ctcTrigger.innerText = this.copiedTxt; 
+        if (this.copiedTxt) {
+            if(this.textTarget)this.textTarget.innerText = this.copiedTxt; 
+            else this.ctcTrigger.innerText = this.copiedTxt; 
+        } 
         if (this.activeClass) this.ctcTrigger.classList.toggle(this.activeClass);
     }
 
     resetTriggerDisplay() {
-        if (this.copiedTxt)  this.ctcTrigger.innerText = this.ctcDefaultTxt; 
+        if (this.copiedTxt) {
+            if(this.textTarget)this.textTarget.innerText = this.ctcDefaultTxt; 
+            else this.ctcTrigger.innerText = this.ctcDefaultTxt; 
+        }
         if (this.activeClass) this.ctcTrigger.classList.toggle(this.activeClass);
     }
 }

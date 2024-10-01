@@ -45,7 +45,7 @@ const InitializeShareLink = () => {
 
     links.forEach(link => {
         let instance = new ShareLink(link);
-        window.trickeries.push({ 'ShareLink': instance });
+        window.trickeries.push({'ShareLink': instance });
     });
 };
 
