@@ -96,11 +96,13 @@ class Marquee {
 
 const InitializeMarquee = () => {
     try {
+        window.trickeries = window.trickeries || [];
         const marqueeContainers = document.querySelectorAll('[wt-marquee-element="container"]');
         if (!marqueeContainers || marqueeContainers.length === 0) throw new Error("No marquee containers found.");
 
         marqueeContainers.forEach(container => {
-            new Marquee(container);
+            let instance = new Marquee(container);
+            window.trickeries.push({'Marquee': instance});
         });
     } catch (err) {
         console.error(`Error in InitializeMarquee: ${err.message}`);
