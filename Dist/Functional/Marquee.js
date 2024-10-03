@@ -6,11 +6,12 @@ class Marquee {
             this.container = _container;
             this.elements = Array.from(this.container.children);
             if (this.elements.length === 0) throw new Error("No elements found inside the marquee container.");
-            this.speed =_container.getAttribute('wt-marquee-speed') || 50;
-            this.direction = _container.getAttribute('wt-marquee-direction') || 'left' 
-            this.viewportWidth = window.innerWidth;
-            this.parentWidth = this.container.parentElement.offsetWidth;
-            this.totalWidth = this.calculateTotalWidth();
+            
+            this.speed = _container.getAttribute('wt-marquee-speed') || 50;
+            this.direction = _container.getAttribute('wt-marquee-direction') || 'left';  // Possible values: 'left', 'right', 'top', 'bottom'
+            this.isVertical = this.direction === 'top' || this.direction === 'bottom';   // Detect if vertical
+            this.parentSize = this.isVertical ? this.container.parentElement.offsetHeight : this.container.parentElement.offsetWidth;
+            this.totalSize = this.isVertical ? this.calculateTotalHeight() : this.calculateTotalWidth();
             this.scrollPosition = 0;
             this.gapSize = this.getGapSize();
 
@@ -27,51 +28,66 @@ class Marquee {
         return this.elements.reduce((total, el) => total + el.offsetWidth, 0) + gapTotal;
     }
 
+    calculateTotalHeight() {
+        const gapTotal = (this.elements.length - 1) * this.gapSize;
+        return this.elements.reduce((total, el) => total + el.offsetHeight, 0) + gapTotal;
+    }
+
     getGapSize() {
         const styles = getComputedStyle(this.container);
         return parseFloat(styles.gap) || 0;
     }
 
     fillContainer() {
-        let totalWidth = this.calculateTotalWidth();
-        const targetWidth = this.parentWidth * 1.5;
+        let totalSize = this.isVertical ? this.calculateTotalHeight() : this.calculateTotalWidth();
+        const targetSize = this.parentSize * 1.5;
         
-        while (totalWidth < targetWidth) {
+        while (totalSize < targetSize) {
             this.elements.forEach(el => {
                 const clone = el.cloneNode(true);
                 this.container.appendChild(clone);
             });
             this.elements = Array.from(this.container.children);
-            totalWidth = this.calculateTotalWidth();
+            totalSize = this.isVertical ? this.calculateTotalHeight() : this.calculateTotalWidth();
         }
     }
 
     startMarquee() {
         this.marqueeInterval = setInterval(() => {
-            this.scrollPosition += this.direction === 'left' ? -1 : 1;
+            // Adjust scroll position based on the direction
+            if (this.direction === 'left' || this.direction === 'top') {
+                this.scrollPosition -= 1;
+            } else {
+                this.scrollPosition += 1;
+            }
 
             this.moveOffscreenElement();
 
-            this.container.style.transform = `translateX(${this.scrollPosition}px)`;
+            if (this.isVertical) {
+                this.container.style.transform = `translateY(${this.scrollPosition}px)`;
+            } else {
+                this.container.style.transform = `translateX(${this.scrollPosition}px)`;
+            }
         }, this.speed);
     }
 
     moveOffscreenElement() {
         const firstElement = this.container.firstElementChild;
-        const firstElementWidth = firstElement.offsetWidth + this.gapSize;
+        const firstElementSize = this.isVertical ? firstElement.offsetHeight : firstElement.offsetWidth;
+        const firstElementTotalSize = firstElementSize + this.gapSize;
 
-        if (this.direction === 'left' && this.scrollPosition <= -firstElementWidth) {
+        if ((this.direction === 'left' || this.direction === 'top') && this.scrollPosition <= -firstElementTotalSize) {
             this.container.style.transition = 'none';
             this.container.appendChild(firstElement);
-            this.scrollPosition += firstElementWidth;
+            this.scrollPosition += firstElementTotalSize;
             requestAnimationFrame(() => {
                 this.container.style.transition = '';
             });
-        } else if (this.direction === 'right' && this.scrollPosition >= -firstElementWidth / 2) {
+        } else if ((this.direction === 'right' || this.direction === 'bottom') && this.scrollPosition >= -firstElementTotalSize / 2) {
             const lastElement = this.container.lastElementChild;
             this.container.style.transition = 'none';
             this.container.insertBefore(lastElement, firstElement);
-            this.scrollPosition -= firstElementWidth;
+            this.scrollPosition -= firstElementTotalSize;
             requestAnimationFrame(() => {
                 this.container.style.transition = '';
             });
@@ -81,9 +97,8 @@ class Marquee {
     handleResize() {
         window.addEventListener('resize', () => {
             clearInterval(this.marqueeInterval);
-            this.viewportWidth = window.innerWidth;
-            this.parentWidth = this.container.parentElement.offsetWidth;
-            this.totalWidth = this.calculateTotalWidth();
+            this.parentSize = this.isVertical ? this.container.parentElement.offsetHeight : this.container.parentElement.offsetWidth;
+            this.totalSize = this.isVertical ? this.calculateTotalHeight() : this.calculateTotalWidth();
             this.fillContainer();
             this.startMarquee();
         });
