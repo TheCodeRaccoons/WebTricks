@@ -6,15 +6,17 @@ class Marquee {
             this.container = _container;
             this.elements = Array.from(this.container.children);
             if (this.elements.length === 0) throw new Error("No elements found inside the marquee container.");
-            this.speed =_container.getAttribute('wt-marquee-speed') || 50;
-            this.direction = _container.getAttribute('wt-marquee-direction') || 'left' 
-            this.viewportWidth = window.innerWidth;
-            this.parentWidth = this.container.parentElement.offsetWidth;
-            this.totalWidth = this.calculateTotalWidth();
-            this.scrollPosition = 0;
+
+            this.speed = _container.getAttribute('wt-marquee-speed') || 50;
+            this.direction = _container.getAttribute('wt-marquee-direction') || 'left'; // 'left', 'right', 'top', 'bottom'
+            this.isVertical = this.direction === 'top' || this.direction === 'bottom';
+            this.parentSize = this.isVertical ? this.container.parentElement.offsetHeight : this.container.parentElement.offsetWidth;
             this.gapSize = this.getGapSize();
 
+            this.scrollPosition = 0;
+            this.totalSize = this.calculateTotalSize();
             this.fillContainer();
+            this.setMarqueeStyles();
             this.startMarquee();
             this.handleResize();
         } catch (err) {
@@ -22,9 +24,9 @@ class Marquee {
         }
     }
 
-    calculateTotalWidth() {
+    calculateTotalSize() {
         const gapTotal = (this.elements.length - 1) * this.gapSize;
-        return this.elements.reduce((total, el) => total + el.offsetWidth, 0) + gapTotal;
+        return this.elements.reduce((total, el) => total + (this.isVertical ? el.offsetHeight : el.offsetWidth), 0) + gapTotal;
     }
 
     getGapSize() {
@@ -33,57 +35,76 @@ class Marquee {
     }
 
     fillContainer() {
-        let totalWidth = this.calculateTotalWidth();
-        const targetWidth = this.parentWidth * 1.5;
-        
-        while (totalWidth < targetWidth) {
+        let totalSize = this.calculateTotalSize();
+        const targetSize = this.parentSize * 1.5; 
+
+        while (totalSize < targetSize) {
             this.elements.forEach(el => {
                 const clone = el.cloneNode(true);
                 this.container.appendChild(clone);
             });
             this.elements = Array.from(this.container.children);
-            totalWidth = this.calculateTotalWidth();
+            totalSize = this.calculateTotalSize();
         }
+    }
+
+    setMarqueeStyles() {
+        this.container.style.display = 'flex';
+        this.container.style.flexDirection = this.isVertical ? 'column' : 'row';
+        this.container.style.whiteSpace = 'nowrap';
+        this.container.style.position = 'relative';
     }
 
     startMarquee() {
         this.marqueeInterval = setInterval(() => {
-            this.scrollPosition += this.direction === 'left' ? -1 : 1;
-
+            this.scrollPosition += (this.direction === 'left' || this.direction === 'top') ? -1 : 1;
             this.moveOffscreenElement();
 
-            this.container.style.transform = `translateX(${this.scrollPosition}px)`;
+            if (this.isVertical) {
+                this.container.style.transform = `translate3d(0, ${this.scrollPosition}px, 0)`;
+            } else {
+                this.container.style.transform = `translate3d(${this.scrollPosition}px, 0, 0)`;
+            }
         }, this.speed);
     }
 
     moveOffscreenElement() {
         const firstElement = this.container.firstElementChild;
-        const firstElementWidth = firstElement.offsetWidth + this.gapSize;
+        const lastElement = this.container.lastElementChild;
+        
+        const firstElementSize = this.isVertical ? firstElement.offsetHeight : firstElement.offsetWidth;
+        const firstElementTotalSize = firstElementSize + this.gapSize;
 
-        if (this.direction === 'left' && this.scrollPosition <= -firstElementWidth) {
-            this.container.style.transition = 'none';
-            this.container.appendChild(firstElement);
-            this.scrollPosition += firstElementWidth;
-            requestAnimationFrame(() => {
-                this.container.style.transition = '';
-            });
-        } else if (this.direction === 'right' && this.scrollPosition >= -firstElementWidth / 2) {
-            const lastElement = this.container.lastElementChild;
-            this.container.style.transition = 'none';
-            this.container.insertBefore(lastElement, firstElement);
-            this.scrollPosition -= firstElementWidth;
-            requestAnimationFrame(() => {
-                this.container.style.transition = '';
-            });
+        const lastElementSize = this.isVertical ? lastElement.offsetHeight : lastElement.offsetWidth;
+        const lastElementTotalSize = lastElementSize + this.gapSize;
+
+        if (this.direction === 'left' || this.direction === 'top') {
+            if (this.scrollPosition <= -firstElementTotalSize) {
+                this.container.style.transition = 'none';
+                this.container.appendChild(firstElement);
+                this.scrollPosition += firstElementTotalSize;
+                requestAnimationFrame(() => {
+                    this.container.style.transition = '';
+                });
+            }
+        } else if (this.direction === 'right' || this.direction === 'bottom') {
+            if (this.scrollPosition >= -firstElementTotalSize / 2) {
+                this.container.style.transition = 'none';
+                this.container.insertBefore(lastElement, firstElement);
+                this.scrollPosition -= lastElementTotalSize; 
+                requestAnimationFrame(() => {
+                    this.container.style.transition = '';
+                });
+            }
         }
     }
+
 
     handleResize() {
         window.addEventListener('resize', () => {
             clearInterval(this.marqueeInterval);
-            this.viewportWidth = window.innerWidth;
-            this.parentWidth = this.container.parentElement.offsetWidth;
-            this.totalWidth = this.calculateTotalWidth();
+            this.parentSize = this.isVertical ? this.container.parentElement.offsetHeight : this.container.parentElement.offsetWidth;
+            this.totalSize = this.calculateTotalSize();
             this.fillContainer();
             this.startMarquee();
         });
@@ -96,11 +117,13 @@ class Marquee {
 
 const InitializeMarquee = () => {
     try {
+        window.trickeries = window.trickeries || [];
         const marqueeContainers = document.querySelectorAll('[wt-marquee-element="container"]');
         if (!marqueeContainers || marqueeContainers.length === 0) throw new Error("No marquee containers found.");
 
         marqueeContainers.forEach(container => {
-            new Marquee(container);
+            let instance = new Marquee(container);
+            window.trickeries.push({'Marquee': instance});
         });
     } catch (err) {
         console.error(`Error in InitializeMarquee: ${err.message}`);
@@ -111,4 +134,4 @@ if (/complete|interactive|loaded/.test(document.readyState)) {
     InitializeMarquee();
 } else {
     window.addEventListener('DOMContentLoaded', InitializeMarquee);
-}
+};
