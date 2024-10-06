@@ -337,9 +337,8 @@ class CMSFilter {
     }
 
     SetActiveTags() {
+        if(!this.tagTemplateContainer) return;
         this.InitializeTagTemplate();
-        // Clear existing tags before adding new ones
-        this.tagTemplateContainer.innerHTML = "";
     
         const filterTags = Object.keys(this.activeFilters);
         filterTags.forEach(tag => {
