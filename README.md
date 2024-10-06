@@ -24,10 +24,10 @@
 <br />
 <div align="center">
     <a href="https://github.com/TheCodeRaccoons/WebflowTrickery">
-        <img src="https://raw.githubusercontent.com/TheCodeRaccoons/Imagery/16a395115ab598a94a7d1ab93f182218d8bbb751/wt-logo.svg" alt="Webflow Trickery Logo" height="140" />
+        <img src="https://raw.githubusercontent.com/TheCodeRaccoons/Imagery/16a395115ab598a94a7d1ab93f182218d8bbb751/wt-logo.svg" alt="WebTricks Logo" height="140" />
     </a>
     <h5 align="center">
-        Webflow Trickery aims to create easy to implement, reusable functionalities for the web. As it's name implies, the main platform this project targets is <a href="https://webflow.com/">Webflow</a>, but the majority of the scripts are made with general web development in mind. Meaning that most of this scripts should work without an issue on any website unless it is a CMS functionality or a Webflow specific script.
+        WebTricks aims to create easy to implement, reusable functionalities for the web. As it's name implies, the main platform this project targets is <a href="https://webflow.com/">Webflow</a>, but the majority of the scripts are made with general web development in mind. Meaning that most of this scripts should work without an issue on any website unless it is a CMS functionality or a Webflow specific script.
     </h5>
     <p align="center">
         <a target="_blank" href="https://github.com/TheCodeRaccoons/WebflowTrickery/issues/new/choose">Request a functionality</a>
@@ -54,12 +54,12 @@ All of the documentation is explained by functionality in <a href="https://coder
 <p>
 	As any other developer using no-code web design tools I've struggled with the ability to bring specific, more complex functionalities to platforms like Webflow.
 	<br/><br/>
-	 Over the past couple of years I started noticing some of this functionalities are not only commonly used but also requested by many in the community. Webflow trickery aims to empower developers and designers alike, provinding both simple and complex functionalities that could, in other cases, take longer to develop from scratch.
+	 Over the past couple of years I started noticing some of this functionalities are not only commonly used but also requested by many in the community. WebTricks aims to empower developers and designers alike, provinding both simple and complex functionalities that could, in other cases, take longer to develop from scratch.
 	 <br/><br/>
 	This being said even though most of this functionalities are built for Webflow, there's many that can be used in any other web project and platform. Feel free to see the full <a href="https://coderacoons.webflow.io/tools/webflow-trickery">documentation</a> in our site for the complete list of functionalities and scripts available.
 </p>
 <sub>
-   Webflow Trickery might have been started as a personal project, but I'm a believer that a project for the comunity by the comunity can offer way more value than any single dev could provide so feel free to contribute to this project and use any solution here.
+   WebTricks might have been started as a personal project, but I'm a believer that a project for the comunity by the comunity can offer way more value than any single dev could provide so feel free to contribute to this project and use any solution here.
 </sub>
 
 <h2 id="getting-started">Getting Started</h2>
