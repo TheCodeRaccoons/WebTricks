@@ -88,7 +88,7 @@ Ready to Use: Once imported, the scripts initialize automatically, provided the 
 
 <h2 id="contribute">Contributing</h2>
 <p>
-    We are happy with every contribution, whether it's new functionalities, fixes, features, or maintainers. Please have a look at our <a href="https://github.com/TheCodeRaccoons/WebTricks/wiki">Wiki</a> to see how you can contribute to this project. When contributing make sure you follow the [Code Standards](https://github.com/TheCodeRaccoons/WebTricks/wiki/Code-Standards) descrived in the project.
+    We are happy with every contribution, whether it's new functionalities, fixes, features, or maintainers. Please have a look at our <a href="https://github.com/TheCodeRaccoons/WebTricks/wiki">Wiki</a> to see how you can contribute to this project. When contributing make sure you follow the <a href="https://github.com/TheCodeRaccoons/WebTricks/wiki/Code-Standards">Code Standards</a> descrived in the project.
 </p>
 
 <h2 id="discord-community">Discord community</h2>
