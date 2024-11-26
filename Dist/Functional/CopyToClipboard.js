@@ -41,11 +41,11 @@ class CopyToClipboard {
 }
 
 const initializeCopyToClipboard = () => {
-    window.trickeries = window.trickeries || [];
+    window.webtricks = window.webtricks || [];
     const triggers = document.querySelectorAll('[wt-copycb-element="container"]');
     triggers.forEach(trigger => {
         let instance = new CopyToClipboard(trigger);
-        window.trickeries.push({'CopyToClipboard': instance});
+        window.webtricks.push({'CopyToClipboard': instance});
     });
 }
 

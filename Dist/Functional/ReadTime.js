@@ -30,12 +30,12 @@ class ReadTime {
 }
 
 const InitializeReadTime = () => {
-    window.trickeries = window.trickeries || [];
+    window.webtricks = window.webtricks || [];
     let articleContainers = document.querySelectorAll('[wt-readtime-element="article"]');
     if(!articleContainers || articleContainers.length === 0) return;
     articleContainers.forEach(article => {
         let instance = new ReadTime(article);
-        window.trickeries.push({'ReadTime': instance});
+        window.webtricks.push({'ReadTime': instance});
     });
 }
 

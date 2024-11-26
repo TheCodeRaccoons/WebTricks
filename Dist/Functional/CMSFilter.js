@@ -489,9 +489,9 @@ class CMSFilter {
 }
 
 const InitializeCMSFilter = () => {
-    window.trickeries = window.trickeries || [];
+    window.webtricks = window.webtricks || [];
     let instance = new CMSFilter();
-    window.trickeries.push({'CMSFilter': instance});
+    window.webtricks.push({'CMSFilter': instance});
 }
 
 if (/complete|interactive|loaded/.test(document.readyState)) {

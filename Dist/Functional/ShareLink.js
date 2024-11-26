@@ -39,13 +39,13 @@ class ShareLink {
 }
 
 const InitializeShareLink = () => {
-    window.trickeries = window.trickeries || [];
+    window.webtricks = window.webtricks || [];
     let links = document.querySelectorAll("[wt-share-element]");
     if (!links || links.length === 0) return;
 
     links.forEach(link => {
         let instance = new ShareLink(link);
-        window.trickeries.push({'ShareLink': instance });
+        window.webtricks.push({'ShareLink': instance });
     });
 };
 

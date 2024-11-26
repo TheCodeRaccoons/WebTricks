@@ -66,11 +66,11 @@ class RenderStatic {
 }
 
 const initializeRenderStatic = () => {
-    window.trickeries = window.trickeries || [];
+    window.webtricks = window.webtricks || [];
     let rsContainer = document.querySelector("[wt-renderstatic-element='container']");
     if(!rsContainer) return;
     let instance = new RenderStatic(rsContainer);
-    window.trickeries.push({'RenderStatic': instance});
+    window.webtricks.push({'RenderStatic': instance});
 }
 
 if (/complete|interactive|loaded/.test(document.readyState)) {

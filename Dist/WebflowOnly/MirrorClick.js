@@ -30,13 +30,13 @@ class MirrorClick {
 
 const InitializeMirrorClick = () => {
     try {
-        window.trickeries = window.trickeries || [];
+        window.webtricks = window.webtricks || [];
         const triggers = document.querySelectorAll('[wt-mirrorclick-element^="trigger-"], [wt-mirrorclick-element="trigger"]');
         if (!triggers || triggers.length === 0) throw new Error("No trigger elements found.");
 
         triggers.forEach((triggerElement) => {
             let instance = new MirrorClick(triggerElement);
-            window.trickeries.push({'MirrorClick': instance});
+            window.webtricks.push({'MirrorClick': instance});
         });
     } catch (err) {
         console.error(`MirrorClick found an error during initialization: ${err.message}`);

@@ -101,11 +101,11 @@ class CookieConsent {
 }
 
 const InitializeCookieConsent = () => {
-    window.trickeries = window.trickeries || [];
+    window.webtricks = window.webtricks || [];
     const cookieBanner = document.querySelector('[wt-cookieconsent-element="banner"]');
     if (cookieBanner) {
         let instance = new CookieConsent(cookieBanner);
-        window.trickeries.push({
+        window.webtricks.push({
             'CookieConsent': instance
         });
     }

@@ -18,12 +18,12 @@ class HideContainer {
 }
 
 const InitializeHideContainer = () => {
-    window.trickeries = window.trickeries || [];
+    window.webtricks = window.webtricks || [];
     let hcElements = document.querySelectorAll('[wt-hidecontainer-element="container"]');
     if(!hcElements || hcElements.length === 0) return;
     hcElements.forEach(hcElement => {
         let instance = new HideContainer(hcElement);
-        window.trickeries.push({'HideContainer': instance});
+        window.webtricks.push({'HideContainer': instance});
     });
 
 }
