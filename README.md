@@ -54,10 +54,10 @@ All of the documentation is explained by functionality in <a href="https://coder
 <p>
 	As any other developer using no-code web design tools I've struggled with the ability to bring specific, more complex functionalities to platforms like Webflow.
 	<br/><br/>
-	 Over the past couple of years I started noticing some of this functionalities are not only commonly used but also requested by many in the community. WebTricks aims to empower developers and designers alike, provinding both simple and complex functionalities that could, in other cases, take longer to develop from scratch.
-	 <br/>
-     Webtricks is a lightweight JavaScript library designed to extend and overcome the limitations of no-code platforms like Webflow. It provides a collection of scripts that solve common challenges faced by developers and designers, offering enhanced functionality, dynamic interactions, and streamlined workflows without heavy dependencies.
-     <br/>
+	Over the past couple of years I started noticing some of this functionalities are not only commonly used but also requested by many in the community. WebTricks aims to empower developers and designers alike, provinding both simple and complex functionalities that could, in other cases, take longer to develop from scratch.
+	<br/><br/>
+    Webtricks is a lightweight JavaScript library designed to extend and overcome the limitations of no-code platforms like Webflow. It provides a collection of scripts that solve common challenges faced by developers and designers, offering enhanced functionality, dynamic interactions, and streamlined workflows without heavy dependencies.
+    <br/><br/>
 	This being said even though most of this functionalities are built for Webflow, there's many that can be used in any other web project and platform. Feel free to see the full <a href="https://coderacoons.webflow.io/tools/webtricks">documentation</a> in my site for the complete list of functionalities and scripts available.
 </p>
 <sub>
@@ -65,8 +65,6 @@ All of the documentation is explained by functionality in <a href="https://coder
 </sub>
 
 <h2 id="getting-started">Getting Started</h2>
-<br/>
-<h3>Installation Guide</h3>
 Direct Import via jsDelivr: Webtricks is hosted on jsDelivr, making it simple to include in your project. You can import individual functionalities directly into your HTML file. For example:
 
 ```
