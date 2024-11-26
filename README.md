@@ -54,21 +54,32 @@ All of the documentation is explained by functionality in <a href="https://coder
 <p>
 	As any other developer using no-code web design tools I've struggled with the ability to bring specific, more complex functionalities to platforms like Webflow.
 	<br/><br/>
-	 Over the past couple of years I started noticing some of this functionalities are not only commonly used but also requested by many in the community. WebTricks aims to empower developers and designers alike, provinding both simple and complex functionalities that could, in other cases, take longer to develop from scratch.
-	 <br/><br/>
-	This being said even though most of this functionalities are built for Webflow, there's many that can be used in any other web project and platform. Feel free to see the full <a href="https://coderacoons.webflow.io/tools/webflow-trickery">documentation</a> in our site for the complete list of functionalities and scripts available.
+	Over the past couple of years I started noticing some of this functionalities are not only commonly used but also requested by many in the community. WebTricks aims to empower developers and designers alike, provinding both simple and complex functionalities that could, in other cases, take longer to develop from scratch.
+	<br/><br/>
+     	Webtricks is a lightweight JavaScript library designed to extend and overcome the limitations of no-code platforms like Webflow. It provides a collection of scripts that solve common challenges faced by developers and designers, offering enhanced functionality, dynamic interactions, and streamlined workflows without heavy dependencies.
+     	<br/><br/>
+	This being said even though most of this functionalities are built for Webflow, there's many that can be used in any other web project and platform. Feel free to see the full <a href="https://coderacoons.webflow.io/tools/webtricks">documentation</a> in my site for the complete list of functionalities and scripts available.
 </p>
 <sub>
    WebTricks might have been started as a personal project, but I'm a believer that a project for the comunity by the comunity can offer way more value than any single dev could provide so feel free to contribute to this project and use any solution here.
 </sub>
 
 <h2 id="getting-started">Getting Started</h2>
+Direct Import via jsDelivr: Webtricks is hosted on jsDelivr, making it simple to include in your project. You can import individual functionalities directly into your HTML file. For example:
 
-```html
-    Include each script or pack scripts together.
-    For a faster load, download the scripts and add to your project
-    packages will be added in a future version
 ```
+<script src="https://cdn.jsdelivr.net/gh/your-username/webtricks@latest/dist/Functional/CountUp.min.js"></script>
+```
+Replace CountUp.min.js with the specific script you want to include.
+
+Multiple Scripts: Add as many scripts as you need to your project by referencing their respective paths. Example:
+
+```
+<script src="https://cdn.jsdelivr.net/gh/your-username/webtricks@latest/dist/Functional/CMSFilter.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/your-username/webtricks@latest/dist/Functional/FormCheck.min.js"></script>
+```
+Ready to Use: Once imported, the scripts initialize automatically, provided the correct HTML attributes are in place.
+
     
 <h2 id="request-functionality">Requesting a functionality</h2>
 <p>
@@ -82,7 +93,7 @@ All of the documentation is explained by functionality in <a href="https://coder
 
 <h2 id="discord-community">Discord community</h2>
 <p>
-We are building a community on discord. You can easily discuss, and have a good time talking with the community members! an official discord link will be released in a later date to allow the community to chat.
+If the project get's enough usage I'm planning on building a community on discord. Where everyone can easily discuss, and have a good time talking with the community members, an official discord link will be released in a later date to allow the community to chat.
 </p>
 
 <h2 id="develop-vs-master"><code>develop</code> vs <code>master</code></h2>
