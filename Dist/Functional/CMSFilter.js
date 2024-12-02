@@ -8,8 +8,10 @@ class CMSFilter {
         this.filterForm = document.querySelector('[wt-cmsfilter-element="filter-form"]');
         this.listElement = document.querySelector('[wt-cmsfilter-element="list"]');
         this.tagTemplate = document.querySelector('[wt-cmsfilter-element="tag-template"]');
+        this.paginationWrapper = document.querySelector('[wt-cmsfilter-element="pagination-wrapper"]')
         this.tagTemplateContainer = (this.tagTemplate) ? this.tagTemplate.parentElement : null;
         this.emptyElement = document.querySelector('[wt-cmsfilter-element="empty"]');
+        this.loadAll = this.listElement.hasAttribute('wt-cmsfilter-paginate') || false;
         this.paginationElements = document.querySelectorAll('[wt-cmsfilter-pagination]');
         this.filterElements = this.filterForm.querySelectorAll('[wt-cmsfilter-category]');
         this.allItems = [];
@@ -26,7 +28,9 @@ class CMSFilter {
 
     async init() {
         if (this.loadAll) {
+            console.log('here?');
             await this.LoadAllItems();
+            console.log('done');
         } else {
             this.allItems = Array.from(this.listElement.children);
             this.itemsPerPage = this.allItems.length;
@@ -90,34 +94,56 @@ class CMSFilter {
         }
     }
 
+    generatePaginationLinksFromString(paginationString, baseUrl) {
+        // Parse the pagination string to get the current and total pages
+        const [currentPage, totalPages] = paginationString.split(' / ').map(Number);
+        
+        const links = [];
+        
+        // Generate links for all pages after the first
+        for (let page = currentPage + 1; page <= totalPages; page++) {
+            // Replace or append the page query parameter in the URL
+            const updatedUrl = baseUrl.replace(/([?&])caceae11_page=\d+/, `$1caceae11_page=${page}`);
+            links.push(updatedUrl);
+        }
+    
+        return links;
+    }
+
     async LoadAllItems() {
-        const paginationWrapper = this.listElement.closest('.w-pagination-wrapper');
-        if (!paginationWrapper) return;
-
-        const links = Array.from(paginationWrapper.querySelectorAll('a'));
+        if (!this.paginationWrapper) return;
+        
+        const paginationPages = this.paginationWrapper.querySelector('.w-page-count');
+        const baseLink = this.paginationWrapper.querySelector('a');
+        const links = this.generatePaginationLinksFromString(paginationPages.innerText, baseLink.href);
         if (!links || links.length === 0) return;
-
         for (const link of links) {
             try {
-                const htmlDoc = await this.FetchHTML(link.href);
+                const htmlDoc = await this.FetchHTML(link);
                 if (htmlDoc) {
-                    const cards = htmlDoc.querySelectorAll('.w-dyn-item');
-                    cards.forEach(card => {
-                        this.listElement.appendChild(card.cloneNode(true));
-                        this.allItems.push(card);
-                    });
+                    const cards = Array.from(htmlDoc.querySelector('[wt-cmsfilter-element="list"]')?.children || []);
+    
+                    if (cards.length > 0) {
+                        for (const card of cards) {
+                            if (card instanceof Node) { // Ensure it's a valid DOM node
+                                this.listElement.appendChild(card);
+                                this.allItems.push(card);
+                            } else {
+                                console.warn('Non-DOM element skipped:', card);
+                            }
+                        }
+                    }
                 } else {
-                    console.log('Failed to fetch HTML from the URL:', link.href);
+                    console.error('Failed to fetch HTML from the URL:', link.href);
                 }
             } catch (error) {
                 console.error('Error fetching HTML:', error);
             }
         }
-
+    
         this.itemsPerPage = this.allItems.length;
-        paginationWrapper.remove();
+        this.paginationWrapper.remove();
     }
-
     async FetchHTML(url) {
         const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
         const text = await response.text();
@@ -346,19 +372,20 @@ class CMSFilter {
                 this.activeFilters[tag].forEach(filterValue => {
                     const newTag = this.tagTemplate.cloneNode(true);
                     const tagText = newTag.querySelector('[wt-cmsfilter-element="tag-text"]');
+                    const showTagCategory = newTag.getAttribute('wt-cmsfilter-tag-category') || 'true';
                     const tagRemove = newTag.querySelector('[wt-cmsfilter-element="tag-remove"]');
 
                     if (typeof filterValue === 'object' && filterValue.from !== null && filterValue.to !== null) {
-                        tagText.innerText = `${tag}: ${filterValue?.from} - ${filterValue?.to}`;
+                        tagText.innerText = `${showTagCategory === 'true' ? `${tag}:` : ''} ${filterValue?.from} - ${filterValue?.to}`;
                     }
                     else if (typeof filterValue === 'object' && filterValue.from !== null && filterValue.to === null ) {
-                        tagText.innerText = `${tag}: ${filterValue?.from}`;
+                        tagText.innerText = `${showTagCategory === 'true' ? `${tag}:` : ''} ${filterValue?.from}`;
                     }
                     else if (typeof filterValue === 'object' && filterValue.from === null && filterValue.to !== null ) {
-                        tagText.innerText = `${tag}: ${filterValue?.to}`;
+                        tagText.innerText = `${showTagCategory === 'true' ? `${tag}:` : ''} ${filterValue?.to}`;
                     }
                     else{
-                        tagText.innerText = `${tag}: ${filterValue}`;
+                        tagText.innerText = `${showTagCategory === 'true' ? `${tag}:` : ''} ${filterValue}`;
                     }
                     this.tagTemplateContainer.append(newTag);
     
@@ -374,7 +401,7 @@ class CMSFilter {
     
     RemoveActiveTag(_tag, filterTag, value) {
         const categoryElements = this.filterForm.querySelectorAll(`[wt-cmsfilter-category="${filterTag}"]`);
-    
+        const advancedFiltering = this.filterForm.getAttribute('wt-cmsfilter-filtering');
         categoryElements.forEach(categoryElement => {
             const input = (categoryElement.tagName === "INPUT") 
                 ? categoryElement 
@@ -389,9 +416,17 @@ class CMSFilter {
                             input.value = '';
                         }
                     } else if (input.type === 'checkbox') {
-                        input.checked = false;
+                        console.log(input, categoryElement, value, filterTag)
+                        if(advancedFiltering === 'advanced') { 
+                            input.checked = false;
+                        }
+                        else {  
+                            if(categoryElement.innerText === value) { 
+                                input.checked = false;
+                            }
+                        }
                     }
-                }
+                } 
         });
     
         this.activeFilters[filterTag] = this.activeFilters[filterTag].filter(filter => filter !== value);
