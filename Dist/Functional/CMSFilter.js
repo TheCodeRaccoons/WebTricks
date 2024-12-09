@@ -3,34 +3,45 @@
 
 class CMSFilter {
     constructor() {
-        this.currentPage = 1;
-        this.itemsPerPage = 0;
+        //CORE elements
         this.filterForm = document.querySelector('[wt-cmsfilter-element="filter-form"]');
         this.listElement = document.querySelector('[wt-cmsfilter-element="list"]');
-        this.tagTemplate = document.querySelector('[wt-cmsfilter-element="tag-template"]');
-        this.paginationWrapper = document.querySelector('[wt-cmsfilter-element="pagination-wrapper"]')
-        this.tagTemplateContainer = (this.tagTemplate) ? this.tagTemplate.parentElement : null;
-        this.emptyElement = document.querySelector('[wt-cmsfilter-element="empty"]');
-        this.loadAll = this.listElement.hasAttribute('wt-cmsfilter-paginate') || false;
-        this.paginationElements = document.querySelectorAll('[wt-cmsfilter-pagination]');
         this.filterElements = this.filterForm.querySelectorAll('[wt-cmsfilter-category]');
+        this.currentPage = 1;   // default value
+        this.itemsPerPage = 0;  // gets updated during init
+
+        //TAG elements
+        this.tagTemplate = document.querySelector('[wt-cmsfilter-element="tag-template"]');
+        this.tagTemplateContainer = (this.tagTemplate) ? this.tagTemplate.parentElement : null;
+
+        //Pagination & Loading
+        //Pagination wrapper is a MUST for the full functionality of the filter to work properly, 
+        //if not added the filter will only work with whatever is loaded by default.
+        this.paginationWrapper = document.querySelector('[wt-cmsfilter-element="pagination-wrapper"]');
+        this.loadAll = this.listElement.getAttribute('wt-cmsfilter-loadmode');
+        this.paginationElements = document.querySelectorAll('[wt-cmsfilter-pagination]');
+
+        //OPT
+        this.activeFilterClass = this.filterForm.getAttribute('wt-cmsfilter-class');
+        this.clearAll = document.querySelector('[wt-cmsfilter-element="clear-all"]');
+        this.sortOptions = document.querySelector('[wt-cmsfilter-element="sort-options"]');
+        this.resultCount = document.querySelector('[wt-cmsfilter-element="results-count"]');
+        this.emptyElement = document.querySelector('[wt-cmsfilter-element="empty"]');
+
+        //Data Tracking Values
         this.allItems = [];
         this.filteredItems = [];
         this.totalPages = 1;
-        this.activeFilterClass = this.filterForm.getAttribute('wt-cmsfilter-class');
         this.activeFilters = {};
         this.availableFilters = {};
-        this.resultCount = document.querySelector('[wt-cmsfilter-element="results-count"]');
-        this.clearAll = document.querySelector('[wt-cmsfilter-element="clear-all"]');
-        this.sortOptions = document.querySelector('[wt-cmsfilter-element="sort-options"]');
+
+        //Script Init
         this.init();
     }
 
     async init() {
         if (this.loadAll) {
-            console.log('here?');
             await this.LoadAllItems();
-            console.log('done');
         } else {
             this.allItems = Array.from(this.listElement.children);
             this.itemsPerPage = this.allItems.length;
@@ -72,6 +83,7 @@ class CMSFilter {
 
         if(!this.paginationElements) return;
         this.paginationElements.forEach(button => {
+            console.log(button)
             button.addEventListener('click', (event) => {
                 event.preventDefault();
                 const direction = button.getAttribute('wt-cmsfilter-pagination');
@@ -103,7 +115,8 @@ class CMSFilter {
         // Generate links for all pages after the first
         for (let page = currentPage + 1; page <= totalPages; page++) {
             // Replace or append the page query parameter in the URL
-            const updatedUrl = baseUrl.replace(/([?&])caceae11_page=\d+/, `$1caceae11_page=${page}`);
+            const updatedUrl = baseUrl.replace(/page=\d+/, `page=${page}`);
+            console.log('url update', baseUrl, updatedUrl);
             links.push(updatedUrl);
         }
     
@@ -112,7 +125,8 @@ class CMSFilter {
 
     async LoadAllItems() {
         if (!this.paginationWrapper) return;
-        
+        this.itemsPerPage = this.allItems.length;
+
         const paginationPages = this.paginationWrapper.querySelector('.w-page-count');
         const baseLink = this.paginationWrapper.querySelector('a');
         const links = this.generatePaginationLinksFromString(paginationPages.innerText, baseLink.href);
