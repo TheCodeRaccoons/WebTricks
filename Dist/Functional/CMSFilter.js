@@ -17,9 +17,15 @@ class CMSFilter {
         //Pagination & Loading
         //Pagination wrapper is a MUST for the full functionality of the filter to work properly, 
         //if not added the filter will only work with whatever is loaded by default.
-        this.paginationWrapper = document.querySelector('[wt-cmsfilter-element="pagination-wrapper"]');
-        this.loadAll = this.listElement.getAttribute('wt-cmsfilter-loadmode');
-        this.paginationElements = document.querySelectorAll('[wt-cmsfilter-pagination]');
+        this.paginationWrapper = document.querySelector('[wt-cmsfilter-element="pagination-wrapper"]') || null;
+        this.loadMode = this.listElement.getAttribute('wt-cmsfilter-loadmode') || 'load-all'; //Currently only paginate and load-all
+        this.previousButton = document.querySelector('[wt-cmsfilter-pagination="prev"]');
+        this.nextButton = document.querySelector('[wt-cmsfilter-pagination="next"]');
+
+        //pagination opt
+        this.paginationcounter = document.querySelector('[wt-cmsfilter-element="page-count"]');
+        this.customNextButton = document.querySelector('[wt-cmsfilter-element="custom-next"]');
+        this.customPrevButton = document.querySelector('[wt-cmsfilter-element="custom-prev"]');
 
         //OPT
         this.activeFilterClass = this.filterForm.getAttribute('wt-cmsfilter-class');
@@ -40,17 +46,16 @@ class CMSFilter {
     }
 
     async init() {
-        if (this.loadAll) {
-            await this.LoadAllItems();
-        } else {
-            this.allItems = Array.from(this.listElement.children);
-            this.itemsPerPage = this.allItems.length;
-        }
         this.allItems = Array.from(this.listElement.children);
         this.itemsPerPage = this.allItems.length;
-        this.SetupPagination();
+        if (this.paginationWrapper) {
+            await this.LoadAllItems();
+        }
+        // TODO: Check if this is still necesary once we finish the "pagination functionality"
+        // this.allItems = Array.from(this.listElement.children);
+        // this.itemsPerPage = this.allItems.length;
         this.SetupEventListeners();
-        this.LoadItems();
+        this.RenderItems();
         this.UpdateAvailableFilters();
         this.activeFilters = this.GetFilters();
         this.ShowResultCount();
@@ -81,16 +86,38 @@ class CMSFilter {
             });
         }
 
-        if(!this.paginationElements) return;
-        this.paginationElements.forEach(button => {
-            console.log(button)
-            button.addEventListener('click', (event) => {
-                event.preventDefault();
-                const direction = button.getAttribute('wt-cmsfilter-pagination');
-                if (direction === 'next') this.NextPage();
-                if (direction === 'prev') this.PrevPage();
-            });
-        });
+        if(this.previousButton || this.customPrevButton) {
+            if(this.customPrevButton) { 
+                this.customPrevButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    this.PrevPage();
+                });
+                if (this.previousButton) {
+                    this.previousButton.remove();
+                }
+            } else { 
+                this.previousButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    this.PrevPage();
+                });
+            }
+        }
+        if(this.nextButton || this.customNextButton) {
+            if(this.customNextButton) { 
+                this.customNextButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    this.NextPage();
+                });
+                if (this.nextButton) {
+                    this.nextButton.remove();
+                }
+            } else { 
+                this.nextButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    this.NextPage();
+                });
+            }
+        }
 
         if(this.clearAll) {
             this.clearAll.addEventListener('click', (event) => {
@@ -116,7 +143,6 @@ class CMSFilter {
         for (let page = currentPage + 1; page <= totalPages; page++) {
             // Replace or append the page query parameter in the URL
             const updatedUrl = baseUrl.replace(/page=\d+/, `page=${page}`);
-            console.log('url update', baseUrl, updatedUrl);
             links.push(updatedUrl);
         }
     
@@ -136,11 +162,10 @@ class CMSFilter {
                 const htmlDoc = await this.FetchHTML(link);
                 if (htmlDoc) {
                     const cards = Array.from(htmlDoc.querySelector('[wt-cmsfilter-element="list"]')?.children || []);
-    
+
                     if (cards.length > 0) {
                         for (const card of cards) {
                             if (card instanceof Node) { // Ensure it's a valid DOM node
-                                this.listElement.appendChild(card);
                                 this.allItems.push(card);
                             } else {
                                 console.warn('Non-DOM element skipped:', card);
@@ -154,10 +179,8 @@ class CMSFilter {
                 console.error('Error fetching HTML:', error);
             }
         }
-    
-        this.itemsPerPage = this.allItems.length;
-        this.paginationWrapper.remove();
     }
+
     async FetchHTML(url) {
         const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
         const text = await response.text();
@@ -165,28 +188,40 @@ class CMSFilter {
         return parser.parseFromString(text, 'text/html');
     }
 
-    SetupPagination() {
-        const totalPagesElement = document.getElementById('total-pages');
-        if (totalPagesElement) {
-            this.totalPages = parseInt(totalPagesElement.innerText, 10);
-        } else {
-            this.totalPages = Math.ceil(this.allItems.length / this.itemsPerPage);
-        }
-    }
-
-    LoadItems() {
-        const start = (this.currentPage - 1) * this.itemsPerPage;
-        const end = this.currentPage * this.itemsPerPage;
-        this.filteredItems = this.allItems.slice(start, end);
-        this.RenderItems();
+    FiltersApplied() {
+        return Object.values(this.activeFilters).some(arr => Array.isArray(arr) && arr.length > 0);
     }
 
     RenderItems() {
         this.listElement.innerHTML = '';
-        this.filteredItems.forEach(item => {
-            this.listElement.appendChild(item);
-        });
+        if(this.filteredItems.length === 0) { 
+            if(!this.FiltersApplied()) {
+                this.filteredItems = this.allItems;
+            }
+        } 
+        if(this.paginationWrapper) {
+            if(this.loadMode === 'load-all') {
+                this.filteredItems.forEach(item => {
+                    this.listElement.appendChild(item);
+                });
+                if(this.paginationWrapper){
+                    this.paginationWrapper.remove();
+                }
+            } else if (this.loadMode === 'paginate') {
+                this.totalPages = Math.ceil(this.filteredItems.length / this.itemsPerPage);
+                const currentSlice = (this.currentPage * this.itemsPerPage) - this.itemsPerPage;
+                const currentPage = this.filteredItems.slice(currentSlice, currentSlice + this.itemsPerPage);
+                currentPage.forEach(item => {
+                    this.listElement.appendChild(item);
+                });
+            }
+        } else {
+            this.filteredItems.forEach(item => {
+                this.listElement.appendChild(item);
+            });
+        }
         this.ToggleEmptyState();
+        this.UpdatePaginationDisplay();
     }
 
     SortItems() {
@@ -219,7 +254,7 @@ class CMSFilter {
     
     ApplyFilters() {
         const filters = this.GetFilters();
-    
+        this.currentPage = 1; //Reset pagination to first page
         this.filteredItems = this.allItems.filter(item => {
             return Object.keys(filters).every(category => {
                 const values = [...filters[category]];
@@ -430,7 +465,6 @@ class CMSFilter {
                             input.value = '';
                         }
                     } else if (input.type === 'checkbox') {
-                        console.log(input, categoryElement, value, filterTag)
                         if(advancedFiltering === 'advanced') { 
                             input.checked = false;
                         }
@@ -451,25 +485,39 @@ class CMSFilter {
     }
 
     NextPage() {
-        if (this.currentPage < this.totalPages) {
-            this.currentPage++;
-            this.LoadItems();
-            this.UpdatePaginationDisplay();
+        if (this.currentPage <= this.totalPages) {
+            this.currentPage = this.currentPage + 1;
+            this.RenderItems();
         }
     }
 
     PrevPage() {
         if (this.currentPage > 1) {
-            this.currentPage--;
-            this.LoadItems();
-            this.UpdatePaginationDisplay();
+            this.currentPage = this.currentPage - 1;
+            this.RenderItems();
         }
     }
 
     UpdatePaginationDisplay() {
-        const currentPageElement = document.getElementById('current-page');
-        if (currentPageElement) {
-            currentPageElement.innerText = this.currentPage;
+        if(!this.paginationWrapper) return;
+
+        this.paginationcounter = this.paginationcounter ? this.paginationcounter : this.paginationWrapper.querySelector('.w-page-count');
+        if (this.paginationcounter) {
+            this.paginationcounter.innerText = `${this.currentPage} / ${this.totalPages}`;
+        }
+        if(this.currentPage === 1){
+            if(this.previousButton) this.previousButton.hidden = true;
+            if(this.customPrevButton) this.customPrevButton.hidden = true;
+        } else {
+            if(this.previousButton) this.previousButton.hidden = false;
+            if(this.customPrevButton) this.customPrevButton.hidden = false;
+        }
+        if(this.currentPage === this.totalPages){
+            if(this.nextButton) this.nextButton.hidden = true;
+            if(this.customNextButton) this.customNextButton.hidden = true;
+        } else {
+            if(this.nextButton) this.nextButton.hidden = false;
+            if(this.customNextButton) this.customNextButton.hidden = false;
         }
     }
 
