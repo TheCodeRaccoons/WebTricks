@@ -29,13 +29,13 @@ class CountUp {
 }
 
 const InitializeCountUp = () => {
-    window.trickeries = window.trickeries || [];
+    window.webtricks = window.webtricks || [];
     let counters = document.querySelectorAll("[wt-countup-element='counter']");
     if(!counters || counters.length === 0) return;
 
     counters.forEach(counter => {
         let instance = new CountUp(counter);
-        window.trickeries.push({'CountUp': instance});
+        window.webtricks.push({'CountUp': instance});
     });
 
 }

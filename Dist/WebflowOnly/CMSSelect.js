@@ -37,14 +37,14 @@ class CMSSelect {
 
 const InitializeCMSSelect = () => {
     try {
-        window.trickeries = window.trickeries || [];
+        window.webtricks = window.webtricks || [];
         const selectElements = document.querySelectorAll('[wt-cmsselect-element^="select-"], [wt-cmsselect-element="select"]');
         
         if (!selectElements || selectElements.length === 0) throw new Error("No select elements found.");
 
         selectElements.forEach(selectElement => {
             const instance = new CMSSelect(selectElement);
-            window.trickeries.push({ 'CMSSelect': instance });
+            window.webtricks.push({ 'CMSSelect': instance });
         });
     } catch (err) {
         console.error(`Error during CMSSelect initialization: ${err.message}`);

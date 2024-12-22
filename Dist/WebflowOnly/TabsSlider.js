@@ -110,13 +110,13 @@ class TabsSlider {
 
 const InitializeTabsSlider = () => {
     try {
-        window.trickeries = window.trickeries || [];
+        window.webtricks = window.webtricks || [];
         let tabsComponents = document.querySelectorAll("[wt-tabslider-element='tabs']");
         if (!tabsComponents || tabsComponents.length === 0) throw new Error("No tabs components found.");
 
         tabsComponents.forEach(tabsComponent => {
             let instance = new TabsSlider(tabsComponent);
-            window.trickeries.push({ 'TabsSlider': instance });
+            window.webtricks.push({ 'TabsSlider': instance });
         });
     } catch (err) {
         console.error("InitializeTabsSlider error: ", err.message);

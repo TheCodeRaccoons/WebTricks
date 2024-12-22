@@ -67,13 +67,13 @@ class NumberFormatter {
 
 const InitializeFormatNumbers = () => {
     try {
-        window.trickeries = window.trickeries || [];
+        window.webtricks = window.webtricks || [];
         const numbersToFormat = document.querySelectorAll('[wt-formatnumber-element="number"]');
         if (!numbersToFormat || numbersToFormat.length === 0) throw new Error("No elements found to format.");
 
         numbersToFormat.forEach((numberContainer) => {
             let instance = new NumberFormatter(numberContainer);
-            window.trickeries.push({'FormatNumber': instance});
+            window.webtricks.push({'FormatNumber': instance});
         });
     } catch (err) {
         console.error(`Format Number found an Error while initializing: ${err.message}`);

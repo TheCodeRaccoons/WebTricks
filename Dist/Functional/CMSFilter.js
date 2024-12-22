@@ -3,39 +3,56 @@
 
 class CMSFilter {
     constructor() {
-        this.currentPage = 1;
-        this.itemsPerPage = 0;
+        //CORE elements
         this.filterForm = document.querySelector('[wt-cmsfilter-element="filter-form"]');
         this.listElement = document.querySelector('[wt-cmsfilter-element="list"]');
+        this.filterElements = this.filterForm.querySelectorAll('[wt-cmsfilter-category]');
+        this.currentPage = 1;   // default value
+        this.itemsPerPage = 0;  // gets updated during init
+
+        //TAG elements
         this.tagTemplate = document.querySelector('[wt-cmsfilter-element="tag-template"]');
         this.tagTemplateContainer = (this.tagTemplate) ? this.tagTemplate.parentElement : null;
+
+        //Pagination & Loading
+        //Pagination wrapper is a MUST for the full functionality of the filter to work properly, 
+        //if not added the filter will only work with whatever is loaded by default.
+        this.paginationWrapper = document.querySelector('[wt-cmsfilter-element="pagination-wrapper"]') || null;
+        this.loadMode = this.listElement.getAttribute('wt-cmsfilter-loadmode') || 'load-all'; //Currently only paginate and load-all
+        this.previousButton = document.querySelector('[wt-cmsfilter-pagination="prev"]');
+        this.nextButton = document.querySelector('[wt-cmsfilter-pagination="next"]');
+        this.customNextButton = document.querySelector('[wt-cmsfilter-element="custom-next"]');
+        this.customPrevButton = document.querySelector('[wt-cmsfilter-element="custom-prev"]');
+
+        //pagination opt
+        this.paginationcounter = document.querySelector('[wt-cmsfilter-element="page-count"]');
+
+        //OPT
+        this.activeFilterClass = this.filterForm.getAttribute('wt-cmsfilter-class');
+        this.clearAll = document.querySelector('[wt-cmsfilter-element="clear-all"]');
+        this.sortOptions = document.querySelector('[wt-cmsfilter-element="sort-options"]');
+        this.resultCount = document.querySelector('[wt-cmsfilter-element="results-count"]');
         this.emptyElement = document.querySelector('[wt-cmsfilter-element="empty"]');
-        this.paginationElements = document.querySelectorAll('[wt-cmsfilter-pagination]');
-        this.filterElements = this.filterForm.querySelectorAll('[wt-cmsfilter-category]');
+
+        //Data Tracking Values
         this.allItems = [];
         this.filteredItems = [];
         this.totalPages = 1;
-        this.activeFilterClass = this.filterForm.getAttribute('wt-cmsfilter-class');
         this.activeFilters = {};
         this.availableFilters = {};
-        this.resultCount = document.querySelector('[wt-cmsfilter-element="results-count"]');
-        this.clearAll = document.querySelector('[wt-cmsfilter-element="clear-all"]');
-        this.sortOptions = document.querySelector('[wt-cmsfilter-element="sort-options"]');
+
+        //Script Init
         this.init();
     }
 
     async init() {
-        if (this.loadAll) {
-            await this.LoadAllItems();
-        } else {
-            this.allItems = Array.from(this.listElement.children);
-            this.itemsPerPage = this.allItems.length;
-        }
         this.allItems = Array.from(this.listElement.children);
         this.itemsPerPage = this.allItems.length;
-        this.SetupPagination();
+        if (this.paginationWrapper) {
+            await this.LoadAllItems();
+        }
         this.SetupEventListeners();
-        this.LoadItems();
+        this.RenderItems();
         this.UpdateAvailableFilters();
         this.activeFilters = this.GetFilters();
         this.ShowResultCount();
@@ -66,15 +83,38 @@ class CMSFilter {
             });
         }
 
-        if(!this.paginationElements) return;
-        this.paginationElements.forEach(button => {
-            button.addEventListener('click', (event) => {
-                event.preventDefault();
-                const direction = button.getAttribute('wt-cmsfilter-pagination');
-                if (direction === 'next') this.NextPage();
-                if (direction === 'prev') this.PrevPage();
-            });
-        });
+        if(this.previousButton || this.customPrevButton) {
+            if(this.customPrevButton) { 
+                this.customPrevButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    this.PrevPage();
+                });
+                if (this.previousButton) {
+                    this.previousButton.remove();
+                }
+            } else { 
+                this.previousButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    this.PrevPage();
+                });
+            }
+        }
+        if(this.nextButton || this.customNextButton) {
+            if(this.customNextButton) { 
+                this.customNextButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    this.NextPage();
+                });
+                if (this.nextButton) {
+                    this.nextButton.remove();
+                }
+            } else { 
+                this.nextButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    this.NextPage();
+                });
+            }
+        }
 
         if(this.clearAll) {
             this.clearAll.addEventListener('click', (event) => {
@@ -90,32 +130,48 @@ class CMSFilter {
         }
     }
 
+    generatePaginationLinksFromString(paginationString, baseUrl) {
+        const [currentPage, totalPages] = paginationString.split(' / ').map(Number);
+        const links = [];
+        
+        for (let page = currentPage + 1; page <= totalPages; page++) {
+            const updatedUrl = baseUrl.replace(/page=\d+/, `page=${page}`);
+            links.push(updatedUrl);
+        }
+    
+        return links;
+    }
+
     async LoadAllItems() {
-        const paginationWrapper = this.listElement.closest('.w-pagination-wrapper');
-        if (!paginationWrapper) return;
+        if (!this.paginationWrapper) return;
+        this.itemsPerPage = this.allItems.length;
 
-        const links = Array.from(paginationWrapper.querySelectorAll('a'));
+        const paginationPages = this.paginationWrapper.querySelector('.w-page-count');
+        const baseLink = this.paginationWrapper.querySelector('a');
+        const links = this.generatePaginationLinksFromString(paginationPages.innerText, baseLink.href);
         if (!links || links.length === 0) return;
-
         for (const link of links) {
             try {
-                const htmlDoc = await this.FetchHTML(link.href);
+                const htmlDoc = await this.FetchHTML(link);
                 if (htmlDoc) {
-                    const cards = htmlDoc.querySelectorAll('.w-dyn-item');
-                    cards.forEach(card => {
-                        this.listElement.appendChild(card.cloneNode(true));
-                        this.allItems.push(card);
-                    });
+                    const cards = Array.from(htmlDoc.querySelector('[wt-cmsfilter-element="list"]')?.children || []);
+
+                    if (cards.length > 0) {
+                        for (const card of cards) {
+                            if (card instanceof Node) { // Ensure it's a valid DOM node
+                                this.allItems.push(card);
+                            } else {
+                                console.warn('Non-DOM element skipped:', card);
+                            }
+                        }
+                    }
                 } else {
-                    console.log('Failed to fetch HTML from the URL:', link.href);
+                    console.error('Failed to fetch HTML from the URL:', link.href);
                 }
             } catch (error) {
                 console.error('Error fetching HTML:', error);
             }
         }
-
-        this.itemsPerPage = this.allItems.length;
-        paginationWrapper.remove();
     }
 
     async FetchHTML(url) {
@@ -125,28 +181,45 @@ class CMSFilter {
         return parser.parseFromString(text, 'text/html');
     }
 
-    SetupPagination() {
-        const totalPagesElement = document.getElementById('total-pages');
-        if (totalPagesElement) {
-            this.totalPages = parseInt(totalPagesElement.innerText, 10);
-        } else {
-            this.totalPages = Math.ceil(this.allItems.length / this.itemsPerPage);
-        }
-    }
-
-    LoadItems() {
-        const start = (this.currentPage - 1) * this.itemsPerPage;
-        const end = this.currentPage * this.itemsPerPage;
-        this.filteredItems = this.allItems.slice(start, end);
-        this.RenderItems();
+    FiltersApplied() {
+        return Object.values(this.activeFilters).some(arr => Array.isArray(arr) && arr.length > 0);
     }
 
     RenderItems() {
         this.listElement.innerHTML = '';
-        this.filteredItems.forEach(item => {
-            this.listElement.appendChild(item);
-        });
+        if(this.filteredItems.length === 0) { 
+            if(!this.FiltersApplied()) {
+                this.filteredItems = this.allItems;
+            }
+        } 
+        if(this.paginationWrapper) {
+            if(this.loadMode === 'load-all') {
+                this.filteredItems.forEach(item => {
+                    this.listElement.appendChild(item);
+                });
+                if(this.paginationWrapper){
+                    this.paginationWrapper.remove();
+                }
+            } else if (this.loadMode === 'paginate') {
+                this.totalPages = Math.ceil(this.filteredItems.length / this.itemsPerPage);
+                const currentSlice = (this.currentPage * this.itemsPerPage) - this.itemsPerPage;
+                const currentPage = this.filteredItems.slice(currentSlice, currentSlice + this.itemsPerPage);
+                currentPage.forEach(item => {
+                    this.listElement.appendChild(item);
+                });
+            }
+        } else {
+            this.filteredItems.forEach(item => {
+                this.listElement.appendChild(item);
+            });
+        }
+        
+        var webflow = window.Webflow || [];
+        if(webflow) {
+            webflow.require('ix2').init();
+        }
         this.ToggleEmptyState();
+        this.UpdatePaginationDisplay();
     }
 
     SortItems() {
@@ -157,18 +230,15 @@ class CMSFilter {
             let aValue = a.dataset[key];
             let bValue = b.dataset[key];
     
-            // Handle numeric sorting (e.g., price or year)
             if (!isNaN(aValue) && !isNaN(bValue)) {
                 aValue = parseFloat(aValue);
                 bValue = parseFloat(bValue);
             }
-            // Handle date sorting (convert to Date object)
             else if (Date.parse(aValue) && Date.parse(bValue)) {
                 aValue = new Date(aValue);
                 bValue = new Date(bValue);
             }
     
-            // Handle alphabetical sorting or already processed values
             if (order === 'asc') {
                 return aValue > bValue ? 1 : -1;
             } else {
@@ -179,7 +249,7 @@ class CMSFilter {
     
     ApplyFilters() {
         const filters = this.GetFilters();
-    
+        this.currentPage = 1; //Reset pagination to first page
         this.filteredItems = this.allItems.filter(item => {
             return Object.keys(filters).every(category => {
                 const values = [...filters[category]];
@@ -346,19 +416,20 @@ class CMSFilter {
                 this.activeFilters[tag].forEach(filterValue => {
                     const newTag = this.tagTemplate.cloneNode(true);
                     const tagText = newTag.querySelector('[wt-cmsfilter-element="tag-text"]');
+                    const showTagCategory = newTag.getAttribute('wt-cmsfilter-tag-category') || 'true';
                     const tagRemove = newTag.querySelector('[wt-cmsfilter-element="tag-remove"]');
 
                     if (typeof filterValue === 'object' && filterValue.from !== null && filterValue.to !== null) {
-                        tagText.innerText = `${tag}: ${filterValue?.from} - ${filterValue?.to}`;
+                        tagText.innerText = `${showTagCategory === 'true' ? `${tag}:` : ''} ${filterValue?.from} - ${filterValue?.to}`;
                     }
                     else if (typeof filterValue === 'object' && filterValue.from !== null && filterValue.to === null ) {
-                        tagText.innerText = `${tag}: ${filterValue?.from}`;
+                        tagText.innerText = `${showTagCategory === 'true' ? `${tag}:` : ''} ${filterValue?.from}`;
                     }
                     else if (typeof filterValue === 'object' && filterValue.from === null && filterValue.to !== null ) {
-                        tagText.innerText = `${tag}: ${filterValue?.to}`;
+                        tagText.innerText = `${showTagCategory === 'true' ? `${tag}:` : ''} ${filterValue?.to}`;
                     }
                     else{
-                        tagText.innerText = `${tag}: ${filterValue}`;
+                        tagText.innerText = `${showTagCategory === 'true' ? `${tag}:` : ''} ${filterValue}`;
                     }
                     this.tagTemplateContainer.append(newTag);
     
@@ -374,7 +445,7 @@ class CMSFilter {
     
     RemoveActiveTag(_tag, filterTag, value) {
         const categoryElements = this.filterForm.querySelectorAll(`[wt-cmsfilter-category="${filterTag}"]`);
-    
+        const advancedFiltering = this.filterForm.getAttribute('wt-cmsfilter-filtering');
         categoryElements.forEach(categoryElement => {
             const input = (categoryElement.tagName === "INPUT") 
                 ? categoryElement 
@@ -389,9 +460,16 @@ class CMSFilter {
                             input.value = '';
                         }
                     } else if (input.type === 'checkbox') {
-                        input.checked = false;
+                        if(advancedFiltering === 'advanced') { 
+                            input.checked = false;
+                        }
+                        else {  
+                            if(categoryElement.innerText === value) { 
+                                input.checked = false;
+                            }
+                        }
                     }
-                }
+                } 
         });
     
         this.activeFilters[filterTag] = this.activeFilters[filterTag].filter(filter => filter !== value);
@@ -402,25 +480,39 @@ class CMSFilter {
     }
 
     NextPage() {
-        if (this.currentPage < this.totalPages) {
-            this.currentPage++;
-            this.LoadItems();
-            this.UpdatePaginationDisplay();
+        if (this.currentPage <= this.totalPages) {
+            this.currentPage = this.currentPage + 1;
+            this.RenderItems();
         }
     }
 
     PrevPage() {
         if (this.currentPage > 1) {
-            this.currentPage--;
-            this.LoadItems();
-            this.UpdatePaginationDisplay();
+            this.currentPage = this.currentPage - 1;
+            this.RenderItems();
         }
     }
 
     UpdatePaginationDisplay() {
-        const currentPageElement = document.getElementById('current-page');
-        if (currentPageElement) {
-            currentPageElement.innerText = this.currentPage;
+        if(!this.paginationWrapper) return;
+
+        this.paginationcounter = this.paginationcounter ? this.paginationcounter : this.paginationWrapper.querySelector('.w-page-count');
+        if (this.paginationcounter) {
+            this.paginationcounter.innerText = `${this.currentPage} / ${this.totalPages}`;
+        }
+        if(this.currentPage === 1){
+            if(this.previousButton) this.previousButton.hidden = true;
+            if(this.customPrevButton) this.customPrevButton.hidden = true;
+        } else {
+            if(this.previousButton) this.previousButton.hidden = false;
+            if(this.customPrevButton) this.customPrevButton.hidden = false;
+        }
+        if(this.currentPage === this.totalPages){
+            if(this.nextButton) this.nextButton.hidden = true;
+            if(this.customNextButton) this.customNextButton.hidden = true;
+        } else {
+            if(this.nextButton) this.nextButton.hidden = false;
+            if(this.customNextButton) this.customNextButton.hidden = false;
         }
     }
 
@@ -489,9 +581,9 @@ class CMSFilter {
 }
 
 const InitializeCMSFilter = () => {
-    window.trickeries = window.trickeries || [];
+    window.webtricks = window.webtricks || [];
     let instance = new CMSFilter();
-    window.trickeries.push({'CMSFilter': instance});
+    window.webtricks.push({'CMSFilter': instance});
 }
 
 if (/complete|interactive|loaded/.test(document.readyState)) {
