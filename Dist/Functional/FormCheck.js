@@ -113,11 +113,11 @@ class FormCheck {
 }
 
 const initializeFormCheck = () => {
-    window.trickeries = window.trickeries || [];
+    window.webtricks = window.webtricks || [];
     const forms = document.querySelectorAll('[wt-formcheck-element="form"]');
     forms.forEach(form => {
         let instance = new FormCheck(form);
-        window.trickeries.push({'FormCheck': instance});
+        window.webtricks.push({'FormCheck': instance});
     });
 }
 

@@ -13,7 +13,7 @@ class RenderStatic {
     init() {
         if (!this.container || this.cloneables.length === 0) return;
 
-        this.gap = this.gap !== 0 ? this.gap : +this.container.getAttribute("wt-renderstatic-gap") || 0;
+        this.gap = this.gap !== 0 ? this.gap : +this.container.getAttribute("wt-renderstatic-gap") || 1;
 
         if (this.observer) this.observer.disconnect();
 
@@ -41,6 +41,7 @@ class RenderStatic {
 
     insertChildAtIndex(parent, child, index = 0) {
         if (!child) return;
+        if (parent.children.length === index) return;
         let childClone = child.cloneNode(true);
         if (parent) {
             parent.insertBefore(childClone, parent.children[index]);
@@ -66,11 +67,11 @@ class RenderStatic {
 }
 
 const initializeRenderStatic = () => {
-    window.trickeries = window.trickeries || [];
+    window.webtricks = window.webtricks || [];
     let rsContainer = document.querySelector("[wt-renderstatic-element='container']");
     if(!rsContainer) return;
     let instance = new RenderStatic(rsContainer);
-    window.trickeries.push({'RenderStatic': instance});
+    window.webtricks.push({'RenderStatic': instance});
 }
 
 if (/complete|interactive|loaded/.test(document.readyState)) {

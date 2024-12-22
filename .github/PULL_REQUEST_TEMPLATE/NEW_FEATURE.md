@@ -2,11 +2,11 @@
 
 <!-- Tick the checkboxes to ensure you've done everything correctly -->
 - [ ] PR does not match another non-stale PR currently opened
-- [ ] PR name matches the format *[ feature ]: <i>Feature Name</i> (<i>versions separated by comma</i>)*. More details [here](https://github.com/TheCodeRaccoons/WebflowTrickery/wiki/Overview-on-Submitting-Features)
+- [ ] PR name matches the format *[ feature ]: <i>Feature Name</i> (<i>versions separated by comma</i>)*. More details [here](https://github.com/TheCodeRaccoons/WebTricks/wiki/Overview-on-Submitting-Features)
 - [ ] PR's base is the `develop` branch.
-- [ ] Your Feature matches the standards laid out [here](https://github.com/TheCodeRaccoons/WebflowTrickery/wiki/Programming-Standards)
+- [ ] Your Feature matches the standards laid out [here](https://github.com/TheCodeRaccoons/WebTricks/wiki/Programming-Standards)
 
-<!-- Refer to the [contributing](https://github.com/TheCodeRaccoons/WebflowTrickery/wiki/Contributing) guidelines for more details. -->
+<!-- Refer to the [contributing](https://github.com/TheCodeRaccoons/WebTricks/wiki/Contributing) guidelines for more details. -->
 
 ## Features
 <!-- List your features here and the benefits they bring. Include images/codes if appropriate -->
