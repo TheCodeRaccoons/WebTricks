@@ -21,11 +21,11 @@ class CMSFilter {
         this.loadMode = this.listElement.getAttribute('wt-cmsfilter-loadmode') || 'load-all'; //Currently only paginate and load-all
         this.previousButton = document.querySelector('[wt-cmsfilter-pagination="prev"]');
         this.nextButton = document.querySelector('[wt-cmsfilter-pagination="next"]');
+        this.customNextButton = document.querySelector('[wt-cmsfilter-element="custom-next"]');
+        this.customPrevButton = document.querySelector('[wt-cmsfilter-element="custom-prev"]');
 
         //pagination opt
         this.paginationcounter = document.querySelector('[wt-cmsfilter-element="page-count"]');
-        this.customNextButton = document.querySelector('[wt-cmsfilter-element="custom-next"]');
-        this.customPrevButton = document.querySelector('[wt-cmsfilter-element="custom-prev"]');
 
         //OPT
         this.activeFilterClass = this.filterForm.getAttribute('wt-cmsfilter-class');
@@ -51,9 +51,6 @@ class CMSFilter {
         if (this.paginationWrapper) {
             await this.LoadAllItems();
         }
-        // TODO: Check if this is still necesary once we finish the "pagination functionality"
-        // this.allItems = Array.from(this.listElement.children);
-        // this.itemsPerPage = this.allItems.length;
         this.SetupEventListeners();
         this.RenderItems();
         this.UpdateAvailableFilters();
@@ -134,14 +131,10 @@ class CMSFilter {
     }
 
     generatePaginationLinksFromString(paginationString, baseUrl) {
-        // Parse the pagination string to get the current and total pages
         const [currentPage, totalPages] = paginationString.split(' / ').map(Number);
-        
         const links = [];
         
-        // Generate links for all pages after the first
         for (let page = currentPage + 1; page <= totalPages; page++) {
-            // Replace or append the page query parameter in the URL
             const updatedUrl = baseUrl.replace(/page=\d+/, `page=${page}`);
             links.push(updatedUrl);
         }
@@ -220,6 +213,11 @@ class CMSFilter {
                 this.listElement.appendChild(item);
             });
         }
+        
+        var webflow = window.Webflow || [];
+        if(webflow) {
+            webflow.require('ix2').init();
+        }
         this.ToggleEmptyState();
         this.UpdatePaginationDisplay();
     }
@@ -232,18 +230,15 @@ class CMSFilter {
             let aValue = a.dataset[key];
             let bValue = b.dataset[key];
     
-            // Handle numeric sorting (e.g., price or year)
             if (!isNaN(aValue) && !isNaN(bValue)) {
                 aValue = parseFloat(aValue);
                 bValue = parseFloat(bValue);
             }
-            // Handle date sorting (convert to Date object)
             else if (Date.parse(aValue) && Date.parse(bValue)) {
                 aValue = new Date(aValue);
                 bValue = new Date(bValue);
             }
     
-            // Handle alphabetical sorting or already processed values
             if (order === 'asc') {
                 return aValue > bValue ? 1 : -1;
             } else {
