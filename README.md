@@ -37,7 +37,7 @@
 </div>
 
 <h2>TL;DR</h2>
-All of the documentation is explained by functionality in <a href="https://coderacoons.webflow.io/tools/webflow-trickery">the website</a>. Feel free to browse there or request any aditional functionalities in the <a target="_blank" href="https://github.com/TheCodeRaccoons/WebTricks/issues/new/choose">issues</a> section of this project.
+All of the documentation is explained by functionality in <a href="https://coderacoons.webflow.io/tools/webtricks">the website</a>. Feel free to browse there or request any aditional functionalities in the <a target="_blank" href="https://github.com/TheCodeRaccoons/WebTricks/issues/new/choose">issues</a> section of this project.
  
 <h2>Table of Contents</h2>
 <ol>
