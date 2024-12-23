@@ -1,15 +1,16 @@
-'use strict'
+'use strict';
 
 class CookieConsent {
-    constructor(cookieBanner, config = {
-        cookieExpiryDays: 90
-    }) {
+    constructor(cookieBanner, config = { cookieExpiryDays: 90 }) {
         this.cookieBanner = cookieBanner;
-        this.acceptAllButton = this.cookieBanner.querySelectorAll('[wt-cookieconsent-element="accept-all"]');
+        this.acceptAllButtons = this.cookieBanner.querySelectorAll('[wt-cookieconsent-element="accept-all"]');
         this.acceptNecessaryButton = this.cookieBanner.querySelector('[wt-cookieconsent-element="accept-necessary"]');
         this.manageCookiesButton = document.querySelector('[wt-cookieconsent-element="manage-cookies"]');
+        this.categoriesForm = this.cookieBanner.querySelector('[wt-cookieconsent-element="categories-form"]');
+
         this.cookieExpiryDays = config.cookieExpiryDays;
         this.consentGiven = false;
+
         this.initialize();
     }
 
@@ -29,14 +30,21 @@ class CookieConsent {
     }
 
     addEventListeners() {
-        if(this.acceptAllButton && this.acceptAllButton.length) {
-            for(let acceptBtn of this.acceptAllButton) {
-                acceptBtn.addEventListener('click', () => this.acceptAllCookies());
-            }
+        if (this.acceptAllButtons && this.acceptAllButtons.length) {
+            this.acceptAllButtons.forEach(btn => {
+                btn.addEventListener('click', () => this.acceptAllCookies());
+            });
         }
 
-        if(this.acceptNecessaryButton) {
+        if (this.acceptNecessaryButton) {
             this.acceptNecessaryButton.addEventListener('click', () => this.acceptNecessaryCookies());
+        }
+
+        if (this.categoriesForm) {
+            this.categoriesForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleCategoryFormSubmit();
+            });
         }
     }
 
@@ -54,8 +62,29 @@ class CookieConsent {
         this.loadConsentScripts();
     }
 
+    handleCategoryFormSubmit() {
+        let chosenCategories = [];
+        const checkboxes = this.categoriesForm.querySelectorAll('[wt-cookieconsent-category]');
+
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                const category = checkbox.getAttribute('wt-cookieconsent-category');
+                chosenCategories.push(category);
+            }
+        });
+
+        if (!chosenCategories.includes('necessary')) {
+            chosenCategories.unshift('necessary');
+        }
+
+        const finalValue = chosenCategories.join(',');
+        this.setCookie('cookieConsent', finalValue, this.cookieExpiryDays);
+        this.consentGiven = true;
+        this.cookieBanner.remove();
+        this.loadConsentScripts();
+    }
+
     manageCookies() {
-        // Logic to open a modal or menu to manage cookie preferences.
         this.cookieBanner.style.display = 'block';
     }
 
@@ -69,34 +98,56 @@ class CookieConsent {
     getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
+        if (parts.length === 2) {
+            return parts.pop().split(';').shift();
+        }
     }
 
     loadConsentScripts() {
-        const consentStatus = this.getCookie('cookieConsent');
+        const consentValue = this.getCookie('cookieConsent') || '';
+
+        let consentCategories = [];
+        if (consentValue === 'all') {
+            consentCategories = ['all'];
+        } else {
+            consentCategories = consentValue
+                .split(',')
+                .map(val => val.trim())
+                .filter(Boolean);
+        }
+
         const consentScripts = document.querySelectorAll('script[wt-cookieconsent-script]');
-        consentScripts.forEach(script => {
-            const scriptType = script.getAttribute('wt-cookieconsent-script');
-            if (consentStatus === 'all' || (consentStatus === 'necessary' && scriptType === 'necessary')) {
-                if (!script.dataset.loaded) {
-                    if (!script.src) {
-                        // Inline script
-                        const inlineScript = document.createElement('script');
-                        inlineScript.textContent = script.textContent;
-                        document.head.appendChild(inlineScript);
-                    } else {
-                        // External script
-                        const externalScript = document.createElement('script');
-                        externalScript.src = script.src;
-                        externalScript.async = script.async;
-                        externalScript.defer = script.defer;
-                        document.head.appendChild(externalScript);
-                    }
-                    script.dataset.loaded = 'true'; // Mark script as loaded
-                }
-                script.remove(); // Remove original script to prevent duplicate loading
+        consentScripts.forEach(originalScript => {
+            const scriptCategory = originalScript.getAttribute('wt-cookieconsent-script');
+
+            if (
+                consentCategories.includes('all') ||
+                consentCategories.includes(scriptCategory) ||
+                scriptCategory === 'necessary'
+            ) {
+                this.injectScript(originalScript);
             }
         });
+    }
+
+    injectScript(originalScript) {
+        if (originalScript.dataset.loaded === 'true') return;
+
+        const newScript = document.createElement('script');
+        
+        if (!originalScript.src) {
+            newScript.textContent = originalScript.textContent;
+        } else {
+            newScript.src = originalScript.src;
+            newScript.async = originalScript.async;
+            newScript.defer = originalScript.defer;
+        }
+
+        newScript.type = 'text/javascript';
+        document.head.appendChild(newScript);
+
+        originalScript.dataset.loaded = 'true';
+        originalScript.remove();
     }
 }
 
@@ -105,9 +156,7 @@ const InitializeCookieConsent = () => {
     const cookieBanner = document.querySelector('[wt-cookieconsent-element="banner"]');
     if (cookieBanner) {
         let instance = new CookieConsent(cookieBanner);
-        window.webtricks.push({
-            'CookieConsent': instance
-        });
+        window.webtricks.push({ 'CookieConsent': instance });
     }
 };
 
