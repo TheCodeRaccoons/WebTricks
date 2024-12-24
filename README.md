@@ -27,12 +27,14 @@
         <img src="https://raw.githubusercontent.com/TheCodeRaccoons/Imagery/16a395115ab598a94a7d1ab93f182218d8bbb751/wt-logo.svg" alt="WebTricks Logo" height="140" />
     </a>
     <h5 align="center">
-        WebTricks aims to create easy to implement, reusable functionalities for the web. As it's name implies, the main platform this project targets is <a href="https://webflow.com/">Webflow</a>, but the majority of the scripts are made with general web development in mind. Meaning that most of this scripts should work without an issue on any website unless it is a CMS functionality or a Webflow specific script.
+	    WebTricks aims to create easy-to-implement, reusable functionalities for the web. The main platform this project was built for at the beginning was <a href="https://webflow.com/">Webflow</a>, but most of the scripts are made to work on any web development project. Meaning that most of the scripts should work without an issue on any website unless it is a CMS  ONLY functionality or a Webflow-Specific script.
     </h5>
     <p align="center">
         <a target="_blank" href="https://github.com/TheCodeRaccoons/WebTricks/issues/new/choose">Request a functionality</a>
         &middot;
         <a href="#contribute">Contribute</a>
+        &middot;
+        <a href="https://www.thecoderaccoons.com/webtricks">See the documentation</a>
     </p>
 </div>
 
@@ -68,15 +70,15 @@ All of the documentation is explained by functionality in <a href="https://theco
 Direct Import via jsDelivr: Webtricks is hosted on jsDelivr, making it simple to include in your project. You can import individual functionalities directly into your HTML file. For example:
 
 ```
-<script src="https://cdn.jsdelivr.net/gh/your-username/webtricks@latest/dist/Functional/CountUp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@1/Dist/Functional/ReadTime.min.js"></script>
 ```
 Replace CountUp.min.js with the specific script you want to include.
 
 Multiple Scripts: Add as many scripts as you need to your project by referencing their respective paths. Example:
 
 ```
-<script src="https://cdn.jsdelivr.net/gh/your-username/webtricks@latest/dist/Functional/CMSFilter.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/your-username/webtricks@latest/dist/Functional/FormCheck.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/webtricks@1/dist/Functional/CMSFilter.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/webtricks@1/dist/Functional/FormCheck.min.js"></script>
 ```
 Ready to Use: Once imported, the scripts initialize automatically, provided the correct HTML attributes are in place.
 
