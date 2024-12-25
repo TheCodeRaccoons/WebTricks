@@ -9,7 +9,6 @@ class HideContainer {
     }
 
     init = () => {
-        this.container 
         if(this.cmsEmptyState) { 
             if(this.isRemoveContainer) {this.container.remove();}
             else{this.container.style.display = 'none';}
