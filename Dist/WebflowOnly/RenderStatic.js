@@ -25,15 +25,17 @@ class RenderStatic {
 
         let insertIndex = this.gap;
         const totalChildren = childrenArray.length;
-        const totalInsertions = Math.round(totalChildren / this.gap);
         let cloneIndex = 0;
 
-        for (let i = 0; i <= totalChildren + totalInsertions; i++) {
-            if (i === insertIndex) {
-                this.insertChildAtIndex(this.container, this.cloneables[cloneIndex], insertIndex);
-                cloneIndex = (cloneIndex < this.cloneables.length - 1) ? cloneIndex + 1 : 0;
-                insertIndex = i + this.gap + 1;
-            }
+        const maxInsertions = Math.floor((totalChildren - 1) / this.gap);
+
+        for (let i = 0; i < maxInsertions; i++) {
+            const currentIndex = i * (this.gap + 1) + this.gap;
+
+            if (currentIndex >= totalChildren) break;
+
+            this.insertChildAtIndex(this.container, this.cloneables[cloneIndex], currentIndex);
+            cloneIndex = (cloneIndex < this.cloneables.length - 1) ? cloneIndex + 1 : 0;
         }
         
         this.observeContainer();
@@ -41,7 +43,9 @@ class RenderStatic {
 
     insertChildAtIndex(parent, child, index = 0) {
         if (!child) return;
-        if (parent.children.length === index) return;
+
+        if (index >= parent.children.length) return;
+
         let childClone = child.cloneNode(true);
         if (parent) {
             parent.insertBefore(childClone, parent.children[index]);
@@ -77,5 +81,5 @@ const initializeRenderStatic = () => {
 if (/complete|interactive|loaded/.test(document.readyState)) {
     initializeRenderStatic();
 } else { 
-    window.addEventListener('DOMContentLoaded',initializeRenderStatic )
+    window.addEventListener('DOMContentLoaded', initializeRenderStatic);
 }
