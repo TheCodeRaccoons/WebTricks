@@ -134,7 +134,3 @@ After a pull request has been open for over 30 days with no activity or response
     <img src="https://forthebadge.com/images/badges/built-by-developers.svg" />
 </div>
 
-
-
-### Disclaimer
-Even though this project has Webflow on its name I'm by no means part of the webflow team, just a dev sharing a bit of the work I've done over the years and trying to help out others looking for easier ways to build for the web.
