@@ -520,8 +520,10 @@ class CMSFilter {
             }
         } 
         if(this.allItems){
-            if(this.allItems.length > 0) {
-                return this.allItems.length;
+            //trim out static elements from RenderStatic
+            let elements = this.allItems.filter(item => !item.hasAttribute('wt-renderstatic-element'));
+            if(elements.length > 0) {
+                return elements.length;
             }
             return 0;
         }
