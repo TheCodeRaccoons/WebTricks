@@ -33,6 +33,7 @@ class CMSFilter {
         this.sortOptions = document.querySelector('[wt-cmsfilter-element="sort-options"]');
         this.resultCount = document.querySelector('[wt-cmsfilter-element="results-count"]');
         this.emptyElement = document.querySelector('[wt-cmsfilter-element="empty"]');
+        this.resetIx2 = this.listElement.getAttribute('wt-cmsfilter-resetix2') || false;
 
         //Data Tracking Values
         this.allItems = [];
@@ -206,6 +207,7 @@ class CMSFilter {
                 const currentPage = this.filteredItems.slice(currentSlice, currentSlice + this.itemsPerPage);
                 currentPage.forEach(item => {
                     this.listElement.appendChild(item);
+                    if(this.resetIx2) this.ResetInteraction(item);
                 });
             }
         } else {
@@ -214,10 +216,6 @@ class CMSFilter {
             });
         }
         
-        var webflow = window.Webflow || [];
-        if(webflow) {
-            webflow.require('ix2').init();
-        }
         this.ToggleEmptyState();
         this.UpdatePaginationDisplay();
     }
@@ -291,7 +289,6 @@ class CMSFilter {
         this.ShowResultCount();
         this.SetActiveTags();
     }
-
 
     ShowResultCount() {
         if(!this.resultCount) return;
@@ -369,7 +366,6 @@ class CMSFilter {
         return filters;
     }
     
-
     GetDataSet(str) {
         return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) {
             return index === 0 ? word.toLowerCase() : word.toUpperCase();
@@ -524,8 +520,10 @@ class CMSFilter {
             }
         } 
         if(this.allItems){
-            if(this.allItems.length > 0) {
-                return this.allItems.length;
+            //trim out static elements from RenderStatic
+            let elements = this.allItems.filter(item => !item.hasAttribute('wt-renderstatic-element'));
+            if(elements.length > 0) {
+                return elements.length;
             }
             return 0;
         }
@@ -565,6 +563,37 @@ class CMSFilter {
         this.ApplyFilters();
     }
     
+    ResetInteraction(element) {
+        if (!element) {
+            console.error('Element not found');
+            return;
+        }
+
+        const WebflowIX2 = window.Webflow && Webflow.require('ix2');
+        if (!WebflowIX2) {
+            console.error('Webflow IX2 engine not found.');
+            return;
+        }
+
+        const targetElement = element.hasAttribute('data-w-id') 
+            ? element 
+            : element.querySelector('[data-w-id]');
+        
+        if (!targetElement) {
+            console.warn('No IX2 interaction found on the element or its children.');
+            return;
+        }
+
+        const dataWId = targetElement.getAttribute('data-w-id');
+        if (dataWId) {
+            targetElement.removeAttribute('data-w-id');
+            targetElement.setAttribute('data-w-id', dataWId);
+
+            WebflowIX2.init();
+        } else {
+            console.warn('No valid data-w-id attribute found.');
+        }
+    }
 
     GetFilterData() {
         let filterData = {
