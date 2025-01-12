@@ -7,8 +7,8 @@ class CMSFilter {
         this.filterForm = document.querySelector('[wt-cmsfilter-element="filter-form"]');
         this.listElement = document.querySelector('[wt-cmsfilter-element="list"]');
         this.filterElements = this.filterForm.querySelectorAll('[wt-cmsfilter-category]');
-        this.currentPage = 1;   // default value
-        this.itemsPerPage = 0;  // gets updated during init
+        this.currentPage = 1;
+        this.itemsPerPage = 0;
 
         //TAG elements
         this.tagTemplate = document.querySelector('[wt-cmsfilter-element="tag-template"]');
@@ -24,24 +24,19 @@ class CMSFilter {
         this.customNextButton = document.querySelector('[wt-cmsfilter-element="custom-next"]');
         this.customPrevButton = document.querySelector('[wt-cmsfilter-element="custom-prev"]');
 
-        //pagination opt
         this.paginationcounter = document.querySelector('[wt-cmsfilter-element="page-count"]');
-
-        //OPT
         this.activeFilterClass = this.filterForm.getAttribute('wt-cmsfilter-class');
         this.clearAll = document.querySelector('[wt-cmsfilter-element="clear-all"]');
         this.sortOptions = document.querySelector('[wt-cmsfilter-element="sort-options"]');
         this.resultCount = document.querySelector('[wt-cmsfilter-element="results-count"]');
         this.emptyElement = document.querySelector('[wt-cmsfilter-element="empty"]');
 
-        //Data Tracking Values
         this.allItems = [];
         this.filteredItems = [];
         this.totalPages = 1;
         this.activeFilters = {};
         this.availableFilters = {};
 
-        //Script Init
         this.init();
     }
 
