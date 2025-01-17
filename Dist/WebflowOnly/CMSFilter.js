@@ -46,11 +46,11 @@ class CMSFilter {
         this.itemsPerPage = this.allItems.length;
         if (this.paginationWrapper) {
             await this.LoadAllItems();
-        }
-        if (this.paginationcounter && this.paginationcounter != this.paginationWrapper.querySelector('.w-page-count')) {
-            this.paginationWrapper.querySelector('.w-page-count').remove();
-        } else {
-            this.paginationcounter = this.paginationWrapper.querySelector('.w-page-count');
+            if (this.paginationcounter && this.paginationcounter != this.paginationWrapper.querySelector('.w-page-count')) {
+                this.paginationWrapper.querySelector('.w-page-count').remove();
+            } else {
+                this.paginationcounter = this.paginationWrapper.querySelector('.w-page-count');
+            }
         }
         this.SetupEventListeners();
         this.RenderItems();
@@ -562,7 +562,7 @@ class CMSFilter {
     
         this.ApplyFilters();
     }
-    
+
     ResetInteraction(element) {
         if (!element) {
             console.error('Element not found');
