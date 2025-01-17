@@ -7,8 +7,8 @@ class CMSFilter {
         this.filterForm = document.querySelector('[wt-cmsfilter-element="filter-form"]');
         this.listElement = document.querySelector('[wt-cmsfilter-element="list"]');
         this.filterElements = this.filterForm.querySelectorAll('[wt-cmsfilter-category]');
-        this.currentPage = 1;   // default value
-        this.itemsPerPage = 0;  // gets updated during init
+        this.currentPage = 1;
+        this.itemsPerPage = 0;
 
         //TAG elements
         this.tagTemplate = document.querySelector('[wt-cmsfilter-element="tag-template"]');
@@ -18,16 +18,13 @@ class CMSFilter {
         //Pagination wrapper is a MUST for the full functionality of the filter to work properly, 
         //if not added the filter will only work with whatever is loaded by default.
         this.paginationWrapper = document.querySelector('[wt-cmsfilter-element="pagination-wrapper"]') || null;
-        this.loadMode = this.listElement.getAttribute('wt-cmsfilter-loadmode') || 'load-all'; //Currently only paginate and load-all
+        this.loadMode = this.listElement.getAttribute('wt-cmsfilter-loadmode') || 'load-all';
         this.previousButton = document.querySelector('[wt-cmsfilter-pagination="prev"]');
         this.nextButton = document.querySelector('[wt-cmsfilter-pagination="next"]');
         this.customNextButton = document.querySelector('[wt-cmsfilter-element="custom-next"]');
         this.customPrevButton = document.querySelector('[wt-cmsfilter-element="custom-prev"]');
 
-        //pagination opt
         this.paginationcounter = document.querySelector('[wt-cmsfilter-element="page-count"]');
-
-        //OPT
         this.activeFilterClass = this.filterForm.getAttribute('wt-cmsfilter-class');
         this.clearAll = document.querySelector('[wt-cmsfilter-element="clear-all"]');
         this.sortOptions = document.querySelector('[wt-cmsfilter-element="sort-options"]');
@@ -35,14 +32,12 @@ class CMSFilter {
         this.emptyElement = document.querySelector('[wt-cmsfilter-element="empty"]');
         this.resetIx2 = this.listElement.getAttribute('wt-cmsfilter-resetix2') || false;
 
-        //Data Tracking Values
         this.allItems = [];
         this.filteredItems = [];
         this.totalPages = 1;
         this.activeFilters = {};
         this.availableFilters = {};
 
-        //Script Init
         this.init();
     }
 
@@ -51,6 +46,11 @@ class CMSFilter {
         this.itemsPerPage = this.allItems.length;
         if (this.paginationWrapper) {
             await this.LoadAllItems();
+            if (this.paginationcounter && this.paginationcounter != this.paginationWrapper.querySelector('.w-page-count')) {
+                this.paginationWrapper.querySelector('.w-page-count').remove();
+            } else {
+                this.paginationcounter = this.paginationWrapper.querySelector('.w-page-count');
+            }
         }
         this.SetupEventListeners();
         this.RenderItems();
@@ -213,6 +213,7 @@ class CMSFilter {
         } else {
             this.filteredItems.forEach(item => {
                 this.listElement.appendChild(item);
+                if(this.resetIx2) this.ResetInteraction(item);
             });
         }
         
@@ -492,7 +493,6 @@ class CMSFilter {
     UpdatePaginationDisplay() {
         if(!this.paginationWrapper) return;
 
-        this.paginationcounter = this.paginationcounter ? this.paginationcounter : this.paginationWrapper.querySelector('.w-page-count');
         if (this.paginationcounter) {
             this.paginationcounter.innerText = `${this.currentPage} / ${this.totalPages}`;
         }
@@ -562,7 +562,7 @@ class CMSFilter {
     
         this.ApplyFilters();
     }
-    
+
     ResetInteraction(element) {
         if (!element) {
             console.error('Element not found');
