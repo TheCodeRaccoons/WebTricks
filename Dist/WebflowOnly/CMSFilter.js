@@ -46,6 +46,11 @@ class CMSFilter {
         if (this.paginationWrapper) {
             await this.LoadAllItems();
         }
+        if (this.paginationcounter && this.paginationcounter != this.paginationWrapper.querySelector('.w-page-count')) {
+            this.paginationWrapper.querySelector('.w-page-count').remove();
+        } else {
+            this.paginationcounter = this.paginationWrapper.querySelector('.w-page-count');
+        }
         this.SetupEventListeners();
         this.RenderItems();
         this.UpdateAvailableFilters();
@@ -491,7 +496,6 @@ class CMSFilter {
     UpdatePaginationDisplay() {
         if(!this.paginationWrapper) return;
 
-        this.paginationcounter = this.paginationcounter ? this.paginationcounter : this.paginationWrapper.querySelector('.w-page-count');
         if (this.paginationcounter) {
             this.paginationcounter.innerText = `${this.currentPage} / ${this.totalPages}`;
         }
