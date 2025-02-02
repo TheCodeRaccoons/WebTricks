@@ -236,6 +236,9 @@ class CMSFilter {
             else if (Date.parse(aValue) && Date.parse(bValue)) {
                 aValue = new Date(aValue);
                 bValue = new Date(bValue);
+            } else {
+                aValue = aValue.toString().toLowerCase();
+                bValue = bValue.toString().toLowerCase();
             }
     
             if (order === 'asc') {
