@@ -4,6 +4,8 @@ class RenderStatic {
     constructor(_container) {
         this.container = _container;
         this.cloneables = document.querySelectorAll("[wt-renderstatic-element='cloneable']");
+        this.resetIx2 = this.container.getAttribute('wt-renderstatic-resetix2') || false;
+
         this.gap = 0;
         this.observer = null;
 
@@ -49,6 +51,7 @@ class RenderStatic {
         let childClone = child.cloneNode(true);
         if (parent) {
             parent.insertBefore(childClone, parent.children[index]);
+            if(this.resetIx2) this.ResetInteraction(childClone);
         }
     }
 
@@ -67,6 +70,38 @@ class RenderStatic {
         });
 
         this.observer.observe(this.container, { childList: true });
+    }
+    
+    ResetInteraction(element) {
+        if (!element) {
+            console.error('Element not found');
+            return;
+        }
+
+        const WebflowIX2 = window.Webflow && Webflow.require('ix2');
+        if (!WebflowIX2) {
+            console.error('Webflow IX2 engine not found.');
+            return;
+        }
+
+        const targetElement = element.hasAttribute('data-w-id') 
+            ? element 
+            : element.querySelector('[data-w-id]');
+        
+        if (!targetElement) {
+            console.warn('No IX2 interaction found on the element or its children.');
+            return;
+        }
+
+        const dataWId = targetElement.getAttribute('data-w-id');
+        if (dataWId) {
+            targetElement.removeAttribute('data-w-id');
+            targetElement.setAttribute('data-w-id', dataWId);
+
+            WebflowIX2.init();
+        } else {
+            console.warn('No valid data-w-id attribute found.');
+        }
     }
 }
 
