@@ -222,32 +222,35 @@ class CMSFilter {
     }
 
     SortItems() {
-        if(!this.sortOptions) return;
+        if (!this.sortOptions) return;
     
         let [key, order] = this.sortOptions.value.split('-');
         this.filteredItems.sort((a, b) => {
             let aValue = a.dataset[key];
             let bValue = b.dataset[key];
     
+            if (aValue === undefined || bValue === undefined) {
+                return 0; // If either value is undefined, consider them equal
+            }
+    
             if (!isNaN(aValue) && !isNaN(bValue)) {
                 aValue = parseFloat(aValue);
                 bValue = parseFloat(bValue);
-            }
-            else if (Date.parse(aValue) && Date.parse(bValue)) {
+            } else if (Date.parse(aValue) && Date.parse(bValue)) {
                 aValue = new Date(aValue);
                 bValue = new Date(bValue);
             } else {
-                aValue = aValue.toString().toLowerCase();
-                bValue = bValue.toString().toLowerCase();
+                aValue = aValue ? aValue.toString().toLowerCase() : '';
+                bValue = bValue ? bValue.toString().toLowerCase() : '';
             }
     
             if (order === 'asc') {
-                return aValue > bValue ? 1 : -1;
+                return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
             } else {
-                return aValue < bValue ? 1 : -1;
+                return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
             }
         });
-    }   
+    }
     
     ApplyFilters() {
         const filters = this.GetFilters();
