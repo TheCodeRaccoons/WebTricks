@@ -237,6 +237,10 @@ Your CMS items should include data attributes that match your filter categories.
 
 ### JavaScript API
 Access the filter instance globally:
+
+> **Note:** The following example uses [optional chaining (`?.`)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining), which is supported in all modern browsers but **not** in Internet Explorer or some older browsers. If you need to support older browsers, use the alternative code below.
+
+**Modern browsers (with optional chaining):**
 ```javascript
 // Get the filter instance
 const filterInstance = window.webtricks.find(item => item.CMSFilter)?.CMSFilter;
