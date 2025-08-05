@@ -1,0 +1,399 @@
+/*!
+ * Webflow Utilities v1.1.0
+ * Range Slider Module
+ * A customizable, attribute-driven range slider that can be easily integrated into any HTML-based website.
+ * (c) 2023 Jorge Cortez
+ * MIT License
+ * https://github.com/JorchCortez/Weblfow-Trickery
+ */
+
+/**
+ * @file RangeSlider.js
+ * @description A customizable dual-handle range slider for selecting value ranges.
+ * 
+ * Key Features:
+ * - Dual handles for selecting a range of values
+ * - Real-time visual updates
+ * - Form integration with input fields
+ * - Display elements for current values
+ * - Customizable thumbs with SVG/image support
+ * - Mutation observer support for programmatic value changes
+ * - Configurable min/max values and step size
+ * 
+ * Required Attributes:
+ * - wt-rangeslider-element="slider-wrapper": Container element
+ * - wt-rangeslider-element="slider": Main slider element
+ * - wt-rangeslider-element="input-left": Left range input
+ * - wt-rangeslider-element="input-right": Right range input
+ * - wt-rangeslider-element="thumb-left": Left thumb element
+ * - wt-rangeslider-element="thumb-right": Right thumb element
+ * - wt-rangeslider-element="range": Range indicator element
+ * 
+ * Optional Attributes:
+ * - wt-rangeslider-min: Minimum value (default: 0)
+ * - wt-rangeslider-max: Maximum value (default: 100)
+ * - wt-rangeslider-steps: Step size (default: 1)
+ * 
+ * Optional Elements:
+ * - [wt-rangeslider-range="from"]: Form input for start value
+ * - [wt-rangeslider-range="to"]: Form input for end value
+ * - [wt-rangeslider-display="from"]: Display element for start value
+ * - [wt-rangeslider-display="to"]: Display element for end value
+ * 
+ * @example
+ * <!-- Basic Implementation -->
+ * <div wt-rangeslider-element="slider-wrapper">
+ *   <!-- Optional Display Elements -->
+ *   <div wt-rangeslider-display="from">0</div>
+ *   <div wt-rangeslider-display="to">100</div>
+ *   
+ *   <!-- Optional Form Inputs -->
+ *   <input wt-rangeslider-range="from" type="text">
+ *   <input wt-rangeslider-range="to" type="text">
+ *   
+ *   <!-- Required Slider Structure -->
+ *   <div wt-rangeslider-element="slider"
+ *        wt-rangeslider-min="0"
+ *        wt-rangeslider-max="100"
+ *        wt-rangeslider-steps="1">
+ *     <div wt-rangeslider-element="range"></div>
+ *     <div wt-rangeslider-element="thumb-left"></div>
+ *     <div wt-rangeslider-element="thumb-right"></div>
+ *     <input type="range" wt-rangeslider-element="input-left">
+ *     <input type="range" wt-rangeslider-element="input-right">
+ *   </div>
+ * </div>
+ * 
+ * @example
+ * <!-- Custom Thumb Implementation -->
+ * <div wt-rangeslider-element="slider-wrapper">
+ *   <div wt-rangeslider-element="slider">
+ *     <div wt-rangeslider-element="range"></div>
+ *     <div wt-rangeslider-element="thumb-left">
+ *       <svg width="20" height="20">
+ *         <circle cx="10" cy="10" r="8" fill="white" stroke="black"/>
+ *       </svg>
+ *     </div>
+ *     <div wt-rangeslider-element="thumb-right">
+ *       <svg width="20" height="20">
+ *         <circle cx="10" cy="10" r="8" fill="white" stroke="black"/>
+ *       </svg>
+ *     </div>
+ *     <input type="range" wt-rangeslider-element="input-left">
+ *     <input type="range" wt-rangeslider-element="input-right">
+ *   </div>
+ * </div>
+ * 
+ * Behavior:
+ * 1. Slider updates in real-time during interaction
+ * 2. Form inputs update simultaneously with slider movement
+ * 3. Display elements update in real-time
+ * 4. Programmatic changes to form inputs trigger slider updates
+ * 5. Values are constrained within min/max range
+ * 6. Left value cannot exceed right value minus step size
+ * 7. Right value cannot be less than left value plus step size
+ */
+
+'use strict';
+
+/**
+ * @class RangeSlider
+ * @classdesc Creates a range slider component with two handles for selecting a range of values.
+ * The component supports both visual slider interaction and direct input of values.
+ * 
+ * @param {HTMLElement} wrapper - The container element for the range slider
+ * @throws {Error} If required elements or attributes are missing
+ */
+class RangeSlider {
+    /**
+     * @constructor
+     * @param {HTMLElement} wrapper - The wrapper element containing all slider components
+     */
+    constructor(wrapper) {
+        try {
+            this.wrapper = wrapper;
+            this.slider = wrapper.querySelector('[wt-rangeslider-element="slider"]');
+            
+            if (!this.slider) {
+                throw new Error('Slider element not found within wrapper');
+            }
+
+            // Initialize configuration
+            this.initConfig();
+            
+            // Initialize elements
+            this.initElements();
+            
+            // Setup initial state
+            this.initState();
+            
+            // Setup event listeners
+            this.setupEventListeners();
+        } catch (err) {
+            console.error(`RangeSlider initialization failed: ${err.message}`);
+        }
+    }
+
+    /**
+     * Initialize slider configuration from attributes
+     * @private
+     */
+    initConfig() {
+        this.sliderMin = this.validateNumber(this.slider.getAttribute('wt-rangeslider-min')) || 0;
+        this.sliderMax = this.validateNumber(this.slider.getAttribute('wt-rangeslider-max')) || 100;
+        this.sliderSteps = this.validateNumber(this.slider.getAttribute('wt-rangeslider-steps')) || 1;
+    }
+
+    /**
+     * Initialize DOM elements
+     * @private
+     */
+    initElements() {
+        // Range inputs (form elements)
+        this.rangeStart = this.wrapper.querySelector('[wt-rangeslider-range="from"]');
+        this.rangeEnd = this.wrapper.querySelector('[wt-rangeslider-range="to"]');
+        
+        // Display elements
+        this.displayStart = this.wrapper.querySelector('[wt-rangeslider-display="from"]');
+        this.displayEnd = this.wrapper.querySelector('[wt-rangeslider-display="to"]');
+        
+        // Slider elements
+        this.inputLeft = this.slider.querySelector('[wt-rangeslider-element="input-left"]');
+        this.inputRight = this.slider.querySelector('[wt-rangeslider-element="input-right"]');
+        this.thumbLeft = this.slider.querySelector('[wt-rangeslider-element="thumb-left"]');
+        this.thumbRight = this.slider.querySelector('[wt-rangeslider-element="thumb-right"]');
+        this.range = this.slider.querySelector('[wt-rangeslider-element="range"]');
+
+        this.validateRequiredElements();
+    }
+
+    /**
+     * Initialize slider state
+     * @private
+     */
+    initState() {
+        // Configure range inputs
+        [this.inputLeft, this.inputRight].forEach(input => {
+            input.setAttribute('min', this.sliderMin);
+            input.setAttribute('max', this.sliderMax);
+            input.setAttribute('step', this.sliderSteps);
+            input.setAttribute('formnovalidate', '');
+            input.setAttribute('data-form-ignore', '');
+        });
+
+        // Set initial values from range inputs if they exist
+        if (this.rangeStart && this.rangeStart.value) {
+            this.updateLeftValues(this.rangeStart.value);
+        } else {
+            this.updateLeftValues(this.sliderMin);
+        }
+
+        if (this.rangeEnd && this.rangeEnd.value) {
+            this.updateRightValues(this.rangeEnd.value);
+        } else {
+            this.updateRightValues(this.sliderMax);
+        }
+    }
+
+    /**
+     * Updates all visual elements and values for the left handle
+     * @private
+     */
+    updateLeftValues(value) {
+        const constrainedValue = Math.min(parseInt(value), parseInt(this.inputRight.value) - this.sliderSteps);
+        
+        // Update slider input
+        this.inputLeft.value = constrainedValue;
+        
+        // Update form input
+        if (this.rangeStart) {
+            this.rangeStart.value = constrainedValue;
+        }
+        
+        // Update display
+        if (this.displayStart) {
+            this.displayStart.innerHTML = constrainedValue;
+        }
+        
+        // Update visual position
+        this.updateThumbPosition(this.inputLeft, this.thumbLeft, this.range, 'left');
+    }
+
+    /**
+     * Updates all visual elements and values for the right handle
+     * @private
+     */
+    updateRightValues(value) {
+        const constrainedValue = Math.max(parseInt(value), parseInt(this.inputLeft.value) + this.sliderSteps);
+        
+        // Update slider input
+        this.inputRight.value = constrainedValue;
+        
+        // Update form input
+        if (this.rangeEnd) {
+            this.rangeEnd.value = constrainedValue;
+        }
+        
+        // Update display
+        if (this.displayEnd) {
+            this.displayEnd.innerHTML = constrainedValue;
+        }
+        
+        // Update visual position
+        this.updateThumbPosition(this.inputRight, this.thumbRight, this.range, 'right');
+    }
+
+    /**
+     * Sets up event listeners for the range slider
+     * @private
+     */
+    setupEventListeners() {
+        // Input events for the slider inputs
+        this.inputLeft.addEventListener('input', () => {
+            this.updateLeftValues(this.inputLeft.value);
+            if (this.rangeStart) {
+                this.triggerEvent(this.rangeStart);
+            }
+        });
+
+        this.inputRight.addEventListener('input', () => {
+            this.updateRightValues(this.inputRight.value);
+            if (this.rangeEnd) {
+                this.triggerEvent(this.rangeEnd);
+            }
+        });
+
+        // Watch for changes to the form inputs
+        if (this.rangeStart) {
+            this.rangeStart.addEventListener('input', (e) => {
+                this.updateLeftValues(e.target.value);
+            });
+
+            // Watch for programmatic changes
+            const startObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                        const value = parseInt(this.rangeStart.value);
+                        if (!isNaN(value) && value >= this.sliderMin && value <= this.sliderMax) {
+                            this.updateLeftValues(value);
+                        }
+                    }
+                });
+            });
+            startObserver.observe(this.rangeStart, { attributes: true });
+        }
+
+        if (this.rangeEnd) {
+            this.rangeEnd.addEventListener('input', (e) => {
+                this.updateRightValues(e.target.value);
+            });
+
+            // Watch for programmatic changes
+            const endObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                        const value = parseInt(this.rangeEnd.value);
+                        if (!isNaN(value) && value >= this.sliderMin && value <= this.sliderMax) {
+                            this.updateRightValues(value);
+                        }
+                    }
+                });
+            });
+            endObserver.observe(this.rangeEnd, { attributes: true });
+        }
+    }
+
+    /**
+     * Updates the position of a thumb element
+     * @param {HTMLInputElement} input - The input element
+     * @param {HTMLElement} thumb - The thumb element
+     * @param {HTMLElement} range - The range element
+     * @param {string} side - The side of the slider ('left' or 'right')
+     * @private
+     */
+    updateThumbPosition(input, thumb, range, side) {
+        const min = parseInt(input.min);
+        const max = parseInt(input.max);
+        const percent = ((input.value - min) / (max - min)) * 100;
+
+        if (side === 'left') {
+            thumb.style.left = `${percent}%`;
+            range.style.left = `${percent}%`;
+        } else {
+            thumb.style.right = `${100 - percent}%`;
+            range.style.right = `${100 - percent}%`;
+        }
+    }
+
+    /**
+     * Validates that a value is a valid number
+     * @param {string} value - The value to validate
+     * @returns {number} The parsed number
+     * @throws {Error} If the value is not a valid number
+     */
+    validateNumber(value) {
+        const num = parseFloat(value);
+        if (isNaN(num)) {
+            throw new Error(`Invalid number value: ${value}`);
+        }
+        return num;
+    }
+
+    /**
+     * Triggers an input event on an element
+     * @param {HTMLElement} element - The element to trigger the event on
+     * @private
+     */
+    triggerEvent(element) {
+        if (element) {
+            element.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    }
+
+    /**
+     * Validates that all required elements are present
+     * @private
+     * @throws {Error} If any required element is missing
+     */
+    validateRequiredElements() {
+        const requiredElements = {
+            inputLeft: this.inputLeft,
+            inputRight: this.inputRight,
+            thumbLeft: this.thumbLeft,
+            thumbRight: this.thumbRight,
+            range: this.range
+        };
+
+        Object.entries(requiredElements).forEach(([name, element]) => {
+            if (!element) {
+                throw new Error(`Required element ${name} is missing`);
+            }
+        });
+    }
+}
+
+/**
+ * Initialize all range sliders on the page
+ */
+const initializeRangeSlider = () => {
+    try {
+        window.webtricks = window.webtricks || [];
+        const wrappers = document.querySelectorAll('[wt-rangeslider-element="slider-wrapper"]');
+        
+        if (!wrappers || wrappers.length === 0) return;
+
+        wrappers.forEach(wrapper => {
+            const instance = new RangeSlider(wrapper);
+            window.webtricks.push({ 'RangeSlider': instance });
+        });
+    } catch (err) {
+        console.error(`RangeSlider initialization error: ${err.message}`);
+    }
+};
+
+// Initialize on DOM ready
+if (/complete|interactive|loaded/.test(document.readyState)) {
+    initializeRangeSlider();
+} else {
+    window.addEventListener('DOMContentLoaded', initializeRangeSlider);
+}

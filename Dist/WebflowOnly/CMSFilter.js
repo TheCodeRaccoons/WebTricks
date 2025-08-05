@@ -1,4 +1,3 @@
-
 'use strict';
 
 class CMSFilter {
@@ -7,8 +6,9 @@ class CMSFilter {
         this.filterForm = document.querySelector('[wt-cmsfilter-element="filter-form"]');
         this.listElement = document.querySelector('[wt-cmsfilter-element="list"]');
         this.filterElements = this.filterForm.querySelectorAll('[wt-cmsfilter-category]');
-        this.currentPage = 1;
-        this.itemsPerPage = 0;
+        this.currentPage = 1;   // default value
+        this.itemsPerPage = 0;  // gets updated during init
+        this.debounceDelay = parseInt(this.filterForm.getAttribute('wt-cmsfilter-debounce') || '300');
 
         //TAG elements
         this.tagTemplate = document.querySelector('[wt-cmsfilter-element="tag-template"]');
@@ -58,29 +58,30 @@ class CMSFilter {
         this.activeFilters = this.GetFilters();
         this.ShowResultCount();
         this.InitializeTagTemplate();
-    }
-
-    SetupEventListeners() {
+    }    SetupEventListeners() {
+        // Create a debounced version of ApplyFilters
+        const debouncedApplyFilters = this.debounce(() => this.ApplyFilters(), this.debounceDelay);
+        
         if(this.filterForm.hasAttribute('wt-cmsfilter-trigger')){ 
             if (this.filterForm.getAttribute('wt-cmsfilter-trigger') === 'button') {
                 this.filterForm.addEventListener('submit', (event) => {
                     event.preventDefault();
-                    this.ApplyFilters();
+                    this.ApplyFilters(); // No debounce needed for button submission
                 });
             } else {
                 this.filterForm.addEventListener('change', () => {
-                    this.ApplyFilters();
+                    debouncedApplyFilters();
                 });
                 this.filterForm.addEventListener('input', () => {
-                    this.ApplyFilters();
+                    debouncedApplyFilters();
                 });
             }
         } else {
             this.filterForm.addEventListener('change', () => {
-                this.ApplyFilters();
+                debouncedApplyFilters();
             });
             this.filterForm.addEventListener('input', () => {
-                this.ApplyFilters();
+                debouncedApplyFilters();
             });
         }
 
@@ -617,6 +618,19 @@ class CMSFilter {
             'current-page': this.currentPage
         }
         return filterData;
+    }
+
+    // Utility method for debouncing function calls
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func.apply(this, args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
 }
 
