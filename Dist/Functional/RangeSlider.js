@@ -94,282 +94,453 @@
  * 7. Right value cannot be less than left value plus step size
  */
 
-'use strict';
-
 /**
  * @class RangeSlider
  * @classdesc Creates a range slider component with two handles for selecting a range of values.
  * The component supports both visual slider interaction and direct input of values.
- * 
+ *
  * @param {HTMLElement} wrapper - The container element for the range slider
  * @throws {Error} If required elements or attributes are missing
  */
 class RangeSlider {
-    /**
-     * @constructor
-     * @param {HTMLElement} wrapper - The wrapper element containing all slider components
-     */
-    constructor(wrapper) {
-        try {
-            this.wrapper = wrapper;
-            this.slider = wrapper.querySelector('[wt-rangeslider-element="slider"]');
-            
-            if (!this.slider) {
-                throw new Error('Slider element not found within wrapper');
+/**
+ * @constructor
+ * @param {HTMLElement} wrapper - The wrapper element containing all slider components
+ */
+constructor(wrapper) {
+    try {
+    this.wrapper = wrapper;
+    this.slider = wrapper.querySelector('[wt-rangeslider-element="slider"]');
+
+    if (!this.slider) {
+        throw new Error('Slider element not found within wrapper');
+    }
+
+    // Add required styles
+    this.addStyles();
+
+    // Initialize configuration
+    this.initConfig();
+
+    // Initialize elements
+    this.initElements();
+
+    // Setup initial state
+    this.initState();
+
+    // Setup event listeners
+    this.setupEventListeners();
+    } catch (err) {
+    console.error(`RangeSlider initialization failed: ${err.message}`);
+    }
+}
+
+/**
+ * Adds required styles for proper thumb alignment
+ * @private
+ */
+addStyles() {
+    const style = document.createElement('style');
+    style.textContent = `
+    [wt-rangeslider-element="slider"] {
+        position: relative;
+    }
+
+    [wt-rangeslider-element="input-left"],
+    [wt-rangeslider-element="input-right"] {
+        pointer-events: all;
+        position: absolute;
+        height: 0;
+        width: 100%;
+        outline: none;
+        -webkit-appearance: none;
+        opacity: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+    }
+    
+    [wt-rangeslider-element="input-left"]::-webkit-slider-thumb,
+    [wt-rangeslider-element="input-right"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: var(--thumb-width, 20px);
+        height: var(--thumb-width, 20px);
+        pointer-events: all;
+        cursor: pointer;
+    }
+    
+    [wt-rangeslider-element="input-left"]::-moz-range-thumb,
+    [wt-rangeslider-element="input-right"]::-moz-range-thumb {
+        width: var(--thumb-width, 20px);
+        height: var(--thumb-width, 20px);
+        pointer-events: all;
+        cursor: pointer;
+        opacity: 0;
+    }
+
+    [wt-rangeslider-element="thumb-left"],
+    [wt-rangeslider-element="thumb-right"] {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        pointer-events: none;
+        will-change: transform;
+    }
+    `;
+    document.head.appendChild(style);
+}
+
+/**
+ * Initialize slider configuration from attributes
+ * @private
+ */
+initConfig() {
+    this.sliderMin =
+    this.validateNumber(this.slider.getAttribute('wt-rangeslider-min')) || 0;
+    this.sliderMax =
+    this.validateNumber(this.slider.getAttribute('wt-rangeslider-max')) ||
+    100;
+    this.sliderSteps =
+    this.validateNumber(this.slider.getAttribute('wt-rangeslider-steps')) ||
+    1;
+    
+    // Minimum difference between left and right values
+    this.minDifference =
+    this.validateNumber(this.slider.getAttribute('wt-rangeslider-mindifference')) || 
+    this.sliderSteps;
+
+    // Show preffix
+    this.rightSuffix =
+    this.slider.getAttribute('wt-rangeslider-rightsuffix') || null;
+    // Show preffix
+    this.defaultSuffix =
+    this.slider.getAttribute('wt-rangeslider-defaultsuffix') || null;
+    // Show preffix
+    this.shouldFormatNumber =
+    this.slider.getAttribute('wt-rangeslider-formatnumber') || null;
+}
+
+/**
+ * Initialize DOM elements
+ * @private
+ */
+initElements() {
+    // Range inputs (form elements)
+    this.rangeStart = this.wrapper.querySelector(
+    '[wt-rangeslider-range="from"]',
+    );
+    this.rangeEnd = this.wrapper.querySelector('[wt-rangeslider-range="to"]');
+
+    // Display elements
+    this.displayStart = this.wrapper.querySelector(
+    '[wt-rangeslider-display="from"]',
+    );
+    this.displayEnd = this.wrapper.querySelector(
+    '[wt-rangeslider-display="to"]',
+    );
+
+    // Slider elements
+    this.inputLeft = this.slider.querySelector(
+    '[wt-rangeslider-element="input-left"]',
+    );
+    this.inputRight = this.slider.querySelector(
+    '[wt-rangeslider-element="input-right"]',
+    );
+    this.thumbLeft = this.slider.querySelector(
+    '[wt-rangeslider-element="thumb-left"]',
+    );
+    this.thumbRight = this.slider.querySelector(
+    '[wt-rangeslider-element="thumb-right"]',
+    );
+    this.range = this.slider.querySelector('[wt-rangeslider-element="range"]');
+
+    this.validateRequiredElements();
+    this.setupThumbStyles();
+}
+
+/**
+ * Sets up proper thumb styling to ensure clickable areas align with visuals
+ * @private
+ */
+setupThumbStyles() {
+    const setupThumb = (thumb, input) => {
+    // Ensure the input's thumb aligns with our custom thumb
+    const thumbWidth = thumb.offsetWidth;
+    input.style.setProperty('--thumb-width', `${thumbWidth}px`);
+    
+    // Apply styles to ensure proper positioning and hit areas
+    thumb.style.position = 'absolute';
+    thumb.style.pointerEvents = 'none'; // Let clicks pass through to input
+    
+    // Create a custom property for the thumb offset
+    this.slider.style.setProperty('--thumb-offset', `${thumbWidth / 2}px`);
+    };
+
+    setupThumb(this.thumbLeft, this.inputLeft);
+    setupThumb(this.thumbRight, this.inputRight);
+}
+
+/**
+ * Initialize slider state
+ * @private
+ */
+initState() {
+    // Configure range inputs
+    [this.inputLeft, this.inputRight].forEach((input) => {
+    input.setAttribute('min', this.sliderMin);
+    input.setAttribute('max', this.sliderMax);
+    input.setAttribute('step', this.sliderSteps);
+    input.setAttribute('formnovalidate', '');
+    input.setAttribute('data-form-ignore', '');
+    });
+
+    // Set initial values from range inputs if they exist
+    if (this.rangeStart && this.rangeStart.value) {
+    this.updateLeftValues(this.rangeStart.value);
+    } else {
+    this.updateLeftValues(this.sliderMin);
+    }
+
+    if (this.rangeEnd && this.rangeEnd.value) {
+    this.updateRightValues(this.rangeEnd.value);
+    } else {
+    this.updateRightValues(this.sliderMax);
+    }
+}
+
+/**
+ * Formats a number with commas as thousand separators
+ * @param {number} number - The number to format
+ * @returns {string} The formatted number string
+ * @private
+ */
+formatNumber(number) {
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+/**
+ * Updates all visual elements and values for the left handle
+ * @private
+ */
+updateLeftValues(value) {
+    const constrainedValue = Math.min(
+    parseInt(value),
+    parseInt(this.inputRight.value) - this.minDifference,
+    );
+
+    // Update slider input
+    this.inputLeft.value = constrainedValue;
+
+    // Update form input
+    if (this.rangeStart) {
+    this.rangeStart.value = constrainedValue;
+    }
+
+    // Update display
+    if (this.displayStart) {
+    this.displayStart.innerHTML = this.shouldFormatNumber === 'true' ? this.formatNumber(constrainedValue) : constrainedValue;
+    }
+
+    // Update visual position
+    this.updateThumbPosition(
+    this.inputLeft,
+    this.thumbLeft,
+    this.range,
+    'left',
+    );
+}
+
+/**
+ * Updates all visual elements and values for the right handle
+ * @private
+ */
+updateRightValues(value) {
+    const constrainedValue = Math.max(
+    parseInt(value),
+    parseInt(this.inputLeft.value) + this.minDifference,
+    );
+
+    // Update slider input
+    this.inputRight.value = constrainedValue;
+
+    // Update form input
+    if (this.rangeEnd) {
+    this.rangeEnd.value = constrainedValue;
+    }
+
+    // Update display
+    if (this.displayEnd) {
+    let finalDisplay = this.shouldFormatNumber === 'true' ? this.formatNumber(constrainedValue) : constrainedValue;
+
+    if (this.rightSuffix && value >= this.sliderMax) {
+        this.displayEnd.innerHTML = `${finalDisplay}${this.rightSuffix}`;
+    } else if (this.defaultSuffix) {
+        this.displayEnd.innerHTML = `${finalDisplay}${this.defaultSuffix}`;
+    } else {
+        this.displayEnd.innerHTML = finalDisplay;
+    }
+    }
+
+    // Update visual position
+    this.updateThumbPosition(
+    this.inputRight,
+    this.thumbRight,
+    this.range,
+    'right',
+    );
+}
+
+/**
+ * Sets up event listeners for the range slider
+ * @private
+ */
+setupEventListeners() {
+    // Input events for the slider inputs
+    this.inputLeft.addEventListener('input', () => {
+    this.updateLeftValues(this.inputLeft.value);
+    if (this.rangeStart) {
+        this.triggerEvent(this.rangeStart);
+    }
+    });
+
+    this.inputRight.addEventListener('input', () => {
+    this.updateRightValues(this.inputRight.value);
+    if (this.rangeEnd) {
+        this.triggerEvent(this.rangeEnd);
+    }
+    });
+
+    // Watch for changes to the form inputs
+    if (this.rangeStart) {
+    this.rangeStart.addEventListener('input', (e) => {
+        this.updateLeftValues(e.target.value);
+    });
+
+    // Watch for programmatic changes
+    const startObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+        if (
+            mutation.type === 'attributes' &&
+            mutation.attributeName === 'value'
+        ) {
+            const value = parseInt(this.rangeStart.value);
+            if (
+            !isNaN(value) &&
+            value >= this.sliderMin &&
+            value <= this.sliderMax
+            ) {
+            this.updateLeftValues(value);
             }
-
-            // Initialize configuration
-            this.initConfig();
-            
-            // Initialize elements
-            this.initElements();
-            
-            // Setup initial state
-            this.initState();
-            
-            // Setup event listeners
-            this.setupEventListeners();
-        } catch (err) {
-            console.error(`RangeSlider initialization failed: ${err.message}`);
         }
-    }
-
-    /**
-     * Initialize slider configuration from attributes
-     * @private
-     */
-    initConfig() {
-        this.sliderMin = this.validateNumber(this.slider.getAttribute('wt-rangeslider-min')) || 0;
-        this.sliderMax = this.validateNumber(this.slider.getAttribute('wt-rangeslider-max')) || 100;
-        this.sliderSteps = this.validateNumber(this.slider.getAttribute('wt-rangeslider-steps')) || 1;
-    }
-
-    /**
-     * Initialize DOM elements
-     * @private
-     */
-    initElements() {
-        // Range inputs (form elements)
-        this.rangeStart = this.wrapper.querySelector('[wt-rangeslider-range="from"]');
-        this.rangeEnd = this.wrapper.querySelector('[wt-rangeslider-range="to"]');
-        
-        // Display elements
-        this.displayStart = this.wrapper.querySelector('[wt-rangeslider-display="from"]');
-        this.displayEnd = this.wrapper.querySelector('[wt-rangeslider-display="to"]');
-        
-        // Slider elements
-        this.inputLeft = this.slider.querySelector('[wt-rangeslider-element="input-left"]');
-        this.inputRight = this.slider.querySelector('[wt-rangeslider-element="input-right"]');
-        this.thumbLeft = this.slider.querySelector('[wt-rangeslider-element="thumb-left"]');
-        this.thumbRight = this.slider.querySelector('[wt-rangeslider-element="thumb-right"]');
-        this.range = this.slider.querySelector('[wt-rangeslider-element="range"]');
-
-        this.validateRequiredElements();
-    }
-
-    /**
-     * Initialize slider state
-     * @private
-     */
-    initState() {
-        // Configure range inputs
-        [this.inputLeft, this.inputRight].forEach(input => {
-            input.setAttribute('min', this.sliderMin);
-            input.setAttribute('max', this.sliderMax);
-            input.setAttribute('step', this.sliderSteps);
-            input.setAttribute('formnovalidate', '');
-            input.setAttribute('data-form-ignore', '');
         });
-
-        // Set initial values from range inputs if they exist
-        if (this.rangeStart && this.rangeStart.value) {
-            this.updateLeftValues(this.rangeStart.value);
-        } else {
-            this.updateLeftValues(this.sliderMin);
-        }
-
-        if (this.rangeEnd && this.rangeEnd.value) {
-            this.updateRightValues(this.rangeEnd.value);
-        } else {
-            this.updateRightValues(this.sliderMax);
-        }
+    });
+    startObserver.observe(this.rangeStart, { attributes: true });
     }
 
-    /**
-     * Updates all visual elements and values for the left handle
-     * @private
-     */
-    updateLeftValues(value) {
-        const constrainedValue = Math.min(parseInt(value), parseInt(this.inputRight.value) - this.sliderSteps);
-        
-        // Update slider input
-        this.inputLeft.value = constrainedValue;
-        
-        // Update form input
-        if (this.rangeStart) {
-            this.rangeStart.value = constrainedValue;
-        }
-        
-        // Update display
-        if (this.displayStart) {
-            this.displayStart.innerHTML = constrainedValue;
-        }
-        
-        // Update visual position
-        this.updateThumbPosition(this.inputLeft, this.thumbLeft, this.range, 'left');
-    }
+    if (this.rangeEnd) {
+    this.rangeEnd.addEventListener('input', (e) => {
+        this.updateRightValues(e.target.value);
+    });
 
-    /**
-     * Updates all visual elements and values for the right handle
-     * @private
-     */
-    updateRightValues(value) {
-        const constrainedValue = Math.max(parseInt(value), parseInt(this.inputLeft.value) + this.sliderSteps);
-        
-        // Update slider input
-        this.inputRight.value = constrainedValue;
-        
-        // Update form input
-        if (this.rangeEnd) {
-            this.rangeEnd.value = constrainedValue;
-        }
-        
-        // Update display
-        if (this.displayEnd) {
-            this.displayEnd.innerHTML = constrainedValue;
-        }
-        
-        // Update visual position
-        this.updateThumbPosition(this.inputRight, this.thumbRight, this.range, 'right');
-    }
-
-    /**
-     * Sets up event listeners for the range slider
-     * @private
-     */
-    setupEventListeners() {
-        // Input events for the slider inputs
-        this.inputLeft.addEventListener('input', () => {
-            this.updateLeftValues(this.inputLeft.value);
-            if (this.rangeStart) {
-                this.triggerEvent(this.rangeStart);
+    // Watch for programmatic changes
+    const endObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+        if (
+            mutation.type === 'attributes' &&
+            mutation.attributeName === 'value'
+        ) {
+            const value = parseInt(this.rangeEnd.value);
+            if (
+            !isNaN(value) &&
+            value >= this.sliderMin &&
+            value <= this.sliderMax
+            ) {
+            this.updateRightValues(value);
             }
+        }
         });
-
-        this.inputRight.addEventListener('input', () => {
-            this.updateRightValues(this.inputRight.value);
-            if (this.rangeEnd) {
-                this.triggerEvent(this.rangeEnd);
-            }
-        });
-
-        // Watch for changes to the form inputs
-        if (this.rangeStart) {
-            this.rangeStart.addEventListener('input', (e) => {
-                this.updateLeftValues(e.target.value);
-            });
-
-            // Watch for programmatic changes
-            const startObserver = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
-                        const value = parseInt(this.rangeStart.value);
-                        if (!isNaN(value) && value >= this.sliderMin && value <= this.sliderMax) {
-                            this.updateLeftValues(value);
-                        }
-                    }
-                });
-            });
-            startObserver.observe(this.rangeStart, { attributes: true });
-        }
-
-        if (this.rangeEnd) {
-            this.rangeEnd.addEventListener('input', (e) => {
-                this.updateRightValues(e.target.value);
-            });
-
-            // Watch for programmatic changes
-            const endObserver = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
-                        const value = parseInt(this.rangeEnd.value);
-                        if (!isNaN(value) && value >= this.sliderMin && value <= this.sliderMax) {
-                            this.updateRightValues(value);
-                        }
-                    }
-                });
-            });
-            endObserver.observe(this.rangeEnd, { attributes: true });
-        }
+    });
+    endObserver.observe(this.rangeEnd, { attributes: true });
     }
+}
 
-    /**
-     * Updates the position of a thumb element
-     * @param {HTMLInputElement} input - The input element
-     * @param {HTMLElement} thumb - The thumb element
-     * @param {HTMLElement} range - The range element
-     * @param {string} side - The side of the slider ('left' or 'right')
-     * @private
-     */
-    updateThumbPosition(input, thumb, range, side) {
-        const min = parseInt(input.min);
-        const max = parseInt(input.max);
-        const percent = ((input.value - min) / (max - min)) * 100;
+/**
+ * Updates the position of a thumb element
+ * @param {HTMLInputElement} input - The input element
+ * @param {HTMLElement} thumb - The thumb element
+ * @param {HTMLElement} range - The range element
+ * @param {string} side - The side of the slider ('left' or 'right')
+ * @private
+ */
+updateThumbPosition(input, thumb, range, side) {
+    const min = parseInt(input.min);
+    const max = parseInt(input.max);
+    const percent = ((input.value - min) / (max - min)) * 100;
+    
+    // Get the thumb's width to account for its dimensions
+    const thumbWidth = thumb.offsetWidth;
+    const sliderWidth = this.slider.offsetWidth;
+    
+    // Calculate the percentage that represents half the thumb width
+    const thumbHalfPercent = (thumbWidth / sliderWidth) * 100;
 
-        if (side === 'left') {
-            thumb.style.left = `${percent}%`;
-            range.style.left = `${percent}%`;
-        } else {
-            thumb.style.right = `${100 - percent}%`;
-            range.style.right = `${100 - percent}%`;
-        }
+    if (side === 'left') {
+    thumb.style.left = `${percent}%`;
+    thumb.style.transform = 'translateX(-50%)';
+    range.style.left = `${percent}%`;
+    } else {
+    thumb.style.right = `${100 - percent}%`;
+    thumb.style.transform = 'translateX(50%)';
+    range.style.right = `${100 - percent}%`;
     }
+}
 
-    /**
-     * Validates that a value is a valid number
-     * @param {string} value - The value to validate
-     * @returns {number} The parsed number
-     * @throws {Error} If the value is not a valid number
-     */
-    validateNumber(value) {
-        const num = parseFloat(value);
-        if (isNaN(num)) {
-            throw new Error(`Invalid number value: ${value}`);
-        }
-        return num;
+/**
+ * Validates that a value is a valid number
+ * @param {string} value - The value to validate
+ * @returns {number} The parsed number
+ * @throws {Error} If the value is not a valid number
+ */
+validateNumber(value) {
+    const num = parseFloat(value);
+    if (isNaN(num)) {
+    throw new Error(`Invalid number value: ${value}`);
     }
+    return num;
+}
 
-    /**
-     * Triggers an input event on an element
-     * @param {HTMLElement} element - The element to trigger the event on
-     * @private
-     */
-    triggerEvent(element) {
-        if (element) {
-            element.dispatchEvent(new Event('input', { bubbles: true }));
-        }
+/**
+ * Triggers an input event on an element
+ * @param {HTMLElement} element - The element to trigger the event on
+ * @private
+ */
+triggerEvent(element) {
+    if (element) {
+    element.dispatchEvent(new Event('input', { bubbles: true }));
     }
+}
 
-    /**
-     * Validates that all required elements are present
-     * @private
-     * @throws {Error} If any required element is missing
-     */
-    validateRequiredElements() {
-        const requiredElements = {
-            inputLeft: this.inputLeft,
-            inputRight: this.inputRight,
-            thumbLeft: this.thumbLeft,
-            thumbRight: this.thumbRight,
-            range: this.range
-        };
+/**
+ * Validates that all required elements are present
+ * @private
+ * @throws {Error} If any required element is missing
+ */
+validateRequiredElements() {
+    const requiredElements = {
+    inputLeft: this.inputLeft,
+    inputRight: this.inputRight,
+    thumbLeft: this.thumbLeft,
+    thumbRight: this.thumbRight,
+    range: this.range,
+    };
 
-        Object.entries(requiredElements).forEach(([name, element]) => {
-            if (!element) {
-                throw new Error(`Required element ${name} is missing`);
-            }
-        });
+    Object.entries(requiredElements).forEach(([name, element]) => {
+    if (!element) {
+        throw new Error(`Required element ${name} is missing`);
     }
+    });
+}
 }
 
 /**
@@ -379,7 +550,7 @@ const initializeRangeSlider = () => {
     try {
         window.webtricks = window.webtricks || [];
         const wrappers = document.querySelectorAll('[wt-rangeslider-element="slider-wrapper"]');
-        
+
         if (!wrappers || wrappers.length === 0) return;
 
         wrappers.forEach(wrapper => {
