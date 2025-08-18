@@ -116,6 +116,14 @@ class CookieConsent {
                 .filter(Boolean);
         }
 
+        // Handle Facebook pixel consent if analytics or all is accepted
+        if (consentCategories.includes('all') || consentCategories.includes('analytics')) {
+            window.localStorage.setItem('fbGrantConsent', 'true');
+            if (typeof window.fbq === 'function') {
+                window.fbq('consent', 'grant');
+            }
+        }
+
         const consentScripts = document.querySelectorAll('script[wt-cookieconsent-script]');
         consentScripts.forEach(originalScript => {
             const scriptCategory = originalScript.getAttribute('wt-cookieconsent-script');
