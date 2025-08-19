@@ -37,6 +37,8 @@ class CMSFilter {
         this.totalPages = 1;
         this.activeFilters = {};
         this.availableFilters = {};
+        this.dataRanges = {}; // Store calculated min/max for numeric categories (set once)
+        this.originalDisplayStyles = new Map(); // Store original display styles for filter elements
 
         this.init();
     }
@@ -53,12 +55,113 @@ class CMSFilter {
             }
         }
         this.SetupEventListeners();
+        
+        // Capture original display styles before any filtering occurs
+        this.captureOriginalDisplayStyles();
+        
+        // Cache search text for all items once during initialization
+        this.cacheItemSearchData();
+        
         this.RenderItems();
         this.UpdateAvailableFilters();
+        
+        // Calculate range slider bounds once from original data (never changes during filtering)
+        this.calculateInitialRanges();
+        
         this.activeFilters = this.GetFilters();
         this.ShowResultCount();
         this.InitializeTagTemplate();
-    }    SetupEventListeners() {
+    }
+
+    /**
+     * Calculates initial data ranges from all items and configures range sliders
+     * This is called once during initialization and ranges never change during filtering
+     */
+    calculateInitialRanges() {
+        this.dataRanges = {};
+        
+        // Get all categories from filter elements
+        const categories = new Set();
+        this.filterElements.forEach(element => {
+            const category = element.getAttribute('wt-cmsfilter-category');
+            if (category && category !== '*') {
+                categories.add(this.GetDataSet(category));
+            }
+        });
+
+        categories.forEach(category => {
+            const values = this.allItems
+                .map(item => parseFloat(item.dataset[category]))
+                .filter(value => !isNaN(value) && isFinite(value));
+            
+            if (values.length > 0) {
+                this.dataRanges[category] = {
+                    min: Math.min(...values),
+                    max: Math.max(...values),
+                    count: values.length
+                };
+            }
+        });
+        
+        // Configure range sliders with calculated ranges (only once)
+        this.configureRangeSliders();
+        
+        console.log('Calculated initial data ranges (static):', this.dataRanges);
+    }
+
+    /**
+     * Configures range sliders with calculated data ranges
+     * Sets min/max values for sliders configured with wt-rangeslider-category
+     * Only called once during initialization
+     */
+    configureRangeSliders() {
+        // Find all range slider elements
+        const rangeSliders = document.querySelectorAll('[wt-rangeslider-element="slider"]');
+        
+        rangeSliders.forEach(slider => {
+            // Try to get category from slider attribute first
+            let category = slider.getAttribute('wt-rangeslider-category');
+            
+            // If not found on slider, look for category from associated filter inputs
+            if (!category) {
+                const wrapper = slider.closest('[wt-rangeslider-element="slider-wrapper"]');
+                if (wrapper) {
+                    const categoryInput = wrapper.querySelector('[wt-cmsfilter-category]');
+                    if (categoryInput) {
+                        category = categoryInput.getAttribute('wt-cmsfilter-category');
+                    }
+                }
+            }
+            
+            // Skip if no category found or no data range for this category
+            if (!category || !this.dataRanges[this.GetDataSet(category)]) return;
+            
+            const datasetCategory = this.GetDataSet(category);
+            
+            // Check if manual configuration exists (manual takes precedence)
+            const hasManualMin = slider.hasAttribute('wt-rangeslider-min');
+            const hasManualMax = slider.hasAttribute('wt-rangeslider-max');
+            
+            // Only set auto-detected values if manual ones aren't provided
+            if (!hasManualMin) {
+                slider.setAttribute('wt-rangeslider-min', this.dataRanges[datasetCategory].min.toString());
+            }
+            if (!hasManualMax) {
+                slider.setAttribute('wt-rangeslider-max', this.dataRanges[datasetCategory].max.toString());
+            }
+            
+            // Set intelligent default steps if not specified
+            if (!slider.hasAttribute('wt-rangeslider-steps')) {
+                const range = this.dataRanges[datasetCategory].max - this.dataRanges[datasetCategory].min;
+                const defaultSteps = range > 1000 ? 100 : range > 100 ? 10 : range > 10 ? 1 : 0.1;
+                slider.setAttribute('wt-rangeslider-steps', defaultSteps.toString());
+            }
+            
+            console.log(`Configured range slider for ${category}: min=${this.dataRanges[datasetCategory].min}, max=${this.dataRanges[datasetCategory].max}`);
+        });
+    }
+
+    SetupEventListeners() {
         // Create a debounced version of ApplyFilters
         const debouncedApplyFilters = this.debounce(() => this.ApplyFilters(), this.debounceDelay);
         
@@ -152,6 +255,9 @@ class CMSFilter {
         const baseLink = this.paginationWrapper.querySelector('a');
         const links = this.generatePaginationLinksFromString(paginationPages.innerText, baseLink.href);
         if (!links || links.length === 0) return;
+        
+        const itemsBeforeLoad = this.allItems.length;
+        
         for (const link of links) {
             try {
                 const htmlDoc = await this.FetchHTML(link);
@@ -173,6 +279,17 @@ class CMSFilter {
             } catch (error) {
                 console.error('Error fetching HTML:', error);
             }
+        }
+        
+        // Cache search data for newly loaded items only
+        if (this.allItems.length > itemsBeforeLoad) {
+            const newItems = this.allItems.slice(itemsBeforeLoad);
+            newItems.forEach(item => {
+                // Cache search data for new item
+                if (!item._wtSearchCache) {
+                    this.cacheItemForSearch(item);
+                }
+            });
         }
     }
 
@@ -264,21 +381,43 @@ class CMSFilter {
         this.currentPage = 1; // Reset pagination to first page
         this.filteredItems = this.allItems.filter(item => {
             return Object.keys(filters).every(category => {
-                const values = [...filters[category]];
+                // Fix 1: Safari-compatible array handling
+                const categoryFilters = filters[category] || [];
+                const values = Array.isArray(categoryFilters) ? categoryFilters.slice() : [];
                 if (values.length === 0) return true;
-    
-                let matchingText = item.querySelector(`[wt-cmsfilter-category="${category}"]`)?.innerText.toLowerCase() || '';
-                matchingText = matchingText.replace(/(?:&nbsp;|\s)+/gi, ' ');
-    
+
+                // Use cached search data instead of live DOM queries
+                const searchCache = item._wtSearchCache;
+                if (!searchCache) {
+                    console.warn('Search cache missing for item, falling back to live query');
+                    // Fallback to original method if cache is missing
+                    const categoryElement = item.querySelector(`[wt-cmsfilter-category="${category}"]`);
+                    let matchingText = '';
+                    if (categoryElement && categoryElement.innerText) {
+                        matchingText = categoryElement.innerText.toLowerCase();
+                    }
+                    matchingText = matchingText.replace(/(?:&nbsp;|\s)+/gi, ' ');
+                }
+
                 if (category === '*') {
-                    return values.some(value => matchingText.includes(value.toLowerCase())) ||
-                        Object.values(item.dataset).some(dataValue => 
-                            values.some(value => dataValue.toLowerCase().includes(value.toLowerCase()))
+                    // Global search using cached text
+                    const globalText = searchCache ? searchCache.globalSearchText : '';
+                    return values.some(value => globalText.includes(value.toLowerCase())) ||
+                        Object.values(item.dataset || {}).some(dataValue => 
+                            values.some(value => {
+                                if (dataValue && typeof dataValue.toLowerCase === 'function') {
+                                    return dataValue.toLowerCase().includes(value.toLowerCase());
+                                }
+                                return false;
+                            })
                         );
                 } else {
                     return values.some(value => {
-                        if (typeof value === 'object') {
-                            const itemValue = parseFloat(item.dataset[category]);
+                        if (typeof value === 'object' && value !== null) {
+                            // Range filtering - use original dataset access
+                            const datasetValue = (item.dataset && item.dataset[category]) ? item.dataset[category] : '';
+                            const itemValue = parseFloat(datasetValue);
+                            if (isNaN(itemValue)) return false;
                             if (value.from !== null && value.to !== null) {
                                 return itemValue >= value.from && itemValue <= value.to;
                             } else if (value.from !== null && value.to == null) {
@@ -286,15 +425,21 @@ class CMSFilter {
                             } else if (value.from == null && value.to !== null) {
                                 return itemValue <= value.to;
                             }
+                            return false;
                         } else {
-                            return item.dataset[category]?.toLowerCase().includes(value.toLowerCase()) || 
-                                matchingText.includes(value.toLowerCase());
+                            // Text filtering using cached data
+                            const datasetCategory = this.GetDataSet(category);
+                            const cachedDatasetValue = searchCache ? searchCache.datasetValues.get(datasetCategory) || '' : '';
+                            const cachedCategoryText = searchCache ? searchCache.categoryTexts.get(category) || '' : '';
+                            const valueStr = value ? value.toString().toLowerCase() : '';
+                            
+                            return cachedDatasetValue.includes(valueStr) || cachedCategoryText.includes(valueStr);
                         }
                     });
                 }
             });
         });
-    
+
         this.activeFilters = filters;
         this.SortItems();
         this.RenderItems();
@@ -385,17 +530,74 @@ class CMSFilter {
         }).replace(/\s+/g, '').replace('-', '');
     }
 
+    /**
+     * Captures original display styles for filter elements
+     * Called once during initialization to preserve original CSS
+     */
+    captureOriginalDisplayStyles() {
+        this.filterElements.forEach(element => {
+            const istoggle = element.querySelector('input[type="checkbox"], input[type="radio"]');
+            if (istoggle) {
+                // Get computed style to capture the actual display value (flex, block, etc.)
+                const computedStyle = window.getComputedStyle(element);
+                const originalDisplay = computedStyle.display;
+                this.originalDisplayStyles.set(element, originalDisplay);
+            }
+        });
+    }
+
     UpdateAvailableFilters() {
         if (this.filterForm.getAttribute('wt-cmsfilter-filtering') !== 'advanced') return;
         this.availableFilters = {};
+        
         this.filterElements.forEach(element => {
             const category = this.GetDataSet(element.getAttribute('wt-cmsfilter-category'));
-            const availableValues = new Set(this.filteredItems.map(item => item.dataset[category]).filter(value => value !== ""));
+            
+            // Safari-compatible dataset access
+            const availableValues = new Set(
+                this.filteredItems
+                    .map(item => (item.dataset && item.dataset[category]) ? item.dataset[category] : '')
+                    .filter(value => value !== "")
+            );
             this.availableFilters[category] = availableValues;
+            
             const istoggle = element.querySelector('input[type="checkbox"], input[type="radio"]');
             if (istoggle) {
-                const value = element.innerText;
-                element.style.display = availableValues.has(value) ? '' : 'none';
+                // Safari-compatible text extraction and comparison
+                let elementText = '';
+                if (element.textContent) {
+                    elementText = element.textContent.trim();
+                } else if (element.innerText) {
+                    elementText = element.innerText.trim();
+                }
+                
+                // Normalize whitespace for Safari compatibility
+                elementText = elementText.replace(/\s+/g, ' ');
+                
+                // Safari-compatible Set.has() check
+                let isAvailable = false;
+                availableValues.forEach(value => {
+                    const normalizedValue = value.toString().replace(/\s+/g, ' ').trim();
+                    if (normalizedValue === elementText) {
+                        isAvailable = true;
+                    }
+                });
+                
+                // Restore original display style or hide
+                if (isAvailable) {
+                    // Restore original display style
+                    const originalDisplay = this.originalDisplayStyles.get(element);
+                    if (originalDisplay && originalDisplay !== 'none') {
+                        element.style.display = originalDisplay;
+                    } else {
+                        // Fallback: remove display override to use CSS default
+                        element.style.display = '';
+                    }
+                    element.style.visibility = 'visible';
+                } else {
+                    element.style.display = 'none';
+                    element.style.visibility = 'hidden';
+                }
             }
         });
     }
