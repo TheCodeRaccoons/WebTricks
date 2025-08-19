@@ -56,6 +56,7 @@ class CMSFilter {
         }
         this.SetupEventListeners();
         
+        this.InitializeTagTemplate();
         // Capture original display styles before any filtering occurs
         this.captureOriginalDisplayStyles();
         
@@ -67,10 +68,12 @@ class CMSFilter {
         
         // Calculate range slider bounds once from original data (never changes during filtering)
         this.calculateInitialRanges();
+
+        // Initialize range inputs defaults (from=min, to=max) once
+        this.initializeRangeInputsDefaults();
         
         this.activeFilters = this.GetFilters();
         this.ShowResultCount();
-        this.InitializeTagTemplate();
     }
 
     /**
@@ -105,8 +108,6 @@ class CMSFilter {
         
         // Configure range sliders with calculated ranges (only once)
         this.configureRangeSliders();
-        
-        console.log('Calculated initial data ranges (static):', this.dataRanges);
     }
 
     /**
@@ -117,7 +118,9 @@ class CMSFilter {
     configureRangeSliders() {
         // Find all range slider elements
         const rangeSliders = document.querySelectorAll('[wt-rangeslider-element="slider"]');
-        
+
+        if(!rangeSliders.length) return;
+
         rangeSliders.forEach(slider => {
             // Try to get category from slider attribute first
             let category = slider.getAttribute('wt-rangeslider-category');
@@ -158,6 +161,98 @@ class CMSFilter {
             }
             
             console.log(`Configured range slider for ${category}: min=${this.dataRanges[datasetCategory].min}, max=${this.dataRanges[datasetCategory].max}`);
+        });
+    }
+
+    /**
+     * Build and store search cache for all items
+     */
+    cacheItemSearchData() {
+        if (!this.allItems || this.allItems.length === 0) return;
+        this.allItems.forEach(item => this.cacheItemForSearch(item));
+    }
+
+    /**
+     * Build and attach a normalized search cache for a single item
+     * Cache shape:
+     * {
+     *   globalSearchText: string,
+     *   datasetValues: Map<datasetKey, string>,
+     *   categoryTexts: Map<categoryAttr, string>
+     * }
+     */
+    cacheItemForSearch(item) {
+        if (!item || !(item instanceof Element)) return;
+
+        const normalize = (text) => (text || '')
+            .toString()
+            .toLowerCase()
+            .replace(/(?:&nbsp;|\s)+/gi, ' ')
+            .trim();
+
+        const datasetValues = new Map();
+        const categoryTexts = new Map();
+
+        // Cache dataset values (normalized)
+        if (item.dataset) {
+            Object.keys(item.dataset).forEach(key => {
+                const value = item.dataset[key];
+                datasetValues.set(key, normalize(value));
+            });
+        }
+
+        // Cache category-specific text found inside the item
+        const categoryNodes = item.querySelectorAll('[wt-cmsfilter-category]');
+        categoryNodes.forEach(node => {
+            const category = node.getAttribute('wt-cmsfilter-category');
+            if (!category) return;
+            const text = node.textContent || node.innerText || '';
+            categoryTexts.set(category, normalize(text));
+        });
+
+        // Global searchable text: item's text + dataset values
+        const itemText = normalize(item.textContent || item.innerText || '');
+        const datasetConcat = Array.from(datasetValues.values()).join(' ');
+        const globalSearchText = normalize(`${itemText} ${datasetConcat}`);
+
+        item._wtSearchCache = { globalSearchText, datasetValues, categoryTexts };
+    }
+
+    /**
+     * Initialize default values for range inputs using precomputed data ranges
+     * - Sets wt-cmsfilter-default to min (from) or max (to) if not present
+     * - Populates the input's value if it's empty
+     */
+    initializeRangeInputsDefaults() {
+        if (!this.filterElements || !this.dataRanges) return;
+
+        this.filterElements.forEach(element => {
+            const input = (element.tagName === 'INPUT')
+                ? element
+                : element.querySelector('input[type="text"]');
+
+            if (!input || input.type !== 'text') return;
+
+            const rangeType = element.getAttribute('wt-cmsfilter-range');
+            if (rangeType !== 'from' && rangeType !== 'to') return;
+
+            const categoryAttr = element.getAttribute('wt-cmsfilter-category');
+            if (!categoryAttr) return;
+
+            const datasetCategory = this.GetDataSet(categoryAttr);
+            const ranges = this.dataRanges[datasetCategory];
+            if (!ranges) return;
+
+            const defaultValue = rangeType === 'from' ? ranges.min : ranges.max;
+            if (!Number.isFinite(defaultValue)) return;
+
+            if (!input.hasAttribute('wt-cmsfilter-default')) {
+                input.setAttribute('wt-cmsfilter-default', String(defaultValue));
+            }
+
+            if (input.value.trim() === '') {
+                input.value = String(defaultValue);
+            }
         });
     }
 
@@ -474,17 +569,21 @@ class CMSFilter {
                         if (!rangeFilters[category]) {
                             rangeFilters[category] = { from: null, to: null };
                         }
-    
+
                         const value = parseFloat(input.value.trim());
-                        if (!isNaN(value)) {
-                            if(!input.hasAttribute('wt-cmsfilter-default')){
-                                input.setAttribute('wt-cmsfilter-default', value)
+                        if (Number.isFinite(value)) {
+                            const datasetCategory = this.GetDataSet(category);
+                            const ranges = this.dataRanges ? this.dataRanges[datasetCategory] : null;
+                            // Determine default for comparison without mutating attributes here
+                            let numericDefault = parseFloat(input.getAttribute('wt-cmsfilter-default'));
+                            if (!Number.isFinite(numericDefault) && ranges) {
+                                numericDefault = rangeType === 'from' ? ranges.min : ranges.max;
                             }
-                            else {
-                                let _default = input.getAttribute('wt-cmsfilter-default');
-                                if (rangeType === 'from' && _default != value ) {
+
+                            if (Number.isFinite(numericDefault)) {
+                                if (rangeType === 'from' && value !== numericDefault) {
                                     rangeFilters[category].from = value;
-                                } else if (rangeType === 'to' && _default != value) {
+                                } else if (rangeType === 'to' && value !== numericDefault) {
                                     rangeFilters[category].to = value;
                                 }
                             }
@@ -818,7 +917,11 @@ class CMSFilter {
             'results': this.GetResults(),
             'per-page-items': this.itemsPerPage,
             'total-pages': this.totalPages,
-            'current-page': this.currentPage
+            'current-page': this.currentPage,
+            'all-items': this.allItems,
+            'filtered-items': this.filteredItems,
+            'load-mode': this.loadMode,
+            'range-sliders': this.dataRanges
         }
         return filterData;
     }
