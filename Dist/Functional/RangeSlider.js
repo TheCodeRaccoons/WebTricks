@@ -203,19 +203,18 @@ addStyles() {
  * @private
  */
 initConfig() {
-    this.sliderMin =
-    this.validateNumber(this.slider.getAttribute('wt-rangeslider-min')) || 0;
-    this.sliderMax =
-    this.validateNumber(this.slider.getAttribute('wt-rangeslider-max')) ||
-    100;
-    this.sliderSteps =
-    this.validateNumber(this.slider.getAttribute('wt-rangeslider-steps')) ||
-    1;
+    const minAttr = this.slider.getAttribute('wt-rangeslider-min');
+    this.sliderMin = minAttr !== null ? this.validateNumber(minAttr) : 0;
+    
+    const maxAttr = this.slider.getAttribute('wt-rangeslider-max');
+    this.sliderMax = maxAttr !== null ? this.validateNumber(maxAttr) : 100;
+    
+    const stepsAttr = this.slider.getAttribute('wt-rangeslider-steps');
+    this.sliderSteps = stepsAttr !== null ? this.validateNumber(stepsAttr) : 1;
     
     // Minimum difference between left and right values
-    this.minDifference =
-    this.validateNumber(this.slider.getAttribute('wt-rangeslider-mindifference')) || 
-    this.sliderSteps;
+    const minDiffAttr = this.slider.getAttribute('wt-rangeslider-mindifference');
+    this.minDifference = minDiffAttr !== null ? this.validateNumber(minDiffAttr) : this.sliderSteps;
 
     // Show preffix
     this.rightSuffix =
