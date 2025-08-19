@@ -418,7 +418,6 @@ class CMSFilter {
                             const datasetValue = (item.dataset && item.dataset[category]) ? item.dataset[category] : '';
                             const itemValue = parseFloat(datasetValue);
                             if (isNaN(itemValue)) return false;
-                            
                             if (value.from !== null && value.to !== null) {
                                 return itemValue >= value.from && itemValue <= value.to;
                             } else if (value.from !== null && value.to == null) {
