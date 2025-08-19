@@ -111,6 +111,8 @@ constructor(wrapper) {
     try {
     this.wrapper = wrapper;
     this.slider = wrapper.querySelector('[wt-rangeslider-element="slider"]');
+    // Guard flag to avoid recursive updates when syncing external inputs
+    this.__suspendExternalSync = false;
 
     if (!this.slider) {
         throw new Error('Slider element not found within wrapper');
@@ -140,7 +142,12 @@ constructor(wrapper) {
  * @private
  */
 addStyles() {
+    // Inject styles once per document
+    const existing = document.getElementById('wt-rangeslider-styles');
+    if (existing) return;
+
     const style = document.createElement('style');
+    style.id = 'wt-rangeslider-styles';
     style.textContent = `
     [wt-rangeslider-element="slider"] {
         position: relative;
@@ -266,12 +273,12 @@ initElements() {
 setupThumbStyles() {
     const setupThumb = (thumb, input) => {
     // Ensure the input's thumb aligns with our custom thumb
-    const thumbWidth = thumb.offsetWidth;
+    const thumbWidth = thumb.offsetWidth || parseInt(getComputedStyle(thumb).width) || 20;
     input.style.setProperty('--thumb-width', `${thumbWidth}px`);
     
     // Apply styles to ensure proper positioning and hit areas
     thumb.style.position = 'absolute';
-    thumb.style.pointerEvents = 'none'; // Let clicks pass through to input
+    thumb.style.pointerEvents = 'none';
     
     // Create a custom property for the thumb offset
     this.slider.style.setProperty('--thumb-offset', `${thumbWidth / 2}px`);
@@ -334,12 +341,17 @@ updateLeftValues(value) {
 
     // Update form input
     if (this.rangeStart) {
-    this.rangeStart.value = constrainedValue;
+    // Avoid recursive reaction to our own programmatic updates
+    const valueProp = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    this.__suspendExternalSync = true;
+    valueProp.set.call(this.rangeStart, constrainedValue);
+    this.__suspendExternalSync = false;
     }
 
     // Update display
     if (this.displayStart) {
-    this.displayStart.innerHTML = this.shouldFormatNumber === 'true' ? this.formatNumber(constrainedValue) : constrainedValue;
+    const displayLeft = this.shouldFormatNumber === 'true' ? this.formatNumber(constrainedValue) : constrainedValue;
+    this.displayStart.textContent = String(displayLeft);
     }
 
     // Update visual position
@@ -366,7 +378,11 @@ updateRightValues(value) {
 
     // Update form input
     if (this.rangeEnd) {
-    this.rangeEnd.value = constrainedValue;
+    // Avoid recursive reaction to our own programmatic updates
+    const valueProp = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    this.__suspendExternalSync = true;
+    valueProp.set.call(this.rangeEnd, constrainedValue);
+    this.__suspendExternalSync = false;
     }
 
     // Update display
@@ -374,11 +390,11 @@ updateRightValues(value) {
     let finalDisplay = this.shouldFormatNumber === 'true' ? this.formatNumber(constrainedValue) : constrainedValue;
 
     if (this.rightSuffix && value >= this.sliderMax) {
-        this.displayEnd.innerHTML = `${finalDisplay}${this.rightSuffix}`;
+        this.displayEnd.textContent = `${finalDisplay}${this.rightSuffix}`;
     } else if (this.defaultSuffix) {
-        this.displayEnd.innerHTML = `${finalDisplay}${this.defaultSuffix}`;
+        this.displayEnd.textContent = `${finalDisplay}${this.defaultSuffix}`;
     } else {
-        this.displayEnd.innerHTML = finalDisplay;
+        this.displayEnd.textContent = String(finalDisplay);
     }
     }
 
@@ -413,55 +429,31 @@ setupEventListeners() {
 
     // Watch for changes to the form inputs
     if (this.rangeStart) {
+    // React to user typing immediately
     this.rangeStart.addEventListener('input', (e) => {
         this.updateLeftValues(e.target.value);
     });
-
-    // Watch for programmatic changes
-    const startObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-        if (
-            mutation.type === 'attributes' &&
-            mutation.attributeName === 'value'
-        ) {
-            const value = parseInt(this.rangeStart.value);
-            if (
-            !isNaN(value) &&
-            value >= this.sliderMin &&
-            value <= this.sliderMax
-            ) {
-            this.updateLeftValues(value);
-            }
-        }
-        });
+    this.rangeStart.addEventListener('change', (e) => {
+        this.updateLeftValues(e.target.value);
     });
-    startObserver.observe(this.rangeStart, { attributes: true });
+    // Hook into programmatic value assignments
+    this.hookInputValueSync(this.rangeStart, (val) => {
+        this.updateLeftValues(val);
+    });
     }
 
     if (this.rangeEnd) {
+    // React to user typing immediately
     this.rangeEnd.addEventListener('input', (e) => {
         this.updateRightValues(e.target.value);
     });
-
-    // Watch for programmatic changes
-    const endObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-        if (
-            mutation.type === 'attributes' &&
-            mutation.attributeName === 'value'
-        ) {
-            const value = parseInt(this.rangeEnd.value);
-            if (
-            !isNaN(value) &&
-            value >= this.sliderMin &&
-            value <= this.sliderMax
-            ) {
-            this.updateRightValues(value);
-            }
-        }
-        });
+    this.rangeEnd.addEventListener('change', (e) => {
+        this.updateRightValues(e.target.value);
     });
-    endObserver.observe(this.rangeEnd, { attributes: true });
+    // Hook into programmatic value assignments
+    this.hookInputValueSync(this.rangeEnd, (val) => {
+        this.updateRightValues(val);
+    });
     }
 }
 
@@ -476,11 +468,12 @@ setupEventListeners() {
 updateThumbPosition(input, thumb, range, side) {
     const min = parseInt(input.min);
     const max = parseInt(input.max);
-    const percent = ((input.value - min) / (max - min)) * 100;
+    const current = parseInt(input.value);
+    const percent = ((current - min) / (max - min)) * 100;
     
     // Get the thumb's width to account for its dimensions
-    const thumbWidth = thumb.offsetWidth;
-    const sliderWidth = this.slider.offsetWidth;
+    const thumbWidth = thumb.offsetWidth || parseInt(getComputedStyle(thumb).width) || 20;
+    const sliderWidth = this.slider.offsetWidth || parseInt(getComputedStyle(this.slider).width) || 1;
     
     // Calculate the percentage that represents half the thumb width
     const thumbHalfPercent = (thumbWidth / sliderWidth) * 100;
@@ -519,6 +512,68 @@ triggerEvent(element) {
     if (element) {
     element.dispatchEvent(new Event('input', { bubbles: true }));
     }
+}
+
+/**
+ * Hook into a text input's value property to react to programmatic assignments
+ * @param {HTMLInputElement} input - The input to hook
+ * @param {(val: string|number) => void} handler - Handler to run on assignment
+ * @private
+ */
+hookInputValueSync(input, handler) {
+    if (!input) return;
+    const valueProp = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    const self = this;
+    try {
+        Object.defineProperty(input, 'value', {
+        get() {
+            return valueProp.get.call(this);
+        },
+        set(v) {
+            valueProp.set.call(this, v);
+            if (!self.__suspendExternalSync) {
+            handler(v);
+            }
+        },
+        configurable: true,
+        enumerable: true,
+        });
+    } catch (err) {
+        // Fallback: rely on 'input'/'change' listeners if defineProperty fails
+    }
+}
+
+/**
+ * Public API: set left range value
+ * @param {number|string} value
+ */
+setFrom(value) {
+    this.updateLeftValues(value);
+}
+
+/**
+ * Public API: set right range value
+ * @param {number|string} value
+ */
+setTo(value) {
+    this.updateRightValues(value);
+}
+
+/**
+ * Public API: set both range values atomically and in correct order
+ * @param {number|string} from
+ * @param {number|string} to
+ */
+setRange(from, to) {
+    this.updateLeftValues(from);
+    this.updateRightValues(to);
+}
+
+/**
+ * Public API: reset slider to configured bounds
+ */
+reset() {
+    this.setRange(this.sliderMin, this.sliderMax);
 }
 
 /**
