@@ -26,9 +26,9 @@ class ShareLink {
         };
 
         let _link = socialSelectors[this.platform];
-        if(!_link) return; // handle errors if the platform has issues
+        if(!_link && !this.platform) return; // handle errors if the platform has issues
 
-        if(_link === 'copy') {
+        if(this.platform === 'copy') {
             this.element.addEventListener('click', () => navigator.clipboard.writeText(`${this.url}`));
         }
         else{
