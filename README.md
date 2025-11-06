@@ -63,7 +63,8 @@ All of the documentation is explained by functionality in <a href="https://theco
 	This being said even though most of this functionalities are built for Webflow, there's many that can be used in any other web project and platform. Feel free to see the full <a href="https://coderacoons.webflow.io/webtricks">documentation</a> in my site for the complete list of functionalities and scripts available.
 </p>
 <sub>
-   WebTricks might have been started as a personal project, but I'm a believer that a project for the comunity by the comunity can offer way more value than any single dev could provide so feel free to contribute to this project and use any solution here.
+   WebTricks might have been started as a personal project, but I'm a believer that a project for the comunity by the comunity can offer way more value than any single dev could provide so feel free to contribute to this project and use any solution here. <br>
+	You can <a href="https://www.thecoderaccoons.com/webtricks">follow development and news here</a>
 </sub>
 
 <h2 id="getting-started">Getting Started</h2>
