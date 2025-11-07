@@ -1,0 +1,20 @@
+{
+  "name": "webtricks",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tests for WebTricks modules",
+  "scripts": {
+    "test": "jest --runInBand"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testMatch": ["**/__tests__/**/*.test.js"],
+    "testEnvironmentOptions": {
+      "url": "https://example.com/"
+    }
+  }
+}
