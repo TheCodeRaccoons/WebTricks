@@ -2,7 +2,7 @@ name: ShareLink Tests
 
 on:
   pull_request:
-    branches: [ Develop ]
+    branches: [ Develop, main ]
 
 jobs:
   test:
