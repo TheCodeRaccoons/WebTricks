@@ -24,9 +24,22 @@ class ShareLink {
     this.copySuccessClass = this.element.getAttribute('wt-share-copysuccess') || null;
     this.copyErrorClass = this.element.getAttribute('wt-share-copyerror') || null;
     this.copyMessage = this.element.getAttribute('wt-share-copymessage') || null; // plain text message
-    // Support external template element for success HTML: <any wt-share-copyelement="copied"> ... </any>
-    const _copyTemplateEl = document.querySelector('[wt-share-copyelement="copied"]');
-    this.copyMessageTemplate = _copyTemplateEl ? _copyTemplateEl.innerHTML : null; // html message from template element
+    const _copyTemplateKey = this.element.getAttribute('wt-share-copytemplate') || 'copied';
+    // Static cache to avoid repeated DOM queries and allow removal of source template
+    if (!ShareLink._templateCache) {
+        ShareLink._templateCache = Object.create(null);
+    }
+    if (ShareLink._templateCache[_copyTemplateKey] == null) {
+        const _copyTemplateEl = document.querySelector(`[wt-share-copyelement="${_copyTemplateKey}"]`);
+        if (_copyTemplateEl) {
+            ShareLink._templateCache[_copyTemplateKey] = _copyTemplateEl.innerHTML;
+            // Remove original template node from DOM after caching to prevent accidental display and reduce layout cost
+            try { _copyTemplateEl.remove(); } catch {}
+        } else {
+            ShareLink._templateCache[_copyTemplateKey] = null;
+        }
+    }
+    this.copyMessageTemplate = ShareLink._templateCache[_copyTemplateKey]; // html message from cached template element
     this.copyFailMessage = this.element.getAttribute('wt-share-copymessage-fail') || 'failed to copy'; // plain text fail
 
         if ( this.copyMessage || this.copyMessageTemplate || this.copySuccessClass || this.copyErrorClass) {

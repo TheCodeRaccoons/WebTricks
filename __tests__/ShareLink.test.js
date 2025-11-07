@@ -86,6 +86,32 @@ describe('ShareLink', () => {
     jest.useRealTimers();
   });
 
+  test('uses per-element template key when wt-share-copytemplate is provided', async () => {
+    jest.useFakeTimers();
+
+    document.body.innerHTML = `
+      <button id="copyBtn" wt-share-element="copy" wt-share-copytemplate="alt" wt-share-copysuccess="copied-class" wt-share-copytimeout="10">Go</button>
+      <div wt-share-copyelement="copied"><span>DEFAULT</span></div>
+      <div wt-share-copyelement="alt"><span class="alt">ALT</span></div>
+    `;
+
+    Object.defineProperty(window, 'isSecureContext', { value: true, configurable: true });
+    const writeText = jest.fn().mockResolvedValue();
+    global.navigator.clipboard = { writeText };
+
+    InitializeShareLink();
+
+    const el = document.getElementById('copyBtn');
+    el.click();
+    await Promise.resolve();
+
+    expect(writeText).toHaveBeenCalled();
+    expect(el.innerHTML).toContain('class="alt"');
+
+    jest.advanceTimersByTime(10);
+    jest.useRealTimers();
+  });
+
   test('fallback uses execCommand when clipboard is unavailable', () => {
     jest.useFakeTimers();
 
