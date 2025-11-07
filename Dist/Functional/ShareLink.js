@@ -1,30 +1,40 @@
 'use strict';
+
 class ShareLink {
     constructor(element) {
         if (!(element instanceof HTMLElement)) {
             throw new Error("Initialization failed: A valid HTMLElement was not provided to the constructor.");
         }
+
         this.element = element;
-        console.log("Component created successfully with element:", this.element);
         this.platform = element.getAttribute('wt-share-element');
+        this.title = document.title;
+        this.url = window.location.href;
 
-        // Internal state for idempotent UI resets
-        this._copyResetTimer = null;
-        this._isCopyLocked = false;
-
-        // Validate platform attribute
         if (!this.platform || this.platform.trim() === '') {
             console.warn('ShareLink: No platform specified for element:', element);
             return;
         }
 
-        this.title = document.title;
-        this.url = window.location.href;
-
-        // Validate URL
         if (!this.url || this.url.trim() === '') {
             console.error('ShareLink: Invalid URL detected:', this.url);
             return;
+        }
+
+    this.copySuccessClass = this.element.getAttribute('wt-share-copysuccess') || null;
+    this.copyErrorClass = this.element.getAttribute('wt-share-copyerror') || null;
+    this.copyMessage = this.element.getAttribute('wt-share-copymessage') || null; // plain text message
+    // Support external template element for success HTML: <any wt-share-copyelement="copied"> ... </any>
+    const _copyTemplateEl = document.querySelector('[wt-share-copyelement="copied"]');
+    this.copyMessageTemplate = _copyTemplateEl ? _copyTemplateEl.innerHTML : null; // html message from template element
+    this.copyFailMessage = this.element.getAttribute('wt-share-copymessage-fail') || 'failed to copy'; // plain text fail
+
+        if ( this.copyMessage || this.copyMessageTemplate || this.copySuccessClass || this.copyErrorClass) {
+            this.copyResetTimer = null;
+            this.isCopyLocked = false;
+            this.copyTimeout = parseInt(this.element.getAttribute('wt-share-copytimeout'), 10) || 1000;
+            // Provide basic screen reader feedback when message swaps occur
+            this.element.setAttribute('aria-live', 'polite');
         }
 
         this.encoded = this.encodeURIParams();
@@ -41,7 +51,7 @@ class ShareLink {
         const socialSelectors = {
             facebook: `https://www.facebook.com/sharer/sharer.php?u=${this.encoded.url}`,
             twitter:  `https://twitter.com/intent/tweet?url=${this.encoded.url}&text=${this.encoded.title}`,
-            linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${this.encoded.url}`,
+            linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${this.encoded.url}&title=${this.encoded.title}`,
             whatsapp: `https://wa.me/?text=${this.encoded.title}%20${this.encoded.url}`,
             pinterest:`https://www.pinterest.com/pin/create/button/?url=${this.encoded.url}&description=${this.encoded.title}`,
             reddit:   `https://www.reddit.com/submit?url=${this.encoded.url}&title=${this.encoded.title}`
@@ -67,177 +77,119 @@ class ShareLink {
     async handleCopyClick(e) {
         e.preventDefault();
 
-        // Optional short lock to avoid spam clicks
-        if (this._isCopyLocked) return;
-        this._isCopyLocked = true;
+        if (this.isCopyLocked) return;
+        this.isCopyLocked = true;
 
         try {
             if (navigator.clipboard && window.isSecureContext) {
                 await navigator.clipboard.writeText(this.url);
-                this.showCopySuccess();
+                this.triggerCopyChange();
             } else {
-                // Fallback for HTTP / older browsers
                 this.copyFallback(this.url);
             }
         } catch (error) {
+            console.warn('ShareLink: Clipboard API failed, using fallback:', error);    
             this.copyFallback(this.url);
         } finally {
-            // Re-enable quickly; adjust if you want a longer cooldown
-            setTimeout(() => (this._isCopyLocked = false), 300);
+            setTimeout(() => (this.isCopyLocked = false), 300);
         }
     }
 
+    /** Fallback method for copying text in unsupported environments
+     * @param {string} text - The text to be copied to the clipboard
+     * @deprecated Use navigator.clipboard API where possible, this is only for legacy support
+     * and will be removed in future versions.
+     */
     copyFallback(text) {
         const ta = document.createElement('textarea');
         ta.value = text;
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        ta.style.left = '-9999px';
+        // Use off-screen positioning to ensure selection works across browsers
+        ta.setAttribute('readonly', '');
+        ta.style.cssText = 'position:absolute;left:-9999px;top:0;opacity:0;';
         document.body.appendChild(ta);
         ta.select();
+        try { ta.setSelectionRange(0, ta.value.length); } catch {}
         try {
             const ok = document.execCommand('copy');
-            ok ? this.showCopySuccess() : this.showCopyError();
+            ok ? this.triggerCopyChange() : this.triggerCopyChange(true);
         } catch {
-            this.showCopyError();
+            this.triggerCopyChange(true);
         }
         document.body.removeChild(ta);
     }
 
-    showCopySuccess() {
-        const originalText = this.element.textContent;
-        const originalStyle = this.element.style.cssText;
-
-        // Clear any previous pending reset so timers don't stack
-        if (this._copyResetTimer) clearTimeout(this._copyResetTimer);
-
-        // Update UI and temporarily disable clicks
-        this.element.textContent = '✓ Copied!';
-        this.element.style.cssText = `
-            background-color: #4caf50 !important;
-            color: white !important;
-            border-color: #4caf50 !important;
-            transform: scale(1.05);
-            transition: all 0.3s ease;
-            pointer-events: none;
-        `;
-
-        this.showTemporaryMessage('Link copied to clipboard!', 'success');
-
-        // Single reset scheduled from the most recent click only
-        this._copyResetTimer = setTimeout(() => {
-            this.element.textContent = originalText;
-            this.element.style.cssText = originalStyle;
-            this._copyResetTimer = null;
-        }, 1000);
-    }
-
-    showCopyError() {
-        const originalText = this.element.textContent;
-        const originalStyle = this.element.style.cssText;
-
-        if (this._copyResetTimer) clearTimeout(this._copyResetTimer);
-
-        this.element.textContent = '✗ Failed';
-        this.element.style.cssText = `
-            background-color: #f44336 !important;
-            color: white !important;
-            border-color: #f44336 !important;
-            transform: scale(1.05);
-            transition: all 0.3s ease;
-            pointer-events: none;
-        `;
-
-        this.showTemporaryMessage('Copy failed - showing manual copy option', 'error');
-        window.prompt('Copy this link manually:', this.url);
-
-        this._copyResetTimer = setTimeout(() => {
-            this.element.textContent = originalText;
-            this.element.style.cssText = originalStyle;
-            this._copyResetTimer = null;
-        }, 1000);
-    }
-
-    showTemporaryMessage(message, type) {
-        // Remove any existing message
-        const existingMessage = document.querySelector('.sharelink-message');
-        if (existingMessage) existingMessage.remove();
-
-        // Create new message element
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'sharelink-message';
-        messageDiv.textContent = message;
-        messageDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 6px;
-            color: white;
-            font-weight: bold;
-            z-index: 10000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            max-width: 300px;
-            word-wrap: break-word;
-        `;
-
-        // Set background color based on type
-        messageDiv.style.backgroundColor = (type === 'success') ? '#4caf50' : '#f44336';
-
-        document.body.appendChild(messageDiv);
-
-        // Animate in
-        setTimeout(() => { messageDiv.style.transform = 'translateX(0)'; }, 10);
-
-        // Remove after 2 seconds
-        setTimeout(() => {
-            messageDiv.style.transform = 'translateX(100%)';
-            setTimeout(() => { if (messageDiv.parentNode) messageDiv.remove(); }, 300);
-        }, 2000);
-    }
-
-    // Cleanup method for proper memory management
-    destroy() {
-        if (this.element && this.platform === 'copy') {
-            // Remove event listeners by cloning the element
-            const newElement = this.element.cloneNode(true);
-            this.element.parentNode.replaceChild(newElement, this.element);
+    triggerCopyChange(error = false) {
+        // Preserve original content across repeated triggers until reset
+        if (this._copyOriginalHTML == null) {
+            this._copyOriginalHTML = this.element.innerHTML;
         }
 
-        // Remove from global array if it exists
-        if (window.webtricks) {
-            const index = window.webtricks.findIndex(item => item.ShareLink === this);
-            if (index > -1) {
-                window.webtricks.splice(index, 1);
+        if (this.copyResetTimer) clearTimeout(this.copyResetTimer);
+
+        // Prefer HTML from external template element when provided, fallback to plain text attributes
+        const successContent = this.copyMessageTemplate != null ? this.copyMessageTemplate : this.copyMessage;
+        const failContent = this.copyFailMessage; // Only plain text fail for now
+        if (error) {
+            // Fail path uses plain text to avoid accidental HTML execution
+            this.element.textContent = failContent ?? '';
+        } else if (successContent) {
+            this.element.innerHTML = successContent;
+        }
+
+        if (this.copySuccessClass && !error) {
+            this.element.classList.add(this.copySuccessClass);
+        }
+        if (this.copyErrorClass && error) {
+            this.element.classList.add(this.copyErrorClass);
+        }
+
+        // Dispatch a custom event for integrations/analytics
+        try {
+            this.element.dispatchEvent(new CustomEvent('sharelink:copy', {
+                bubbles: true,
+                detail: { success: !error, url: this.url, platform: 'copy' }
+            }));
+        } catch {}
+
+        this.copyResetTimer = setTimeout(() => {
+            if (!this.element.isConnected) return;
+            if (this._copyOriginalHTML != null) {
+                this.element.innerHTML = this._copyOriginalHTML;
             }
-        }
+            if (this.copySuccessClass && !error) {
+                this.element.classList.remove(this.copySuccessClass);
+            }
+            if (this.copyErrorClass && error) {
+                this.element.classList.remove(this.copyErrorClass);
+            }
+            this.copyResetTimer = null;
+            this._copyOriginalHTML = null;
+        }, this.copyTimeout);
     }
 }
 
 function InitializeShareLink() {
-  window.webtricks = window.webtricks || [];
-  const links = document.querySelectorAll("[wt-share-element]");
-  if (!links || links.length === 0) return;
+    window.webtricks = window.webtricks || [];
+    const links = document.querySelectorAll("[wt-share-element]");
+    if (!links || links.length === 0) return;
 
-  links.forEach(link => {
-    // Check if element already has a ShareLink instance
-    if (link._shareLinkInstance) {
-      console.warn('ShareLink: Element already initialized, skipping:', link);
-      return;
-    }
+    links.forEach(link => {
+        // Check if element already has a ShareLink instance
+        if (link._shareLinkInstance) {
+        console.warn('ShareLink: Element already initialized, skipping:', link);
+        return;
+        }
 
-    try {
-      const instance = new ShareLink(link);
-      if (instance.platform) { // Only add if platform was valid
-        link._shareLinkInstance = instance;
-        window.webtricks.push({ 'ShareLink': instance });
-      }
-    } catch (error) {
-      console.error('ShareLink: Failed to initialize element:', link, error);
-    }
-  });
+        try {
+        const instance = new ShareLink(link);
+        if (instance.platform) { // Only add if platform was valid
+            link._shareLinkInstance = instance;
+            window.webtricks.push({ 'ShareLink': instance });
+        }
+        } catch (error) {
+        console.error('ShareLink: Failed to initialize element:', link, error);
+        }
+    });
 }
 
 // Execute InitializeShareLink when the DOM is fully loaded
@@ -246,3 +198,10 @@ if (/complete|interactive|loaded/.test(document.readyState)) {
 } else {
     window.addEventListener('DOMContentLoaded', InitializeShareLink);
 }
+
+// Allow requiring this module in test environments without affecting browser usage
+try {
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = { ShareLink, InitializeShareLink };
+    }
+} catch {}
