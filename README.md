@@ -130,6 +130,14 @@ All official releases shall be in <code>master</code>. Any updates in between (u
 After a pull request has been open for over 30 days with no activity or response from the author, it'll be automatically marked as stale. We might fork your changes and merge the changes ourselves. Since GitHub tracks contributions by commits, you will be credited.
 </p>
 <br/>
+<h2 id="contributors">Contributors</h2>
+<p>
+    Big thanks to everyone who has contributed to this project. The list below updates automatically after changes land on <code>main</code>.
+</p>
+
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
+
 <div align="center">
     <img src="https://forthebadge.com/images/badges/built-with-love.svg" />
     <img src="https://forthebadge.com/images/badges/built-by-developers.svg" />

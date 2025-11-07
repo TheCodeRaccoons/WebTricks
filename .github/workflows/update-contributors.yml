@@ -1,0 +1,30 @@
+name: Update contributors in README
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1' # Weekly, Mondays at 06:00 UTC
+
+jobs:
+  update-contributors:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update contributors section in README
+        uses: akhilmhdh/contributors-readme-action@v2.5.8
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          image_size: 80
+          use_username: true
+          pr_merge: true
+          columns_per_row: 8
+          commit_message: 'docs(readme): update contributors [skip ci]'
