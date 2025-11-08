@@ -36,15 +36,21 @@ class Marquee {
 
     fillContainer() {
         let totalSize = this.calculateTotalSize();
-        const targetSize = this.parentSize * 1.5; 
+        const targetSize = this.parentSize * 1.5;
+        // Safety guards: avoid infinite loop if sizes cannot be measured (e.g., 0 widths in tests/SSR)
+        let iterations = 0;
+        const maxIterations = 200; // cap to a reasonable number
 
-        while (totalSize < targetSize) {
+        while (totalSize < targetSize && iterations < maxIterations) {
+            const beforeSize = totalSize;
             this.elements.forEach(el => {
                 const clone = el.cloneNode(true);
                 this.container.appendChild(clone);
             });
             this.elements = Array.from(this.container.children);
             totalSize = this.calculateTotalSize();
+            iterations++;
+            if (totalSize <= beforeSize) break; // cannot grow, abort to prevent infinite loop
         }
     }
 
