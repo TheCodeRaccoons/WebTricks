@@ -44,3 +44,10 @@ if (/complete|interactive|loaded/.test(document.readyState)) {
 } else {
     window.addEventListener('DOMContentLoaded',InitializeReadTime )
 }
+
+// Allow requiring this module in test environments without affecting browser usage
+try {
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = { ReadTime, InitializeReadTime };
+    }
+} catch {}

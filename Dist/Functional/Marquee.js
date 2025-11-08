@@ -135,3 +135,10 @@ if (/complete|interactive|loaded/.test(document.readyState)) {
 } else {
     window.addEventListener('DOMContentLoaded', InitializeMarquee);
 };
+
+// Allow requiring this module in test environments without affecting browser usage
+try {
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = { Marquee, InitializeMarquee };
+    }
+} catch {}
