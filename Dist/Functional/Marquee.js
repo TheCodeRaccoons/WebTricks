@@ -141,4 +141,6 @@ try {
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = { Marquee, InitializeMarquee };
     }
-} catch {}
+} catch {
+    // Suppress errors when module/module.exports are undefined (e.g., in browser environments).
+}
