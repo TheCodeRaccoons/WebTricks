@@ -50,4 +50,6 @@ try {
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = { ReadTime, InitializeReadTime };
     }
-} catch {}
+} catch {
+    // Intentionally suppress errors for compatibility between browser and Node.js environments.
+}
