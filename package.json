@@ -13,6 +13,8 @@
   "jest": {
     "testEnvironment": "jsdom",
     "testMatch": ["**/__tests__/**/*.test.js"],
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+    "testTimeout": 20000,
     "testEnvironmentOptions": {
       "url": "https://example.com/"
     }
