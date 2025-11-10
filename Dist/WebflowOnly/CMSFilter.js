@@ -509,8 +509,9 @@ class CMSFilter {
                 } else {
                     return values.some(value => {
                         if (typeof value === 'object' && value !== null) {
-                            // Range filtering - use original dataset access
-                            const datasetValue = (item.dataset && item.dataset[category]) ? item.dataset[category] : '';
+                            // Range filtering - use normalized dataset key
+                            const datasetCategory = this.GetDataSet(category);
+                            const datasetValue = (item.dataset && item.dataset[datasetCategory]) ? item.dataset[datasetCategory] : '';
                             const itemValue = parseFloat(datasetValue);
                             if (isNaN(itemValue)) return false;
                             if (value.from !== null && value.to !== null) {
@@ -950,3 +951,10 @@ if (/complete|interactive|loaded/.test(document.readyState)) {
 } else { 
     window.addEventListener('DOMContentLoaded', InitializeCMSFilter)
 }
+
+// Allow requiring this module in test environments without affecting browser usage
+try {
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = { CMSFilter, InitializeCMSFilter };
+    }
+} catch {}
