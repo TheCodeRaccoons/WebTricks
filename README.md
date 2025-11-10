@@ -136,6 +136,26 @@ After a pull request has been open for over 30 days with no activity or response
 </p>
 
 <!-- readme: contributors -start -->
+<table>
+	<tbody>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/JorchCortez">
+                    <img src="https://avatars.githubusercontent.com/u/14006732?v=4" width="80;" alt="JorchCortez"/>
+                    <br />
+                    <sub><b>JorchCortez</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/Likhithakathireddy">
+                    <img src="https://avatars.githubusercontent.com/u/112922724?v=4" width="80;" alt="Likhithakathireddy"/>
+                    <br />
+                    <sub><b>Likhithakathireddy</b></sub>
+                </a>
+            </td>
+		</tr>
+	<tbody>
+</table>
 <!-- readme: contributors -end -->
 
 <div align="center">
