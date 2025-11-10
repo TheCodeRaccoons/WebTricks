@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
 
       - name: Update contributors section in README
-        uses: akhilmhdh/contributors-readme-action@v2.5.8
+        uses: akhilmhdh/contributors-readme-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
