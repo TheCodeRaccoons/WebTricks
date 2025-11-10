@@ -57,3 +57,8 @@ if (/complete|interactive|loaded/.test(document.readyState)) {
 } else {
     window.addEventListener('DOMContentLoaded', InitializeCMSSelect);
 }
+
+// Export for CommonJS (testing / bundler environments)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { CMSSelect, InitializeCMSSelect };
+}

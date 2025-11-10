@@ -12,6 +12,7 @@ CMSSelect is a Webflow-specific script that automatically populates select eleme
 - Handles custom values and text content
 - Error handling and validation
 - Automatic initialization on page load
+ - Programmatic initialization available via `InitializeCMSSelect` (CommonJS export)
 
 ## Usage
 Add the script to your Webflow project and include the required attributes on your select element and option sources.
@@ -83,3 +84,11 @@ For multiple selects:
 3. Form select population
 4. Category selection
 5. Dynamic navigation menus
+
+### Programmatic usage (testing/bundlers)
+When using in a bundler or testing environment, you can import the initializer:
+
+```js
+const { InitializeCMSSelect } = require('../../Dist/WebflowOnly/CMSSelect.js');
+InitializeCMSSelect();
+```
