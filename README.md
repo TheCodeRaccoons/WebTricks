@@ -131,6 +131,11 @@ After a pull request has been open for over 30 days with no activity or response
 </p>
 <br/>
 
+<h2 id="contributors">Our Contributors</h2>
+<p>
+	The community supports this project; huge thanks to everyone who has made this possible!
+</p>
+
 <!-- readme: contributors -start -->
 <table>
 	<tbody>
