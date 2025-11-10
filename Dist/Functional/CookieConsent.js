@@ -173,3 +173,10 @@ if (/complete|interactive|loaded/.test(document.readyState)) {
 } else {
     window.addEventListener('DOMContentLoaded', InitializeCookieConsent);
 }
+
+// Allow requiring this module in test environments
+try {
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = { CookieConsent, InitializeCookieConsent };
+    }
+} catch {}
