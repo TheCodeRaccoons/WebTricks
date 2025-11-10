@@ -11,3 +11,12 @@ afterEach(() => {
 // Polyfill requestAnimationFrame/cancelAnimationFrame for jsdom
 global.requestAnimationFrame = global.requestAnimationFrame || (cb => setTimeout(cb, 0));
 global.cancelAnimationFrame = global.cancelAnimationFrame || (id => clearTimeout(id));
+
+// Polyfill innerText for jsdom to mirror textContent behavior
+if (typeof HTMLElement !== 'undefined' && !Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'innerText')) {
+  Object.defineProperty(HTMLElement.prototype, 'innerText', {
+    get() { return this.textContent; },
+    set(value) { this.textContent = value; },
+    configurable: true,
+  });
+}

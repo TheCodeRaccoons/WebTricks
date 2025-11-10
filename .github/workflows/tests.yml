@@ -1,3 +1,48 @@
+name: tests
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  test:
+    name: tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies (lockfile)
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        run: npm ci
+
+      - name: Install dependencies
+        if: ${{ hashFiles('package-lock.json') == '' }}
+        run: npm install
+
+      - name: Run tests with coverage
+        run: npx jest --runInBand --coverage --coverageReporters=text-summary --coverageReporters=lcov --coverageReporters=json-summary
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/**
+
+      - name: Add coverage summary to job summary
+        if: always()
+        shell: bash
+        run: |
+          node -e "const fs=require('fs');const p='coverage/coverage-summary.json';if(fs.existsSync(p)){const s=JSON.parse(fs.readFileSync(p,'utf8'));const t=(o)=>o.total;const c=t(s);const md=\`## Coverage summary\\n\\n- Statements: \${c.statements.pct}% (\${c.statements.covered}/\${c.statements.total})\\n- Branches: \${c.branches.pct}% (\${c.branches.covered}/\${c.branches.total})\\n- Functions: \${c.functions.pct}% (\${c.functions.covered}/\${c.functions.total})\\n- Lines: \${c.lines.pct}% (\${c.lines.covered}/\${c.lines.total})\\n\`;fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);}else{console.log('coverage-summary.json not found')}}"
 name: ShareLink Tests
 
 on:
