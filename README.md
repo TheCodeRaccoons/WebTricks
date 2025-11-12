@@ -15,9 +15,6 @@
 		<img alt="GitHub repository stars" src="https://img.shields.io/github/stars/TheCodeRaccoons/WebTricks?color=%2360be86&label=github%20stars&style=for-the-badge">
 	</a>
 	<a href="#">
-		<img alt="GitHub License" src="https://img.shields.io/github/license/TheCodeRaccoons/WebTricks?color=%2360be86&style=for-the-badge">
-	</a>
-	<a href="#">
 		<img alt="Static Badge" src="https://img.shields.io/badge/monthly_hits-30k-a?color=%2360be86&style=for-the-badge">
 	</a>
 </p>
