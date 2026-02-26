@@ -277,4 +277,67 @@ describe("CMSFilter", () => {
     expect(instance.filteredItems.length).toBe(1);
     expect(instance.emptyElement.style.display).toBe("none");
   });
+
+  test("invalid wt-cmsfilter-empty-max defaults to 0", () => {
+    buildBasicDOM({ emptyMax: "3px" });
+    InitializeCMSFilter();
+    const instance = window.webtricks[0].CMSFilter;
+
+    expect(instance.emptyMaxCount).toBe(0);
+
+    const form = document.querySelector('[wt-cmsfilter-element="filter-form"]');
+    const betaLabel = Array.from(form.querySelectorAll("label")).find((l) =>
+      l.textContent.includes("Beta"),
+    );
+    betaLabel.querySelector("input").checked = true;
+    betaLabel
+      .querySelector("input")
+      .dispatchEvent(new Event("change", { bubbles: true }));
+    instance.ApplyFilters();
+
+    expect(instance.filteredItems.length).toBe(1);
+    expect(instance.emptyElement.style.display).toBe("none");
+  });
+
+  test("negative wt-cmsfilter-empty-max defaults to 0", () => {
+    buildBasicDOM({ emptyMax: "-1" });
+    InitializeCMSFilter();
+    const instance = window.webtricks[0].CMSFilter;
+
+    expect(instance.emptyMaxCount).toBe(0);
+
+    const form = document.querySelector('[wt-cmsfilter-element="filter-form"]');
+    const betaLabel = Array.from(form.querySelectorAll("label")).find((l) =>
+      l.textContent.includes("Beta"),
+    );
+    betaLabel.querySelector("input").checked = true;
+    betaLabel
+      .querySelector("input")
+      .dispatchEvent(new Event("change", { bubbles: true }));
+    instance.ApplyFilters();
+
+    expect(instance.filteredItems.length).toBe(1);
+    expect(instance.emptyElement.style.display).toBe("none");
+  });
+
+  test("non-numeric wt-cmsfilter-empty-max defaults to 0", () => {
+    buildBasicDOM({ emptyMax: "abc" });
+    InitializeCMSFilter();
+    const instance = window.webtricks[0].CMSFilter;
+
+    expect(instance.emptyMaxCount).toBe(0);
+
+    const form = document.querySelector('[wt-cmsfilter-element="filter-form"]');
+    const betaLabel = Array.from(form.querySelectorAll("label")).find((l) =>
+      l.textContent.includes("Beta"),
+    );
+    betaLabel.querySelector("input").checked = true;
+    betaLabel
+      .querySelector("input")
+      .dispatchEvent(new Event("change", { bubbles: true }));
+    instance.ApplyFilters();
+
+    expect(instance.filteredItems.length).toBe(1);
+    expect(instance.emptyElement.style.display).toBe("none");
+  });
 });
