@@ -54,6 +54,7 @@ Add the script to your Webflow project and include the required attributes on yo
 #### Additional Elements
 - `wt-cmsfilter-element="results-count"` - Shows the number of filtered results
 - `wt-cmsfilter-element="empty"` - Element shown when no results are found
+- `wt-cmsfilter-empty-max="n"` - Optional on the empty element; accepts positive whole integers only (`1+`) and shows empty block when filtered results are ≤ n. Missing, `0`, or invalid values default to `0` (show only when there are zero results; e.g. `wt-cmsfilter-empty-max="3"` shows at 3 or fewer). Valid: `1`, `2`, `3`. Invalid: `0`, `3.5`, `3px`, `-1`, `abc`.
 - `wt-cmsfilter-element="clear-all"` - Button to clear all active filters
 - `wt-cmsfilter-element="sort-options"` - Select element for sorting options
 - `wt-cmsfilter-element="tag-template"` - Template for active filter tags
@@ -110,6 +111,11 @@ Add the script to your Webflow project and include the required attributes on yo
     <!-- Empty state -->
     <div wt-cmsfilter-element="empty" style="display: none;">
         No results found.
+    </div>
+
+    <!-- Empty state shown for 3 or fewer results -->
+    <div wt-cmsfilter-element="empty" wt-cmsfilter-empty-max="3" style="display: none;">
+        Only a few results found.
     </div>
 </form>
 ```
