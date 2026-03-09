@@ -63,12 +63,11 @@ class CMSFilter {
     );
     this.emptyMaxCount = 0;
     if (this.emptyElement) {
-      const emptyMaxValue = parseInt(
-        this.emptyElement.getAttribute("wt-cmsfilter-empty-max"),
-        10,
+      const emptyMaxAttr = this.emptyElement.getAttribute(
+        "wt-cmsfilter-empty-max",
       );
-      if (Number.isInteger(emptyMaxValue) && emptyMaxValue >= 0) {
-        this.emptyMaxCount = emptyMaxValue;
+      if (emptyMaxAttr !== null && /^[1-9]\d*$/.test(emptyMaxAttr)) {
+        this.emptyMaxCount = Number(emptyMaxAttr);
       }
     }
     this.resetIx2 =
@@ -446,7 +445,7 @@ class CMSFilter {
             }
           }
         } else {
-          console.error("Failed to fetch HTML from the URL:", link.href);
+          console.error("Failed to fetch HTML from the URL:", link);
         }
       } catch (error) {
         console.error("Error fetching HTML:", error);
