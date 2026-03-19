@@ -2,11 +2,11 @@
 
 ## Version
 
-Current version: **0.0.6** (pre-release — see banner in `Dist/Functional/RangeSliderSimple.js`; bump patch and this line when the script changes).
+Current version: **0.0.7** (pre-release — see banner in `Dist/Functional/RangeSliderSimple.js`; bump patch and this line when the script changes).
 
 ## Description
 
-`RangeSliderSimple` is a dual-handle range control built from two `<input type="range">` elements. Styling follows the **default MDN / Chrome** pattern (blue filled track, grey remainder, white pill thumb); default fill **#3b82f6** matches typical `RangeSlider` `[range]` bar examples. Hit targets match the painted thumbs. The file is **self-contained** (same core behavior as `RangeSlider`, inlined—keep edits in sync manually if you change constraint/display logic).
+`RangeSliderSimple` is a dual-handle range control built from two `<input type="range">` elements. Styling follows the **default MDN / Chrome** pattern (blue filled track, grey remainder, white circular thumb with light border/shadow); default fill **#3b82f6** matches typical `RangeSlider` `[range]` bar examples. Hit targets match the painted thumbs. The file is **self-contained** (same core behavior as `RangeSlider`, inlined—keep edits in sync manually if you change constraint/display logic).
 
 Use **`RangeSlider`** when you need custom thumb graphics or a separate range bar element. Use **`RangeSliderSimple`** when native appearance (plus your own CSS overrides) is enough.
 
@@ -50,7 +50,7 @@ On `[wt-rangeslidersimple-element="slider"]` you can override:
 - `--wt-rs-track-fill`, `--wt-rs-track-bg`
 - `--wt-rs-thumb-bg`, `--wt-rs-thumb-border`, `--wt-rs-thumb-shadow`
 
-Injected styling approximates the default **MDN / Chrome** range look (white vertical pill thumb, blue progress, grey track).
+Injected styling approximates the default **MDN / Chrome** range look (white round thumb, blue progress, grey track). Thumbs use `pointer-events: auto` only on the thumb pseudo-elements so stacked inputs do not block each other (same idea as `RangeSlider.js`).
 
 ## Optional elements (inside wrapper)
 

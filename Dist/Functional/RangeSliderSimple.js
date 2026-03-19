@@ -1,6 +1,6 @@
 /*!
  * WebTricks — RangeSliderSimple
- * @version 0.0.6 — pre-release; bump patch (and docs/Functional/RangeSliderSimple.md) on every change to this file.
+ * @version 0.0.7 — pre-release; bump patch (and docs/Functional/RangeSliderSimple.md) on every change to this file.
  * Dual native range inputs (no custom thumb DOM). Self-contained (single script tag).
  * MIT License
  */
@@ -208,7 +208,8 @@ class RangeSliderSimple {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        pointer-events: auto;
+        pointer-events: none;
+        accent-color: transparent;
         z-index: 2;
         height: 1.5rem;
         min-height: 1.5rem;
@@ -218,12 +219,14 @@ class RangeSliderSimple {
         -moz-appearance: none !important;
     }
 
+    /* Later sibling paints on top; keep right above left when thumbs overlap. */
     input[type="range"][${ATTR_PREFIX}-element="input-right"] {
-        z-index: 1;
+        z-index: 3;
     }
 
     input[type="range"][${ATTR_PREFIX}-element="input-left"]::-webkit-slider-runnable-track,
     input[type="range"][${ATTR_PREFIX}-element="input-right"]::-webkit-slider-runnable-track {
+        pointer-events: none;
         height: 6px;
         border-radius: 3px;
         background: linear-gradient(
@@ -238,18 +241,22 @@ class RangeSliderSimple {
     input[type="range"][${ATTR_PREFIX}-element="input-left"]::-webkit-slider-thumb,
     input[type="range"][${ATTR_PREFIX}-element="input-right"]::-webkit-slider-thumb {
         -webkit-appearance: none !important;
-        width: 12px;
+        pointer-events: auto;
+        position: relative;
+        z-index: 1;
+        width: 16px;
         height: 16px;
         margin-top: -5px;
-        border-radius: 8px;
-        background: var(--wt-rs-thumb-bg, #ffffff);
-        border: 1px solid var(--wt-rs-thumb-border, #cbd5e1);
-        box-shadow: var(--wt-rs-thumb-shadow, 0 1px 2px rgba(0, 0, 0, 0.08));
+        border-radius: 50%;
+        background: var(--wt-rs-thumb-bg, #ffffff) !important;
+        border: 1px solid var(--wt-rs-thumb-border, #cbd5e1) !important;
+        box-shadow: var(--wt-rs-thumb-shadow, 0 1px 3px rgba(0, 0, 0, 0.12)) !important;
         cursor: pointer;
     }
 
     input[type="range"][${ATTR_PREFIX}-element="input-left"]::-moz-range-track,
     input[type="range"][${ATTR_PREFIX}-element="input-right"]::-moz-range-track {
+        pointer-events: none;
         height: 6px;
         border-radius: 3px;
         background: var(--wt-rs-track-bg, #e5e7eb);
@@ -258,6 +265,7 @@ class RangeSliderSimple {
 
     input[type="range"][${ATTR_PREFIX}-element="input-left"]::-moz-range-progress,
     input[type="range"][${ATTR_PREFIX}-element="input-right"]::-moz-range-progress {
+        pointer-events: none;
         height: 6px;
         border-radius: 3px;
         background: var(--wt-rs-track-fill, #3b82f6);
@@ -266,12 +274,13 @@ class RangeSliderSimple {
 
     input[type="range"][${ATTR_PREFIX}-element="input-left"]::-moz-range-thumb,
     input[type="range"][${ATTR_PREFIX}-element="input-right"]::-moz-range-thumb {
-        width: 12px;
+        pointer-events: auto;
+        width: 16px;
         height: 16px;
-        border-radius: 8px;
-        background: var(--wt-rs-thumb-bg, #ffffff);
-        border: 1px solid var(--wt-rs-thumb-border, #cbd5e1);
-        box-shadow: var(--wt-rs-thumb-shadow, 0 1px 2px rgba(0, 0, 0, 0.08));
+        border-radius: 50%;
+        background: var(--wt-rs-thumb-bg, #ffffff) !important;
+        border: 1px solid var(--wt-rs-thumb-border, #cbd5e1) !important;
+        box-shadow: var(--wt-rs-thumb-shadow, 0 1px 3px rgba(0, 0, 0, 0.12)) !important;
         cursor: pointer;
     }
 
@@ -387,10 +396,10 @@ class RangeSliderSimple {
 
     bringInputToFront(which) {
         if (which === 'left') {
-            this.inputLeft.style.zIndex = '3';
-            this.inputRight.style.zIndex = '1';
-        } else {
+            this.inputLeft.style.zIndex = '10';
             this.inputRight.style.zIndex = '3';
+        } else {
+            this.inputRight.style.zIndex = '10';
             this.inputLeft.style.zIndex = '2';
         }
     }
