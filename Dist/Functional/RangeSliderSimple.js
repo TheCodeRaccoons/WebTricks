@@ -1,6 +1,6 @@
 /*!
  * WebTricks — RangeSliderSimple
- * @version 0.0.8 — pre-release; bump patch (and docs/Functional/RangeSliderSimple.md) on every change to this file.
+ * @version 0.0.9 — pre-release; bump patch (and docs/Functional/RangeSliderSimple.md) on every change to this file.
  * Dual native range inputs (no custom thumb DOM). Self-contained (single script tag).
  * MIT License
  */
@@ -176,11 +176,11 @@ class RangeSliderSimple {
         const style = document.createElement('style');
         style.id = 'wt-rangeslidersimple-styles';
         /* Shared track on ::before so neither input's track paints over the other thumb.
-           Thumbs-only on inputs (Safari/Chrome); size ~24px to match common native macOS range. */
+           Default unfilled track #111; override wt-rangeslidersimple-trackbg or --wt-rs-track-bg. */
         style.textContent = `
     [${ATTR_PREFIX}-element="slider"] {
         --wt-rs-track-fill: #3b82f6;
-        --wt-rs-track-bg: #e5e7eb;
+        --wt-rs-track-bg: #111;
         --wt-rs-thumb-bg: #ffffff;
         --wt-rs-thumb-border: #aeb6c2;
         --wt-rs-thumb-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.18);
@@ -210,19 +210,19 @@ class RangeSliderSimple {
         box-sizing: border-box;
         background: linear-gradient(
             to right,
-            var(--wt-rs-track-bg, #e5e7eb) 0%,
-            var(--wt-rs-track-bg, #e5e7eb) var(--wt-rs-range-from, 0%),
+            var(--wt-rs-track-bg, #111) 0%,
+            var(--wt-rs-track-bg, #111) var(--wt-rs-range-from, 0%),
             var(--wt-rs-track-fill, #3b82f6) var(--wt-rs-range-from, 0%),
             var(--wt-rs-track-fill, #3b82f6) var(--wt-rs-range-to, 100%),
-            var(--wt-rs-track-bg, #e5e7eb) var(--wt-rs-range-to, 100%),
-            var(--wt-rs-track-bg, #e5e7eb) 100%
+            var(--wt-rs-track-bg, #111) var(--wt-rs-range-to, 100%),
+            var(--wt-rs-track-bg, #111) 100%
         );
     }
 
     input[type="range"][${ATTR_PREFIX}-element="input-left"],
     input[type="range"][${ATTR_PREFIX}-element="input-right"] {
         --wt-rs-track-fill: #3b82f6;
-        --wt-rs-track-bg: #e5e7eb;
+        --wt-rs-track-bg: #111;
         --wt-rs-thumb-bg: #ffffff;
         --wt-rs-thumb-border: #aeb6c2;
         --wt-rs-thumb-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.18);

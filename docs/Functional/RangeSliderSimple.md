@@ -2,11 +2,11 @@
 
 ## Version
 
-Current version: **0.0.8** (pre-release — see banner in `Dist/Functional/RangeSliderSimple.js`; bump patch and this line when the script changes).
+Current version: **0.0.9** (pre-release — see banner in `Dist/Functional/RangeSliderSimple.js`; bump patch and this line when the script changes).
 
 ## Description
 
-`RangeSliderSimple` is a dual-handle range control built from two `<input type="range">` elements. Styling follows the **default MDN / Chrome** pattern (blue filled track, grey remainder, white circular thumb with light border/shadow); default fill **#3b82f6** matches typical `RangeSlider` `[range]` bar examples. Hit targets match the painted thumbs. The file is **self-contained** (same core behavior as `RangeSlider`, inlined—keep edits in sync manually if you change constraint/display logic).
+`RangeSliderSimple` is a dual-handle range control built from two `<input type="range">` elements. The shared track uses default fill **#3b82f6** and unfilled background **#111**; override the latter with `wt-rangeslidersimple-trackbg` or CSS `--wt-rs-track-bg`. White circular thumbs with light border/shadow. Hit targets match the painted thumbs. The file is **self-contained** (same core behavior as `RangeSlider`, inlined—keep edits in sync manually if you change constraint/display logic).
 
 Use **`RangeSlider`** when you need custom thumb graphics or a separate range bar element. Use **`RangeSliderSimple`** when native appearance (plus your own CSS overrides) is enough.
 
@@ -41,7 +41,7 @@ Same semantics as `RangeSlider`, with the `wt-rangeslidersimple-` prefix:
 - `wt-rangeslidersimple-mindifference`
 - `wt-rangeslidersimple-formatnumber`, `wt-rangeslidersimple-rightsuffix`, `wt-rangeslidersimple-defaultsuffix`
 - `wt-rangeslidersimple-trackfill` — optional CSS color for the filled portion of the track (default **#3b82f6**, aligned with common `RangeSlider` `[range]` bar examples)
-- `wt-rangeslidersimple-trackbg` — optional unfilled track color (default **#e5e7eb**)
+- `wt-rangeslidersimple-trackbg` — unfilled track / “rail” color (default **#111**; e.g. `#e5e7eb` for a light UI)
 
 ## Theming (CSS variables)
 
