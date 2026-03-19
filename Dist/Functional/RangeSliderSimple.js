@@ -1,6 +1,6 @@
 /*!
  * WebTricks — RangeSliderSimple
- * @version 0.0.2 — pre-release; bump patch (and docs/Functional/RangeSliderSimple.md) on every change to this file.
+ * @version 0.0.5 — pre-release; bump patch (and docs/Functional/RangeSliderSimple.md) on every change to this file.
  * Dual native range inputs (no custom thumb DOM). Self-contained (single script tag).
  * MIT License
  */
@@ -174,34 +174,123 @@ class RangeSliderSimple {
 
         const style = document.createElement('style');
         style.id = 'wt-rangeslidersimple-styles';
-        /* Layout only: no appearance:none or ::-webkit-slider-* / ::-moz-range-* so thumbs/tracks stay browser-default. */
+        /* MDN-like range UI (Chrome docs): blue filled track, grey remainder, white pill thumb.
+           --wt-rs-track-fill defaults to #3b82f6 (typical RangeSlider [range] bar in docs). */
         style.textContent = `
     [${ATTR_PREFIX}-element="slider"] {
+        --wt-rs-track-fill: #3b82f6;
+        --wt-rs-track-bg: #e5e7eb;
+        --wt-rs-thumb-bg: #ffffff;
+        --wt-rs-thumb-border: #cbd5e1;
+        --wt-rs-thumb-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
         position: relative;
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+        align-items: center;
+        justify-items: stretch;
         min-height: 2.75rem;
         box-sizing: border-box;
     }
 
-    [${ATTR_PREFIX}-element="input-left"],
-    [${ATTR_PREFIX}-element="input-right"] {
-        position: absolute;
-        left: 0;
+    input[type="range"][${ATTR_PREFIX}-element="input-left"],
+    input[type="range"][${ATTR_PREFIX}-element="input-right"] {
+        grid-column: 1;
+        grid-row: 1;
         width: 100%;
         max-width: 100%;
-        top: 50%;
-        transform: translateY(-50%);
         margin: 0;
         padding: 0;
         box-sizing: border-box;
         pointer-events: auto;
         z-index: 2;
+        height: 1.5rem;
+        min-height: 1.5rem;
+        background: transparent;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        -moz-appearance: none !important;
     }
 
-    [${ATTR_PREFIX}-element="input-right"] {
+    input[type="range"][${ATTR_PREFIX}-element="input-right"] {
         z-index: 1;
+    }
+
+    input[type="range"][${ATTR_PREFIX}-element="input-left"]::-webkit-slider-runnable-track,
+    input[type="range"][${ATTR_PREFIX}-element="input-right"]::-webkit-slider-runnable-track {
+        height: 6px;
+        border-radius: 3px;
+        background: linear-gradient(
+            to right,
+            var(--wt-rs-track-fill) 0%,
+            var(--wt-rs-track-fill) var(--wt-rs-pct, 0%),
+            var(--wt-rs-track-bg) var(--wt-rs-pct, 0%),
+            var(--wt-rs-track-bg) 100%
+        );
+    }
+
+    input[type="range"][${ATTR_PREFIX}-element="input-left"]::-webkit-slider-thumb,
+    input[type="range"][${ATTR_PREFIX}-element="input-right"]::-webkit-slider-thumb {
+        -webkit-appearance: none !important;
+        width: 12px;
+        height: 16px;
+        margin-top: -5px;
+        border-radius: 8px;
+        background: var(--wt-rs-thumb-bg);
+        border: 1px solid var(--wt-rs-thumb-border);
+        box-shadow: var(--wt-rs-thumb-shadow);
+        cursor: pointer;
+    }
+
+    input[type="range"][${ATTR_PREFIX}-element="input-left"]::-moz-range-track,
+    input[type="range"][${ATTR_PREFIX}-element="input-right"]::-moz-range-track {
+        height: 6px;
+        border-radius: 3px;
+        background: var(--wt-rs-track-bg);
+        border: none;
+    }
+
+    input[type="range"][${ATTR_PREFIX}-element="input-left"]::-moz-range-progress,
+    input[type="range"][${ATTR_PREFIX}-element="input-right"]::-moz-range-progress {
+        height: 6px;
+        border-radius: 3px;
+        background: var(--wt-rs-track-fill);
+        border: none;
+    }
+
+    input[type="range"][${ATTR_PREFIX}-element="input-left"]::-moz-range-thumb,
+    input[type="range"][${ATTR_PREFIX}-element="input-right"]::-moz-range-thumb {
+        width: 12px;
+        height: 16px;
+        border-radius: 8px;
+        background: var(--wt-rs-thumb-bg);
+        border: 1px solid var(--wt-rs-thumb-border);
+        box-shadow: var(--wt-rs-thumb-shadow);
+        cursor: pointer;
+    }
+
+    input[type="range"][${ATTR_PREFIX}-element="input-left"]:focus-visible,
+    input[type="range"][${ATTR_PREFIX}-element="input-right"]:focus-visible {
+        outline: 2px solid var(--wt-rs-track-fill);
+        outline-offset: 2px;
     }
     `;
         document.head.appendChild(style);
+    }
+
+    syncTrackFillPercents() {
+        if (!this.inputLeft || !this.inputRight) return;
+        [this.inputLeft, this.inputRight].forEach((input) => {
+            const min = parseInt(input.min, 10);
+            const max = parseInt(input.max, 10);
+            const val = parseInt(input.value, 10);
+            const safeMin = Number.isFinite(min) ? min : 0;
+            const safeMax = Number.isFinite(max) ? max : 100;
+            const safeVal = Number.isFinite(val) ? val : safeMin;
+            const pct =
+                safeMax <= safeMin ? 0 : ((safeVal - safeMin) / (safeMax - safeMin)) * 100;
+            input.style.setProperty('--wt-rs-pct', `${pct}%`);
+        });
     }
 
     initConfig() {
@@ -213,6 +302,15 @@ class RangeSliderSimple {
         this.rightSuffix = cfg.rightSuffix;
         this.defaultSuffix = cfg.defaultSuffix;
         this.shouldFormatNumber = cfg.shouldFormatNumber;
+
+        const trackFill = this.slider.getAttribute(`${ATTR_PREFIX}-trackfill`);
+        if (trackFill) {
+            this.slider.style.setProperty('--wt-rs-track-fill', trackFill);
+        }
+        const trackBg = this.slider.getAttribute(`${ATTR_PREFIX}-trackbg`);
+        if (trackBg) {
+            this.slider.style.setProperty('--wt-rs-track-bg', trackBg);
+        }
     }
 
     initElements() {
@@ -298,6 +396,8 @@ class RangeSliderSimple {
                 this.shouldFormatNumber,
             );
         }
+
+        this.syncTrackFillPercents();
     }
 
     updateRightValues(value) {
@@ -332,6 +432,8 @@ class RangeSliderSimple {
                 this.defaultSuffix,
             );
         }
+
+        this.syncTrackFillPercents();
     }
 
     setupEventListeners() {
@@ -432,6 +534,15 @@ const initializeRangeSliderSimple = () => {
             const instance = new RangeSliderSimple(wrapper);
             window.webtricks.push({ RangeSliderSimple: instance });
         });
+
+        const bumpStyleOrder = () => {
+            const injectedStyle = document.getElementById('wt-rangeslidersimple-styles');
+            if (injectedStyle && document.head) {
+                document.head.appendChild(injectedStyle);
+            }
+        };
+        bumpStyleOrder();
+        setTimeout(bumpStyleOrder, 0);
     } catch (err) {
         console.error(`RangeSliderSimple initialization error: ${err.message}`);
     }

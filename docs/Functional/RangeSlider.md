@@ -50,6 +50,8 @@ Self-contained: **one** script tag. Use [jsDelivr](https://www.jsdelivr.com/) (n
 - `wt-rangeslider-max="100"` - Maximum value (default: 100)
 - `wt-rangeslider-steps="1"` - Step size (default: 1)
 
+Style the `[wt-rangeslider-element="range"]` bar in your CSS; examples often use **#3b82f6** for the fill. [RangeSliderSimple](./RangeSliderSimple.md) defaults its track fill to the same for visual parity.
+
 ### Optional Elements
 
 - `wt-rangeslider-range="from"` - Form input for start value
