@@ -1,5 +1,9 @@
 # RangeSliderSimple
 
+## Version
+
+Current version: **0.0.2** (pre-release — see banner in `Dist/Functional/RangeSliderSimple.js`; bump patch and this line when the script changes).
+
 ## Description
 
 `RangeSliderSimple` is a dual-handle range control built from two native `<input type="range">` elements. The draggable thumbs you see are the browser’s own controls, so hit targets stay aligned with the visuals. The file is **self-contained** (same core behavior as `RangeSlider`, inlined—keep edits in sync manually if you change constraint/display logic).

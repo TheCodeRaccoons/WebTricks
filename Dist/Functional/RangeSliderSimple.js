@@ -1,5 +1,6 @@
 /*!
  * WebTricks — RangeSliderSimple
+ * @version 0.0.2 — pre-release; bump patch (and docs/Functional/RangeSliderSimple.md) on every change to this file.
  * Dual native range inputs (no custom thumb DOM). Self-contained (single script tag).
  * MIT License
  */
