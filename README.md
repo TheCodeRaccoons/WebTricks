@@ -78,6 +78,21 @@ Multiple Scripts: Add as many scripts as you need to your project by referencing
 <script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/webtricks@1/dist/Functional/CMSFilter.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/webtricks@1/dist/Functional/FormCheck.min.js"></script>
 ```
+
+**Range sliders:** each script is **self-contained** (one tag). Use **`RangeSlider.js`** for custom thumbs or **`RangeSliderSimple.js`** for native thumbs only. Use jsDelivr (not raw `githubusercontent.com`, which often serves `text/plain` and blocks execution).
+
+```
+<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@main/Dist/Functional/RangeSlider.js"></script>
+```
+
+Native-thumb variant:
+
+```
+<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@main/Dist/Functional/RangeSliderSimple.js"></script>
+```
+
+If a page uses **both** slider types, you may include **both** scripts; they use separate attribute namespaces (`wt-rangeslider-*` vs `wt-rangeslidersimple-*`).
+
 Ready to Use: Once imported, the scripts initialize automatically, provided the correct HTML attributes are in place.
 
     

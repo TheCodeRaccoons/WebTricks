@@ -1,12 +1,15 @@
 # CMSFilter
 
 ## Version
+
 Current Version: 1.1.0
 
 ## Description
+
 CMSFilter is a powerful Webflow-specific script that provides advanced filtering capabilities for CMS collections. It supports multiple filter types, pagination, sorting, dynamic filtering with real-time updates, and performance optimizations including debounced input handling.
 
 ## Functionality
+
 - Multiple filter types (checkbox, radio, text, range)
 - Advanced filtering with dynamic availability updates
 - Pagination support with auto-loading across pages
@@ -24,20 +27,25 @@ CMSFilter is a powerful Webflow-specific script that provides advanced filtering
 - Custom pagination controls
 
 ## Usage
+
 Add the script to your Webflow project and include the required attributes on your filtering elements.
 
 ### Installation
+
 ```html
 <script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@1/Dist/WebflowOnly/CMSFilter.min.js"></script>
 ```
 
 ### Required Attributes
+
 - `wt-cmsfilter-element="filter-form"` - Applied to the form container
 - `wt-cmsfilter-element="list"` - Applied to the CMS list container
 - `wt-cmsfilter-category="category-name"` - Applied to filter inputs
 
 ### Optional Attributes
+
 #### Core Filter Attributes
+
 - `wt-cmsfilter-filtering="advanced"` - Enables advanced filtering mode with dynamic availability updates
 - `wt-cmsfilter-trigger="button"` - Changes filter trigger to button submit instead of real-time
 - `wt-cmsfilter-class="classname"` - CSS class applied to active filter elements
@@ -45,6 +53,7 @@ Add the script to your Webflow project and include the required attributes on yo
 - `wt-cmsfilter-debounce="300"` - Debounce delay in milliseconds for input events (default: 300ms)
 
 #### Pagination Attributes
+
 - `wt-cmsfilter-element="pagination-wrapper"` - Container for pagination controls (required for multi-page filtering)
 - `wt-cmsfilter-loadmode="paginate|load-all"` - Controls how items are loaded and displayed
 - `wt-cmsfilter-pagination="prev|next"` - Default Webflow pagination buttons
@@ -52,6 +61,7 @@ Add the script to your Webflow project and include the required attributes on yo
 - `wt-cmsfilter-element="page-count"` - Displays current page and total pages
 
 #### Additional Elements
+
 - `wt-cmsfilter-element="results-count"` - Shows the number of filtered results
 - `wt-cmsfilter-element="empty"` - Element shown when no results are found
 - `wt-cmsfilter-empty-max="n"` - Optional on the empty element; accepts positive whole integers only (`1+`) and shows empty block when filtered results are ≤ n. Missing, `0`, or invalid values default to `0` (show only when there are zero results; e.g. `wt-cmsfilter-empty-max="3"` shows at 3 or fewer). Valid: `1`, `2`, `3`. Invalid: `0`, `3.5`, `3px`, `-1`, `abc`.
@@ -62,13 +72,16 @@ Add the script to your Webflow project and include the required attributes on yo
 - `wt-cmsfilter-element="tag-remove"` - Remove button within tag template
 
 #### Range Filter Attributes
+
 - `wt-cmsfilter-range="from|to"` - Specifies range filter input type (minimum or maximum)
 - `wt-cmsfilter-default="value"` - Default value for range inputs (used for comparison)
 
 #### Tag Template Attributes
+
 - `wt-cmsfilter-tag-category="true|false"` - Whether to show category name in tags (default: true)
 
 ## Considerations
+
 1. **Initialization**: Automatically initializes when DOM is ready
 2. **Performance**: Optimized for large collections with pagination and debounced inputs
 3. **Compatibility**: Works with Webflow's native CMS and IX2
@@ -83,6 +96,7 @@ Add the script to your Webflow project and include the required attributes on yo
 ## Examples
 
 ### Basic Filter Implementation
+
 ```html
 <form wt-cmsfilter-element="filter-form" wt-cmsfilter-debounce="250">
     <!-- Checkbox filters -->
@@ -121,6 +135,7 @@ Add the script to your Webflow project and include the required attributes on yo
 ```
 
 ### Advanced Implementation with Pagination and Tags
+
 ```html
 <form wt-cmsfilter-element="filter-form" 
       wt-cmsfilter-filtering="advanced"
@@ -196,6 +211,7 @@ Add the script to your Webflow project and include the required attributes on yo
 ```
 
 ### Button-Triggered Filtering
+
 ```html
 <form wt-cmsfilter-element="filter-form" wt-cmsfilter-trigger="button">
     <!-- Filters -->
@@ -217,6 +233,7 @@ Add the script to your Webflow project and include the required attributes on yo
 ```
 
 ### Common Use Cases
+
 1. E-commerce product filtering with price ranges and categories
 2. Blog post categorization with tags and search
 3. Portfolio filtering by project type and skills
@@ -227,6 +244,7 @@ Add the script to your Webflow project and include the required attributes on yo
 8. Job board with location, salary, and category filters
 
 ### Performance Tips
+
 - Use debouncing for text inputs in large collections (adjust `wt-cmsfilter-debounce` value)
 - Enable pagination for collections with 50+ items
 - Use advanced filtering mode only when needed for better performance
@@ -234,7 +252,9 @@ Add the script to your Webflow project and include the required attributes on yo
 - Consider using button-triggered filtering for complex filter sets
 
 ### Data Attribute Requirements
+
 Your CMS items should include data attributes that match your filter categories. For example:
+
 ```html
 <div class="cms-item" data-category="electronics" data-price="299" data-brand="apple">
     <!-- Item content -->
@@ -242,11 +262,13 @@ Your CMS items should include data attributes that match your filter categories.
 ```
 
 ### JavaScript API
+
 Access the filter instance globally:
 
 > **Note:** The following example uses [optional chaining (`?.`)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining), which is supported in all modern browsers but **not** in Internet Explorer or some older browsers. If you need to support older browsers, use the alternative code below.
 
 **Modern browsers (with optional chaining):**
+
 ```javascript
 // Get the filter instance
 const filterInstance = window.webtricks.find(item => item.CMSFilter)?.CMSFilter;

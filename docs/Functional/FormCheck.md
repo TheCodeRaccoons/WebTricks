@@ -1,12 +1,15 @@
 # FormCheck
 
 ## Version
+
 Current Version: 1.0.0
 
 ## Description
+
 FormCheck is a comprehensive form validation script that provides real-time validation for form inputs with customizable error handling and submission behavior. It supports various input types including text, email, phone, number, and checkboxes.
 
 ## Functionality
+
 - Real-time input validation
 - Custom error messages
 - Email format validation
@@ -18,26 +21,31 @@ FormCheck is a comprehensive form validation script that provides real-time vali
 - Success message display
 
 ## Usage
+
 Add the script to your project and include the required attributes on your form and form elements.
 
 ### Installation
+
 ```html
 <script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@1/Dist/Functional/FormCheck.min.js"></script>
 ```
 
 ### Required Attributes
+
 - `wt-formcheck-element="form"` - Applied to the form element
 - `wt-formcheck-type="submit"` - Applied to the submit button
 - `wt-formcheck-type="required"` - Applied to required input fields
 - `wt-formcheck-type="error"` - Applied to error message elements
 
 ### Optional Attributes
+
 - `wt-formcheck-class="error-class"` - Custom error class for styling
 - `wt-formcheck-message="Success!"` - Custom success message
 - `wt-formcheck-element="default-submit"` - Default submit button (for CMS forms)
 - `wt-formcheck-element="reset"` - Form reset button
 
 ## Considerations
+
 1. **Error Display**: Error messages are hidden by default and shown on validation failure
 2. **Input Types**: Supports text, email, phone, number, and checkbox inputs
 3. **Real-time Validation**: Clears errors on input change or blur
@@ -47,6 +55,7 @@ Add the script to your project and include the required attributes on your form 
 ## Examples
 
 ### Basic Implementation
+
 ```html
 <form wt-formcheck-element="form" wt-formcheck-class="error">
     <!-- Text input with error message -->
@@ -67,6 +76,7 @@ Add the script to your project and include the required attributes on your form 
 ```
 
 ### Advanced Implementation
+
 ```html
 <form wt-formcheck-element="form" 
       wt-formcheck-class="error-state"
@@ -91,6 +101,7 @@ Add the script to your project and include the required attributes on your form 
 ```
 
 ### CSS Styling Example
+
 ```css
 /* Error state styling */
 .error-state {
@@ -106,6 +117,7 @@ Add the script to your project and include the required attributes on your form 
 ```
 
 ### Common Use Cases
+
 1. Contact forms
 2. Registration forms
 3. Newsletter signup

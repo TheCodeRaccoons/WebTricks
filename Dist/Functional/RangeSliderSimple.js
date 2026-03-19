@@ -1,18 +1,13 @@
 /*!
- * Webflow Utilities v1.1.0
- * Range Slider Module
- * A customizable, attribute-driven range slider that can be easily integrated into any HTML-based website.
- * (c) 2023 Jorge Cortez
+ * WebTricks — RangeSliderSimple
+ * Dual native range inputs (no custom thumb DOM). Self-contained (single script tag).
  * MIT License
- * https://github.com/JorchCortez/Weblfow-Trickery
- *
- * Self-contained: no separate shared script required (backward compatible with single-tag embeds).
  */
 
 'use strict';
 
-/** @private Core helpers (IIFE keeps globals clean if RangeSliderSimple.js is also on the page) */
-var __WT_RANGE_SLIDER_CORE = (function () {
+/** @private Duplicated core logic (same behavior as RangeSlider) so this file has no shared dependency. */
+var __WT_RANGE_SLIDER_SIMPLE_CORE = (function () {
     function validateNumber(value) {
         const num = parseFloat(value);
         if (isNaN(num)) {
@@ -141,24 +136,21 @@ var __WT_RANGE_SLIDER_CORE = (function () {
     };
 }());
 
-/**
- * @file RangeSlider.js
- * @description A customizable dual-handle range slider for selecting value ranges.
- *
- * For native-only handles (no custom thumbs), see RangeSliderSimple.js.
- */
+const ATTR_PREFIX = 'wt-rangeslidersimple';
 
 /**
- * @class RangeSlider
+ * Native dual-handle range slider; visible thumbs match browser hit targets.
  * @param {HTMLElement} wrapper
  */
-class RangeSlider {
+class RangeSliderSimple {
     constructor(wrapper) {
         try {
-            this.rs = __WT_RANGE_SLIDER_CORE;
+            this.rs = __WT_RANGE_SLIDER_SIMPLE_CORE;
 
             this.wrapper = wrapper;
-            this.slider = wrapper.querySelector('[wt-rangeslider-element="slider"]');
+            this.slider = wrapper.querySelector(
+                `[${ATTR_PREFIX}-element="slider"]`,
+            );
             this.__suspendExternalSync = false;
 
             if (!this.slider) {
@@ -171,68 +163,83 @@ class RangeSlider {
             this.initState();
             this.setupEventListeners();
         } catch (err) {
-            console.error(`RangeSlider initialization failed: ${err.message}`);
+            console.error(`RangeSliderSimple initialization failed: ${err.message}`);
         }
     }
 
     addStyles() {
-        const existing = document.getElementById('wt-rangeslider-styles');
+        const existing = document.getElementById('wt-rangeslidersimple-styles');
         if (existing) return;
 
         const style = document.createElement('style');
-        style.id = 'wt-rangeslider-styles';
+        style.id = 'wt-rangeslidersimple-styles';
         style.textContent = `
-    [wt-rangeslider-element="slider"] {
+    [${ATTR_PREFIX}-element="slider"] {
         position: relative;
+        min-height: 32px;
     }
 
-    [wt-rangeslider-element="input-left"],
-    [wt-rangeslider-element="input-right"] {
-        pointer-events: all;
+    [${ATTR_PREFIX}-element="input-left"],
+    [${ATTR_PREFIX}-element="input-right"] {
         position: absolute;
-        height: 0;
+        left: 0;
         width: 100%;
-        outline: none;
-        -webkit-appearance: none;
-        opacity: 0;
         top: 0;
         bottom: 0;
         margin: auto;
-    }
-    
-    [wt-rangeslider-element="input-left"]::-webkit-slider-thumb,
-    [wt-rangeslider-element="input-right"]::-webkit-slider-thumb {
+        height: 24px;
         -webkit-appearance: none;
-        width: var(--thumb-width, 20px);
-        height: var(--thumb-width, 20px);
-        pointer-events: all;
-        cursor: pointer;
-    }
-    
-    [wt-rangeslider-element="input-left"]::-moz-range-thumb,
-    [wt-rangeslider-element="input-right"]::-moz-range-thumb {
-        width: var(--thumb-width, 20px);
-        height: var(--thumb-width, 20px);
-        pointer-events: all;
-        cursor: pointer;
-        opacity: 0;
+        appearance: none;
+        background: transparent;
+        pointer-events: auto;
+        z-index: 2;
+        outline: none;
     }
 
-    [wt-rangeslider-element="thumb-left"],
-    [wt-rangeslider-element="thumb-right"] {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        margin: auto;
-        pointer-events: none;
-        will-change: transform;
+    [${ATTR_PREFIX}-element="input-right"] {
+        z-index: 1;
+    }
+
+    [${ATTR_PREFIX}-element="input-left"]::-webkit-slider-thumb,
+    [${ATTR_PREFIX}-element="input-right"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #222;
+        cursor: pointer;
+        pointer-events: auto;
+    }
+
+    [${ATTR_PREFIX}-element="input-left"]::-moz-range-thumb,
+    [${ATTR_PREFIX}-element="input-right"]::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #222;
+        cursor: pointer;
+        border: none;
+    }
+
+    [${ATTR_PREFIX}-element="input-left"]::-webkit-slider-runnable-track,
+    [${ATTR_PREFIX}-element="input-right"]::-webkit-slider-runnable-track {
+        height: 6px;
+        border-radius: 3px;
+        background: rgba(0, 0, 0, 0.12);
+    }
+
+    [${ATTR_PREFIX}-element="input-left"]::-moz-range-track,
+    [${ATTR_PREFIX}-element="input-right"]::-moz-range-track {
+        height: 6px;
+        border-radius: 3px;
+        background: rgba(0, 0, 0, 0.12);
     }
     `;
         document.head.appendChild(style);
     }
 
     initConfig() {
-        const cfg = this.rs.readSliderConfig(this.slider, 'wt-rangeslider');
+        const cfg = this.rs.readSliderConfig(this.slider, ATTR_PREFIX);
         this.sliderMin = cfg.sliderMin;
         this.sliderMax = cfg.sliderMax;
         this.sliderSteps = cfg.sliderSteps;
@@ -244,51 +251,25 @@ class RangeSlider {
 
     initElements() {
         this.rangeStart = this.wrapper.querySelector(
-            '[wt-rangeslider-range="from"]',
+            `[${ATTR_PREFIX}-range="from"]`,
         );
-        this.rangeEnd = this.wrapper.querySelector('[wt-rangeslider-range="to"]');
+        this.rangeEnd = this.wrapper.querySelector(`[${ATTR_PREFIX}-range="to"]`);
 
         this.displayStart = this.wrapper.querySelector(
-            '[wt-rangeslider-display="from"]',
+            `[${ATTR_PREFIX}-display="from"]`,
         );
         this.displayEnd = this.wrapper.querySelector(
-            '[wt-rangeslider-display="to"]',
+            `[${ATTR_PREFIX}-display="to"]`,
         );
 
         this.inputLeft = this.slider.querySelector(
-            '[wt-rangeslider-element="input-left"]',
+            `[${ATTR_PREFIX}-element="input-left"]`,
         );
         this.inputRight = this.slider.querySelector(
-            '[wt-rangeslider-element="input-right"]',
+            `[${ATTR_PREFIX}-element="input-right"]`,
         );
-        this.thumbLeft = this.slider.querySelector(
-            '[wt-rangeslider-element="thumb-left"]',
-        );
-        this.thumbRight = this.slider.querySelector(
-            '[wt-rangeslider-element="thumb-right"]',
-        );
-        this.range = this.slider.querySelector('[wt-rangeslider-element="range"]');
 
         this.validateRequiredElements();
-        this.setupThumbStyles();
-    }
-
-    setupThumbStyles() {
-        const setupThumb = (thumb, input) => {
-            const thumbWidth =
-                thumb.offsetWidth ||
-                parseInt(getComputedStyle(thumb).width, 10) ||
-                20;
-            input.style.setProperty('--thumb-width', `${thumbWidth}px`);
-
-            thumb.style.position = 'absolute';
-            thumb.style.pointerEvents = 'none';
-
-            this.slider.style.setProperty('--thumb-offset', `${thumbWidth / 2}px`);
-        };
-
-        setupThumb(this.thumbLeft, this.inputLeft);
-        setupThumb(this.thumbRight, this.inputRight);
     }
 
     initState() {
@@ -310,6 +291,16 @@ class RangeSlider {
             this.updateRightValues(this.rangeEnd.value);
         } else {
             this.updateRightValues(this.sliderMax);
+        }
+    }
+
+    bringInputToFront(which) {
+        if (which === 'left') {
+            this.inputLeft.style.zIndex = '3';
+            this.inputRight.style.zIndex = '1';
+        } else {
+            this.inputRight.style.zIndex = '3';
+            this.inputLeft.style.zIndex = '2';
         }
     }
 
@@ -341,13 +332,6 @@ class RangeSlider {
                 this.shouldFormatNumber,
             );
         }
-
-        this.updateThumbPosition(
-            this.inputLeft,
-            this.thumbLeft,
-            this.range,
-            'left',
-        );
     }
 
     updateRightValues(value) {
@@ -382,16 +366,15 @@ class RangeSlider {
                 this.defaultSuffix,
             );
         }
-
-        this.updateThumbPosition(
-            this.inputRight,
-            this.thumbRight,
-            this.range,
-            'right',
-        );
     }
 
     setupEventListeners() {
+        const onLeftPointer = () => this.bringInputToFront('left');
+        const onRightPointer = () => this.bringInputToFront('right');
+
+        this.inputLeft.addEventListener('pointerdown', onLeftPointer);
+        this.inputRight.addEventListener('pointerdown', onRightPointer);
+
         this.inputLeft.addEventListener('input', () => {
             this.updateLeftValues(this.inputLeft.value);
             if (this.rangeStart) {
@@ -439,23 +422,6 @@ class RangeSlider {
         }
     }
 
-    updateThumbPosition(input, thumb, range, side) {
-        const min = parseInt(input.min, 10);
-        const max = parseInt(input.max, 10);
-        const current = parseInt(input.value, 10);
-        const percent = ((current - min) / (max - min)) * 100;
-
-        if (side === 'left') {
-            thumb.style.left = `${percent}%`;
-            thumb.style.transform = 'translateX(-50%)';
-            range.style.left = `${percent}%`;
-        } else {
-            thumb.style.right = `${100 - percent}%`;
-            thumb.style.transform = 'translateX(50%)';
-            range.style.right = `${100 - percent}%`;
-        }
-    }
-
     setFrom(value) {
         this.updateLeftValues(value);
     }
@@ -477,9 +443,6 @@ class RangeSlider {
         const requiredElements = {
             inputLeft: this.inputLeft,
             inputRight: this.inputRight,
-            thumbLeft: this.thumbLeft,
-            thumbRight: this.thumbRight,
-            range: this.range,
         };
 
         Object.entries(requiredElements).forEach(([name, element]) => {
@@ -490,30 +453,33 @@ class RangeSlider {
     }
 }
 
-const initializeRangeSlider = () => {
+const initializeRangeSliderSimple = () => {
     try {
         window.webtricks = window.webtricks || [];
         const wrappers = document.querySelectorAll(
-            '[wt-rangeslider-element="slider-wrapper"]',
+            `[${ATTR_PREFIX}-element="slider-wrapper"]`,
         );
 
         if (!wrappers || wrappers.length === 0) return;
 
         wrappers.forEach((wrapper) => {
-            const instance = new RangeSlider(wrapper);
-            window.webtricks.push({ RangeSlider: instance });
+            const instance = new RangeSliderSimple(wrapper);
+            window.webtricks.push({ RangeSliderSimple: instance });
         });
     } catch (err) {
-        console.error(`RangeSlider initialization error: ${err.message}`);
+        console.error(`RangeSliderSimple initialization error: ${err.message}`);
     }
 };
 
 if (/complete|interactive|loaded/.test(document.readyState)) {
-    initializeRangeSlider();
+    initializeRangeSliderSimple();
 } else {
-    window.addEventListener('DOMContentLoaded', initializeRangeSlider);
+    window.addEventListener('DOMContentLoaded', initializeRangeSliderSimple);
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { RangeSlider, InitializeRangeSlider: initializeRangeSlider };
+    module.exports = {
+        RangeSliderSimple,
+        InitializeRangeSliderSimple: initializeRangeSliderSimple,
+    };
 }

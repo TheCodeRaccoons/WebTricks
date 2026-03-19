@@ -1,12 +1,17 @@
 # RangeSlider
 
 ## Version
+
 Current Version: 1.1.0
 
 ## Description
+
 RangeSlider is a highly customizable dual-handle range slider component that allows users to select value ranges. It provides real-time visual updates, form integration, and supports custom styling including SVG/image thumbnails.
 
+For **native browser thumbs only** (no custom thumb DOM), see [RangeSliderSimple](./RangeSliderSimple.md).
+
 ## Functionality
+
 - Dual handles for range selection
 - Real-time value updates
 - Form input integration
@@ -18,14 +23,19 @@ RangeSlider is a highly customizable dual-handle range slider component that all
 - Mobile-friendly interaction
 
 ## Usage
+
 Add the script to your project and include the required attributes and elements structure.
 
 ### Installation
+
+Self-contained: **one** script tag. Use [jsDelivr](https://www.jsdelivr.com/) (not raw GitHub URLs) so the MIME type is JavaScript.
+
 ```html
-<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@1/Dist/Functional/RangeSlider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@main/Dist/Functional/RangeSlider.js"></script>
 ```
 
 ### Required Attributes
+
 - `wt-rangeslider-element="slider-wrapper"` - Container element
 - `wt-rangeslider-element="slider"` - Main slider element
 - `wt-rangeslider-element="input-left"` - Left range input
@@ -35,17 +45,20 @@ Add the script to your project and include the required attributes and elements 
 - `wt-rangeslider-element="range"` - Range indicator element
 
 ### Optional Attributes
+
 - `wt-rangeslider-min="0"` - Minimum value (default: 0)
 - `wt-rangeslider-max="100"` - Maximum value (default: 100)
 - `wt-rangeslider-steps="1"` - Step size (default: 1)
 
 ### Optional Elements
+
 - `wt-rangeslider-range="from"` - Form input for start value
 - `wt-rangeslider-range="to"` - Form input for end value
 - `wt-rangeslider-display="from"` - Display element for start value
 - `wt-rangeslider-display="to"` - Display element for end value
 
 ## Considerations
+
 1. **Form Integration**: Automatically updates connected form inputs
 2. **Value Constraints**: Ensures left value never exceeds right value
 3. **Visual Updates**: Real-time updates of all connected elements
@@ -55,6 +68,7 @@ Add the script to your project and include the required attributes and elements 
 ## Examples
 
 ### Basic Implementation
+
 ```html
 <div wt-rangeslider-element="slider-wrapper">
     <!-- Display Elements -->
@@ -80,6 +94,7 @@ Add the script to your project and include the required attributes and elements 
 ```
 
 ### Custom Thumb Implementation
+
 ```html
 <div wt-rangeslider-element="slider-wrapper">
     <div wt-rangeslider-element="slider">
@@ -101,6 +116,7 @@ Add the script to your project and include the required attributes and elements 
 ```
 
 ### Common Use Cases
+
 1. Price range selectors
 2. Date range pickers
 3. Filter interfaces

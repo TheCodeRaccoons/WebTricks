@@ -1,12 +1,15 @@
 # ReadTime
 
 ## Version
+
 Current Version: 1.0.0
 
 ## Description
+
 ReadTime is a script that calculates and displays estimated reading time for articles or text content. It uses configurable words-per-minute rates and supports custom suffix formatting for the time display.
 
 ## Functionality
+
 - Automatic reading time calculation
 - Configurable words per minute rate
 - Custom suffix support
@@ -15,25 +18,30 @@ ReadTime is a script that calculates and displays estimated reading time for art
 - Automatic initialization
 
 ## Usage
+
 Add the script to your project and include the required attributes on your article container and display elements.
 
 ### Installation
+
 ```html
 <script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@1/Dist/Functional/ReadTime.min.js"></script>
 ```
 
 ### Required Attributes
+
 - `wt-readtime-element="article"` - Applied to the container with the text content
 - `wt-readtime-element="display"` - Applied to elements that will display the reading time
 
 ### Optional Attributes
+
 - `wt-readtime-words="225"` - Set custom words per minute (default: 225)
 - `wt-readtime-suffix="min read"` - Custom suffix for reading time
 - `wt-readtime-smallsuffix="Quick read"` - Custom text for content under 1 minute
 
 ## Considerations
+
 1. **Word Count**: Uses space-based word counting
-2. **Display Format**: 
+2. **Display Format**:
    - Under 1 minute: Shows "less than a minute" or custom smallsuffix
    - 1 minute: Shows "a minute"
    - Over 1 minute: Shows "X minutes" or custom suffix
@@ -44,6 +52,7 @@ Add the script to your project and include the required attributes on your artic
 ## Examples
 
 ### Basic Implementation
+
 ```html
 <article wt-readtime-element="article">
     <!-- Article content here -->
@@ -54,6 +63,7 @@ Add the script to your project and include the required attributes on your artic
 ```
 
 ### Custom Configuration
+
 ```html
 <article 
     wt-readtime-element="article"
@@ -73,6 +83,7 @@ Add the script to your project and include the required attributes on your artic
 ```
 
 ### Common Use Cases
+
 1. Blog post reading time estimates
 2. Article length indicators
 3. Content engagement metrics
