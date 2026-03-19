@@ -2,11 +2,11 @@
 
 ## Version
 
-Current version: **0.0.9** (pre-release — see banner in `Dist/Functional/RangeSliderSimple.js`; bump patch and this line when the script changes).
+Current version: **0.0.10** (pre-release — see banner in `Dist/Functional/RangeSliderSimple.js`; bump patch and this line when the script changes).
 
 ## Description
 
-`RangeSliderSimple` is a dual-handle range control built from two `<input type="range">` elements. The shared track uses default fill **#3b82f6** and unfilled background **#111**; override the latter with `wt-rangeslidersimple-trackbg` or CSS `--wt-rs-track-bg`. White circular thumbs with light border/shadow. Hit targets match the painted thumbs. The file is **self-contained** (same core behavior as `RangeSlider`, inlined—keep edits in sync manually if you change constraint/display logic).
+`RangeSliderSimple` is a dual-handle range control built from two `<input type="range">` elements. The shared track is a **solid rail** using **#111** by default (override with `wt-rangeslidersimple-trackbg` or `--wt-rs-track-bg`). To paint **#3b82f6** (or `trackfill`) **between** the two handles, add `wt-rangeslidersimple-rangehighlight="true"`. White circular thumbs with light border/shadow. The file is **self-contained** (same core behavior as `RangeSlider`, inlined—keep edits in sync manually if you change constraint/display logic).
 
 Use **`RangeSlider`** when you need custom thumb graphics or a separate range bar element. Use **`RangeSliderSimple`** when native appearance (plus your own CSS overrides) is enough.
 
@@ -40,8 +40,9 @@ Same semantics as `RangeSlider`, with the `wt-rangeslidersimple-` prefix:
 - `wt-rangeslidersimple-min`, `wt-rangeslidersimple-max`, `wt-rangeslidersimple-steps`
 - `wt-rangeslidersimple-mindifference`
 - `wt-rangeslidersimple-formatnumber`, `wt-rangeslidersimple-rightsuffix`, `wt-rangeslidersimple-defaultsuffix`
-- `wt-rangeslidersimple-trackfill` — optional CSS color for the filled portion of the track (default **#3b82f6**, aligned with common `RangeSlider` `[range]` bar examples)
-- `wt-rangeslidersimple-trackbg` — unfilled track / “rail” color (default **#111**; e.g. `#e5e7eb` for a light UI)
+- `wt-rangeslidersimple-trackbg` — rail color for the full shared track (default **#111**; e.g. `#e5e7eb` for a light UI)
+- `wt-rangeslidersimple-rangehighlight="true"` — when set, the segment **between** the two thumbs uses the fill color (below); when omitted, the rail is solid `trackbg` everywhere
+- `wt-rangeslidersimple-trackfill` — fill color for that between-handle segment when `rangehighlight` is enabled (default **#3b82f6**)
 
 ## Theming (CSS variables)
 
@@ -50,7 +51,7 @@ On `[wt-rangeslidersimple-element="slider"]` you can override:
 - `--wt-rs-track-fill`, `--wt-rs-track-bg`
 - `--wt-rs-thumb-bg`, `--wt-rs-thumb-border`, `--wt-rs-thumb-shadow`
 
-Injected styling approximates the default **MDN / Safari–Chrome** range look: one **shared** track is drawn on `[wt-rangeslidersimple-element="slider"]::before` (blue only **between** the two values) so neither native track paints over the other thumb. Both inputs use **transparent** tracks and ~**24px** round thumbs. Thumbs use `pointer-events: auto` only on the thumb pseudo-elements. When the two handles overlap, the last-pressed input is raised with `z-index` so one thumb remains grabbable.
+Injected styling: one **shared** track on `[wt-rangeslidersimple-element="slider"]::before` (solid rail by default); native tracks stay **transparent** so thumbs stack cleanly. ~**24px** round thumbs; `pointer-events: auto` only on thumb pseudos. When the two handles overlap, the last-pressed input gets a higher `z-index`.
 
 ## Optional elements (inside wrapper)
 

@@ -1,6 +1,6 @@
 /*!
  * WebTricks — RangeSliderSimple
- * @version 0.0.9 — pre-release; bump patch (and docs/Functional/RangeSliderSimple.md) on every change to this file.
+ * @version 0.0.10 — pre-release; bump patch (and docs/Functional/RangeSliderSimple.md) on every change to this file.
  * Dual native range inputs (no custom thumb DOM). Self-contained (single script tag).
  * MIT License
  */
@@ -175,8 +175,7 @@ class RangeSliderSimple {
 
         const style = document.createElement('style');
         style.id = 'wt-rangeslidersimple-styles';
-        /* Shared track on ::before so neither input's track paints over the other thumb.
-           Default unfilled track #111; override wt-rangeslidersimple-trackbg or --wt-rs-track-bg. */
+        /* Shared track on ::before. Default: solid rail (--wt-rs-track-bg). Optional rangehighlight paints fill between thumbs. */
         style.textContent = `
     [${ATTR_PREFIX}-element="slider"] {
         --wt-rs-track-fill: #3b82f6;
@@ -208,6 +207,10 @@ class RangeSliderSimple {
         pointer-events: none;
         z-index: 0;
         box-sizing: border-box;
+        background: var(--wt-rs-track-bg, #111);
+    }
+
+    [${ATTR_PREFIX}-element="slider"][${ATTR_PREFIX}-rangehighlight="true"]::before {
         background: linear-gradient(
             to right,
             var(--wt-rs-track-bg, #111) 0%,
