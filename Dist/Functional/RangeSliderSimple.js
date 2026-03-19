@@ -173,10 +173,12 @@ class RangeSliderSimple {
 
         const style = document.createElement('style');
         style.id = 'wt-rangeslidersimple-styles';
+        /* Layout only: no appearance:none or ::-webkit-slider-* / ::-moz-range-* so thumbs/tracks stay browser-default. */
         style.textContent = `
     [${ATTR_PREFIX}-element="slider"] {
         position: relative;
-        min-height: 32px;
+        min-height: 2.75rem;
+        box-sizing: border-box;
     }
 
     [${ATTR_PREFIX}-element="input-left"],
@@ -184,55 +186,18 @@ class RangeSliderSimple {
         position: absolute;
         left: 0;
         width: 100%;
-        top: 0;
-        bottom: 0;
-        margin: auto;
-        height: 24px;
-        -webkit-appearance: none;
-        appearance: none;
-        background: transparent;
+        max-width: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
         pointer-events: auto;
         z-index: 2;
-        outline: none;
     }
 
     [${ATTR_PREFIX}-element="input-right"] {
         z-index: 1;
-    }
-
-    [${ATTR_PREFIX}-element="input-left"]::-webkit-slider-thumb,
-    [${ATTR_PREFIX}-element="input-right"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        background: #222;
-        cursor: pointer;
-        pointer-events: auto;
-    }
-
-    [${ATTR_PREFIX}-element="input-left"]::-moz-range-thumb,
-    [${ATTR_PREFIX}-element="input-right"]::-moz-range-thumb {
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        background: #222;
-        cursor: pointer;
-        border: none;
-    }
-
-    [${ATTR_PREFIX}-element="input-left"]::-webkit-slider-runnable-track,
-    [${ATTR_PREFIX}-element="input-right"]::-webkit-slider-runnable-track {
-        height: 6px;
-        border-radius: 3px;
-        background: rgba(0, 0, 0, 0.12);
-    }
-
-    [${ATTR_PREFIX}-element="input-left"]::-moz-range-track,
-    [${ATTR_PREFIX}-element="input-right"]::-moz-range-track {
-        height: 6px;
-        border-radius: 3px;
-        background: rgba(0, 0, 0, 0.12);
     }
     `;
         document.head.appendChild(style);
