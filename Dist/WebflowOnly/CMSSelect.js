@@ -22,9 +22,9 @@ class CMSSelect {
         try {
             this.options.forEach(opt => {
                 const value = opt.getAttribute('wt-cmsselect-value');
-                const text = opt.innerText;
-                
-                if (text && text.trim() !== "") {
+                const text = (opt.textContent || opt.innerText || '').trim();
+
+                if (text !== '') {
                     const option = new Option(text, value || text);
                     this.selectElement.add(option);
                 }

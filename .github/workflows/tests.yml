@@ -32,14 +32,34 @@ jobs:
         run: npx jest --runInBand --coverage --coverageReporters=text-summary --coverageReporters=lcov --coverageReporters=json-summary
 
       - name: Upload coverage artifact
-        if: always()
+        if: always() && hashFiles('coverage/coverage-summary.json') != ''
         uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: coverage/**
 
       - name: Add coverage summary to job summary
-        if: always()
+        if: always() && hashFiles('coverage/coverage-summary.json') != ''
         shell: bash
         run: |
-          node -e "const fs=require('fs');const p='coverage/coverage-summary.json';if(fs.existsSync(p)){const s=JSON.parse(fs.readFileSync(p,'utf8'));const t=(o)=>o.total;const c=t(s);const md=\`## Coverage summary\\n\\n- Statements: \${c.statements.pct}% (\${c.statements.covered}/\${c.statements.total})\\n- Branches: \${c.branches.pct}% (\${c.branches.covered}/\${c.branches.total})\\n- Functions: \${c.functions.pct}% (\${c.functions.covered}/\${c.functions.total})\\n- Lines: \${c.lines.pct}% (\${c.lines.covered}/\${c.lines.total})\\n\`;fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);}else{console.log('coverage-summary.json not found')}}"
+          node <<'NODE'
+          const fs = require('fs');
+          const p = 'coverage/coverage-summary.json';
+          const out = process.env.GITHUB_STEP_SUMMARY;
+          if (!out) {
+            console.log('GITHUB_STEP_SUMMARY not set; skipping');
+            process.exit(0);
+          }
+          const s = JSON.parse(fs.readFileSync(p, 'utf8'));
+          const c = s.total;
+          const lines = [
+            '## Coverage summary',
+            '',
+            `- Statements: ${c.statements.pct}% (${c.statements.covered}/${c.statements.total})`,
+            `- Branches: ${c.branches.pct}% (${c.branches.covered}/${c.branches.total})`,
+            `- Functions: ${c.functions.pct}% (${c.functions.covered}/${c.functions.total})`,
+            `- Lines: ${c.lines.pct}% (${c.lines.covered}/${c.lines.total})`,
+            '',
+          ];
+          fs.appendFileSync(out, lines.join('\n'));
+          NODE
