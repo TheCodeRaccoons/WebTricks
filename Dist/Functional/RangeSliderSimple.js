@@ -1,6 +1,6 @@
 /*!
  * WebTricks — RangeSliderSimple
- * @version 0.0.7 — pre-release; bump patch (and docs/Functional/RangeSliderSimple.md) on every change to this file.
+ * @version 0.0.8 — pre-release; bump patch (and docs/Functional/RangeSliderSimple.md) on every change to this file.
  * Dual native range inputs (no custom thumb DOM). Self-contained (single script tag).
  * MIT License
  */
@@ -175,16 +175,19 @@ class RangeSliderSimple {
 
         const style = document.createElement('style');
         style.id = 'wt-rangeslidersimple-styles';
-        /* MDN-like range UI (Chrome docs): blue filled track, grey remainder, white pill thumb.
-           --wt-rs-track-fill defaults to #3b82f6 (typical RangeSlider [range] bar in docs). */
+        /* Shared track on ::before so neither input's track paints over the other thumb.
+           Thumbs-only on inputs (Safari/Chrome); size ~24px to match common native macOS range. */
         style.textContent = `
     [${ATTR_PREFIX}-element="slider"] {
         --wt-rs-track-fill: #3b82f6;
         --wt-rs-track-bg: #e5e7eb;
         --wt-rs-thumb-bg: #ffffff;
-        --wt-rs-thumb-border: #cbd5e1;
-        --wt-rs-thumb-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        --wt-rs-thumb-border: #aeb6c2;
+        --wt-rs-thumb-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.18);
+        --wt-rs-range-from: 0%;
+        --wt-rs-range-to: 100%;
         position: relative;
+        isolation: isolate;
         display: grid;
         grid-template-columns: 1fr;
         grid-template-rows: 1fr;
@@ -194,13 +197,35 @@ class RangeSliderSimple {
         box-sizing: border-box;
     }
 
+    [${ATTR_PREFIX}-element="slider"]::before {
+        content: "";
+        grid-column: 1;
+        grid-row: 1;
+        align-self: center;
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        pointer-events: none;
+        z-index: 0;
+        box-sizing: border-box;
+        background: linear-gradient(
+            to right,
+            var(--wt-rs-track-bg, #e5e7eb) 0%,
+            var(--wt-rs-track-bg, #e5e7eb) var(--wt-rs-range-from, 0%),
+            var(--wt-rs-track-fill, #3b82f6) var(--wt-rs-range-from, 0%),
+            var(--wt-rs-track-fill, #3b82f6) var(--wt-rs-range-to, 100%),
+            var(--wt-rs-track-bg, #e5e7eb) var(--wt-rs-range-to, 100%),
+            var(--wt-rs-track-bg, #e5e7eb) 100%
+        );
+    }
+
     input[type="range"][${ATTR_PREFIX}-element="input-left"],
     input[type="range"][${ATTR_PREFIX}-element="input-right"] {
         --wt-rs-track-fill: #3b82f6;
         --wt-rs-track-bg: #e5e7eb;
         --wt-rs-thumb-bg: #ffffff;
-        --wt-rs-thumb-border: #cbd5e1;
-        --wt-rs-thumb-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+        --wt-rs-thumb-border: #aeb6c2;
+        --wt-rs-thumb-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.18);
         grid-column: 1;
         grid-row: 1;
         width: 100%;
@@ -211,17 +236,12 @@ class RangeSliderSimple {
         pointer-events: none;
         accent-color: transparent;
         z-index: 2;
-        height: 1.5rem;
-        min-height: 1.5rem;
+        height: 1.75rem;
+        min-height: 1.75rem;
         background: transparent;
         -webkit-appearance: none !important;
         appearance: none !important;
         -moz-appearance: none !important;
-    }
-
-    /* Later sibling paints on top; keep right above left when thumbs overlap. */
-    input[type="range"][${ATTR_PREFIX}-element="input-right"] {
-        z-index: 3;
     }
 
     input[type="range"][${ATTR_PREFIX}-element="input-left"]::-webkit-slider-runnable-track,
@@ -229,13 +249,8 @@ class RangeSliderSimple {
         pointer-events: none;
         height: 6px;
         border-radius: 3px;
-        background: linear-gradient(
-            to right,
-            var(--wt-rs-track-fill, #3b82f6) 0%,
-            var(--wt-rs-track-fill, #3b82f6) var(--wt-rs-pct, 0%),
-            var(--wt-rs-track-bg, #e5e7eb) var(--wt-rs-pct, 0%),
-            var(--wt-rs-track-bg, #e5e7eb) 100%
-        );
+        background: transparent;
+        border: none;
     }
 
     input[type="range"][${ATTR_PREFIX}-element="input-left"]::-webkit-slider-thumb,
@@ -244,13 +259,13 @@ class RangeSliderSimple {
         pointer-events: auto;
         position: relative;
         z-index: 1;
-        width: 16px;
-        height: 16px;
-        margin-top: -5px;
+        width: 24px;
+        height: 24px;
+        margin-top: -9px;
         border-radius: 50%;
         background: var(--wt-rs-thumb-bg, #ffffff) !important;
-        border: 1px solid var(--wt-rs-thumb-border, #cbd5e1) !important;
-        box-shadow: var(--wt-rs-thumb-shadow, 0 1px 3px rgba(0, 0, 0, 0.12)) !important;
+        border: 1px solid var(--wt-rs-thumb-border, #aeb6c2) !important;
+        box-shadow: var(--wt-rs-thumb-shadow, 0 0 0 1px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.18)) !important;
         cursor: pointer;
     }
 
@@ -259,7 +274,7 @@ class RangeSliderSimple {
         pointer-events: none;
         height: 6px;
         border-radius: 3px;
-        background: var(--wt-rs-track-bg, #e5e7eb);
+        background: transparent;
         border: none;
     }
 
@@ -268,19 +283,19 @@ class RangeSliderSimple {
         pointer-events: none;
         height: 6px;
         border-radius: 3px;
-        background: var(--wt-rs-track-fill, #3b82f6);
+        background: transparent;
         border: none;
     }
 
     input[type="range"][${ATTR_PREFIX}-element="input-left"]::-moz-range-thumb,
     input[type="range"][${ATTR_PREFIX}-element="input-right"]::-moz-range-thumb {
         pointer-events: auto;
-        width: 16px;
-        height: 16px;
+        width: 24px;
+        height: 24px;
         border-radius: 50%;
         background: var(--wt-rs-thumb-bg, #ffffff) !important;
-        border: 1px solid var(--wt-rs-thumb-border, #cbd5e1) !important;
-        box-shadow: var(--wt-rs-thumb-shadow, 0 1px 3px rgba(0, 0, 0, 0.12)) !important;
+        border: 1px solid var(--wt-rs-thumb-border, #aeb6c2) !important;
+        box-shadow: var(--wt-rs-thumb-shadow, 0 0 0 1px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.18)) !important;
         cursor: pointer;
     }
 
@@ -294,18 +309,20 @@ class RangeSliderSimple {
     }
 
     syncTrackFillPercents() {
-        if (!this.inputLeft || !this.inputRight) return;
-        [this.inputLeft, this.inputRight].forEach((input) => {
-            const min = parseInt(input.min, 10);
-            const max = parseInt(input.max, 10);
-            const val = parseInt(input.value, 10);
-            const safeMin = Number.isFinite(min) ? min : 0;
-            const safeMax = Number.isFinite(max) ? max : 100;
-            const safeVal = Number.isFinite(val) ? val : safeMin;
-            const pct =
-                safeMax <= safeMin ? 0 : ((safeVal - safeMin) / (safeMax - safeMin)) * 100;
-            input.style.setProperty('--wt-rs-pct', `${pct}%`);
-        });
+        if (!this.slider || !this.inputLeft || !this.inputRight) return;
+        const min = parseInt(this.inputLeft.min, 10);
+        const max = parseInt(this.inputLeft.max, 10);
+        const safeMin = Number.isFinite(min) ? min : 0;
+        const safeMax = Number.isFinite(max) ? max : 100;
+        const span = safeMax <= safeMin ? 1 : safeMax - safeMin;
+        const leftVal = parseInt(this.inputLeft.value, 10);
+        const rightVal = parseInt(this.inputRight.value, 10);
+        const safeL = Number.isFinite(leftVal) ? leftVal : safeMin;
+        const safeR = Number.isFinite(rightVal) ? rightVal : safeMax;
+        const pctFrom = ((safeL - safeMin) / span) * 100;
+        const pctTo = ((safeR - safeMin) / span) * 100;
+        this.slider.style.setProperty('--wt-rs-range-from', `${pctFrom}%`);
+        this.slider.style.setProperty('--wt-rs-range-to', `${pctTo}%`);
     }
 
     /** WebKit range pseudos resolve theme vars on the input; copy from slider after config. */
@@ -397,7 +414,7 @@ class RangeSliderSimple {
     bringInputToFront(which) {
         if (which === 'left') {
             this.inputLeft.style.zIndex = '10';
-            this.inputRight.style.zIndex = '3';
+            this.inputRight.style.zIndex = '2';
         } else {
             this.inputRight.style.zIndex = '10';
             this.inputLeft.style.zIndex = '2';

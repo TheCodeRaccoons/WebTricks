@@ -2,7 +2,7 @@
 
 ## Version
 
-Current version: **0.0.7** (pre-release — see banner in `Dist/Functional/RangeSliderSimple.js`; bump patch and this line when the script changes).
+Current version: **0.0.8** (pre-release — see banner in `Dist/Functional/RangeSliderSimple.js`; bump patch and this line when the script changes).
 
 ## Description
 
@@ -50,7 +50,7 @@ On `[wt-rangeslidersimple-element="slider"]` you can override:
 - `--wt-rs-track-fill`, `--wt-rs-track-bg`
 - `--wt-rs-thumb-bg`, `--wt-rs-thumb-border`, `--wt-rs-thumb-shadow`
 
-Injected styling approximates the default **MDN / Chrome** range look (white round thumb, blue progress, grey track). Thumbs use `pointer-events: auto` only on the thumb pseudo-elements so stacked inputs do not block each other (same idea as `RangeSlider.js`).
+Injected styling approximates the default **MDN / Safari–Chrome** range look: one **shared** track is drawn on `[wt-rangeslidersimple-element="slider"]::before` (blue only **between** the two values) so neither native track paints over the other thumb. Both inputs use **transparent** tracks and ~**24px** round thumbs. Thumbs use `pointer-events: auto` only on the thumb pseudo-elements. When the two handles overlap, the last-pressed input is raised with `z-index` so one thumb remains grabbable.
 
 ## Optional elements (inside wrapper)
 
