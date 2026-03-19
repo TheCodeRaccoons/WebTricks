@@ -1,6 +1,6 @@
 /*!
  * WebTricks — RangeSliderSimple
- * @version 0.0.5 — pre-release; bump patch (and docs/Functional/RangeSliderSimple.md) on every change to this file.
+ * @version 0.0.6 — pre-release; bump patch (and docs/Functional/RangeSliderSimple.md) on every change to this file.
  * Dual native range inputs (no custom thumb DOM). Self-contained (single script tag).
  * MIT License
  */
@@ -161,6 +161,7 @@ class RangeSliderSimple {
             this.addStyles();
             this.initConfig();
             this.initElements();
+            this.syncThemeVarsFromSliderToInputs();
             this.initState();
             this.setupEventListeners();
         } catch (err) {
@@ -170,7 +171,7 @@ class RangeSliderSimple {
 
     addStyles() {
         const existing = document.getElementById('wt-rangeslidersimple-styles');
-        if (existing) return;
+        if (existing) existing.remove();
 
         const style = document.createElement('style');
         style.id = 'wt-rangeslidersimple-styles';
@@ -195,6 +196,11 @@ class RangeSliderSimple {
 
     input[type="range"][${ATTR_PREFIX}-element="input-left"],
     input[type="range"][${ATTR_PREFIX}-element="input-right"] {
+        --wt-rs-track-fill: #3b82f6;
+        --wt-rs-track-bg: #e5e7eb;
+        --wt-rs-thumb-bg: #ffffff;
+        --wt-rs-thumb-border: #cbd5e1;
+        --wt-rs-thumb-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
         grid-column: 1;
         grid-row: 1;
         width: 100%;
@@ -222,10 +228,10 @@ class RangeSliderSimple {
         border-radius: 3px;
         background: linear-gradient(
             to right,
-            var(--wt-rs-track-fill) 0%,
-            var(--wt-rs-track-fill) var(--wt-rs-pct, 0%),
-            var(--wt-rs-track-bg) var(--wt-rs-pct, 0%),
-            var(--wt-rs-track-bg) 100%
+            var(--wt-rs-track-fill, #3b82f6) 0%,
+            var(--wt-rs-track-fill, #3b82f6) var(--wt-rs-pct, 0%),
+            var(--wt-rs-track-bg, #e5e7eb) var(--wt-rs-pct, 0%),
+            var(--wt-rs-track-bg, #e5e7eb) 100%
         );
     }
 
@@ -236,9 +242,9 @@ class RangeSliderSimple {
         height: 16px;
         margin-top: -5px;
         border-radius: 8px;
-        background: var(--wt-rs-thumb-bg);
-        border: 1px solid var(--wt-rs-thumb-border);
-        box-shadow: var(--wt-rs-thumb-shadow);
+        background: var(--wt-rs-thumb-bg, #ffffff);
+        border: 1px solid var(--wt-rs-thumb-border, #cbd5e1);
+        box-shadow: var(--wt-rs-thumb-shadow, 0 1px 2px rgba(0, 0, 0, 0.08));
         cursor: pointer;
     }
 
@@ -246,7 +252,7 @@ class RangeSliderSimple {
     input[type="range"][${ATTR_PREFIX}-element="input-right"]::-moz-range-track {
         height: 6px;
         border-radius: 3px;
-        background: var(--wt-rs-track-bg);
+        background: var(--wt-rs-track-bg, #e5e7eb);
         border: none;
     }
 
@@ -254,7 +260,7 @@ class RangeSliderSimple {
     input[type="range"][${ATTR_PREFIX}-element="input-right"]::-moz-range-progress {
         height: 6px;
         border-radius: 3px;
-        background: var(--wt-rs-track-fill);
+        background: var(--wt-rs-track-fill, #3b82f6);
         border: none;
     }
 
@@ -263,15 +269,15 @@ class RangeSliderSimple {
         width: 12px;
         height: 16px;
         border-radius: 8px;
-        background: var(--wt-rs-thumb-bg);
-        border: 1px solid var(--wt-rs-thumb-border);
-        box-shadow: var(--wt-rs-thumb-shadow);
+        background: var(--wt-rs-thumb-bg, #ffffff);
+        border: 1px solid var(--wt-rs-thumb-border, #cbd5e1);
+        box-shadow: var(--wt-rs-thumb-shadow, 0 1px 2px rgba(0, 0, 0, 0.08));
         cursor: pointer;
     }
 
     input[type="range"][${ATTR_PREFIX}-element="input-left"]:focus-visible,
     input[type="range"][${ATTR_PREFIX}-element="input-right"]:focus-visible {
-        outline: 2px solid var(--wt-rs-track-fill);
+        outline: 2px solid var(--wt-rs-track-fill, #3b82f6);
         outline-offset: 2px;
     }
     `;
@@ -290,6 +296,27 @@ class RangeSliderSimple {
             const pct =
                 safeMax <= safeMin ? 0 : ((safeVal - safeMin) / (safeMax - safeMin)) * 100;
             input.style.setProperty('--wt-rs-pct', `${pct}%`);
+        });
+    }
+
+    /** WebKit range pseudos resolve theme vars on the input; copy from slider after config. */
+    syncThemeVarsFromSliderToInputs() {
+        if (!this.slider || !this.inputLeft || !this.inputRight) return;
+        const names = [
+            '--wt-rs-track-fill',
+            '--wt-rs-track-bg',
+            '--wt-rs-thumb-bg',
+            '--wt-rs-thumb-border',
+            '--wt-rs-thumb-shadow',
+        ];
+        const cs = getComputedStyle(this.slider);
+        names.forEach((name) => {
+            const val = cs.getPropertyValue(name);
+            if (val && val.trim()) {
+                const v = val.trim();
+                this.inputLeft.style.setProperty(name, v);
+                this.inputRight.style.setProperty(name, v);
+            }
         });
     }
 

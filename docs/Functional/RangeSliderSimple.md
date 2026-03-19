@@ -2,7 +2,7 @@
 
 ## Version
 
-Current version: **0.0.5** (pre-release — see banner in `Dist/Functional/RangeSliderSimple.js`; bump patch and this line when the script changes).
+Current version: **0.0.6** (pre-release — see banner in `Dist/Functional/RangeSliderSimple.js`; bump patch and this line when the script changes).
 
 ## Description
 
