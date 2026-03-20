@@ -15,10 +15,7 @@
 		<img alt="GitHub repository stars" src="https://img.shields.io/github/stars/TheCodeRaccoons/WebTricks?color=%2360be86&label=github%20stars&style=for-the-badge">
 	</a>
 	<a href="#">
-		<img alt="GitHub License" src="https://img.shields.io/github/license/TheCodeRaccoons/WebTricks?color=%2360be86&style=for-the-badge">
-	</a>
-	<a href="#">
-		<img alt="Static Badge" src="https://img.shields.io/badge/monthly_hits-28k-a?color=%2360be86&style=for-the-badge">
+		<img alt="Static Badge" src="https://img.shields.io/badge/monthly_hits-30k-a?color=%2360be86&style=for-the-badge">
 	</a>
 </p>
 <br />
@@ -63,7 +60,8 @@ All of the documentation is explained by functionality in <a href="https://theco
 	This being said even though most of this functionalities are built for Webflow, there's many that can be used in any other web project and platform. Feel free to see the full <a href="https://coderacoons.webflow.io/webtricks">documentation</a> in my site for the complete list of functionalities and scripts available.
 </p>
 <sub>
-   WebTricks might have been started as a personal project, but I'm a believer that a project for the comunity by the comunity can offer way more value than any single dev could provide so feel free to contribute to this project and use any solution here.
+   WebTricks might have been started as a personal project, but I'm a believer that a project for the comunity by the comunity can offer way more value than any single dev could provide so feel free to contribute to this project and use any solution here. <br>
+	You can <a href="https://www.thecoderaccoons.com/webtricks">follow development and news here</a>
 </sub>
 
 <h2 id="getting-started">Getting Started</h2>
@@ -80,6 +78,23 @@ Multiple Scripts: Add as many scripts as you need to your project by referencing
 <script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/webtricks@1/dist/Functional/CMSFilter.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/webtricks@1/dist/Functional/FormCheck.min.js"></script>
 ```
+
+**Range sliders:** each script is **self-contained** (one tag). Use **`RangeSlider.js`** for custom thumbs or **`RangeSliderSimple.js`** for native thumbs only. Use jsDelivr (not raw `githubusercontent.com`, which often serves `text/plain` and blocks execution). The URLs below use **`@1`**, same as the other jsDelivr examples in this README—**not `@main`**, so embeds stay on a stable major ref.
+
+```
+<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@1/Dist/Functional/RangeSlider.js"></script>
+```
+
+Native-thumb variant (`RangeSliderSimple` is **1.0.0** in source):
+
+```
+<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@1/Dist/Functional/RangeSliderSimple.js"></script>
+```
+
+For a **stricter** pin, use a [release tag](https://github.com/TheCodeRaccoons/WebTricks/releases) (e.g. `@v1.1.0` for RangeSlider, `@v1.0.0` for RangeSliderSimple) or a **commit SHA**.
+
+If a page uses **both** slider types, you may include **both** scripts; they use separate attribute namespaces (`wt-rangeslider-*` vs `wt-rangeslidersimple-*`).
+
 Ready to Use: Once imported, the scripts initialize automatically, provided the correct HTML attributes are in place.
 
     
@@ -129,12 +144,44 @@ All official releases shall be in <code>master</code>. Any updates in between (u
 After a pull request has been open for over 30 days with no activity or response from the author, it'll be automatically marked as stale. We might fork your changes and merge the changes ourselves. Since GitHub tracks contributions by commits, you will be credited.
 </p>
 <br/>
+
+<h2 id="contributors">Our Contributors</h2>
+<p>
+	The community supports this project; huge thanks to everyone who has made this possible!
+</p>
+
+<!-- readme: contributors -start -->
+<table>
+	<tbody>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/JorchCortez">
+                    <img src="https://avatars.githubusercontent.com/u/14006732?v=4" width="80;" alt="JorchCortez"/>
+                    <br />
+                    <sub><b>JorchCortez</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/matthewcsimpson">
+                    <img src="https://avatars.githubusercontent.com/u/109487898?v=4" width="80;" alt="matthewcsimpson"/>
+                    <br />
+                    <sub><b>matthewcsimpson</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/Likhithakathireddy">
+                    <img src="https://avatars.githubusercontent.com/u/112922724?v=4" width="80;" alt="Likhithakathireddy"/>
+                    <br />
+                    <sub><b>Likhithakathireddy</b></sub>
+                </a>
+            </td>
+		</tr>
+	<tbody>
+</table>
+<!-- readme: contributors -end -->
+
 <div align="center">
     <img src="https://forthebadge.com/images/badges/built-with-love.svg" />
     <img src="https://forthebadge.com/images/badges/built-by-developers.svg" />
 </div>
 
-
-
-### Disclaimer
-Even though this project has Webflow on its name I'm by no means part of the webflow team, just a dev sharing a bit of the work I've done over the years and trying to help out others looking for easier ways to build for the web.

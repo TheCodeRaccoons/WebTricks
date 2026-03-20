@@ -75,6 +75,17 @@ Testing
   - Test your changes thoroughly before submitting.
   - Add examples in the examples/ folder for any new functionality.
 ---
+
+## Contributors
+This project is made possible by:
+
+The contributor list (avatars + profile links) in `README.md` is updated automatically after merges to `main` via a GitHub Action. To appear there:
+1. Make at least one merged commit to the `main` branch (directly or via PR merge).
+2. Ensure your GitHub profile has a public avatar (default works fine).
+
+Inactive or bot accounts may be filtered out automatically.
+
+
 ## Join the Discussion
 Participate in ongoing discussions in [GitHub Discussions](https://github.com/TheCodeRaccoons/WebTricks/discussions).
 Share your feedback, ideas, and improvements.

@@ -1,12 +1,15 @@
 # MirrorClick
 
 ## Version
+
 Current Version: 1.0.0
 
 ## Description
+
 MirrorClick is a Webflow-specific script that allows you to mirror click events from one element to another. When a trigger element is clicked, it automatically triggers a click event on a corresponding target element. This is particularly useful for creating synchronized interactions or controlling multiple elements with a single click.
 
 ## Functionality
+
 - Mirrors click events from trigger elements to target elements
 - Supports multiple trigger-target pairs
 - Automatic initialization on page load
@@ -14,19 +17,24 @@ MirrorClick is a Webflow-specific script that allows you to mirror click events 
 - No interference with other click handlers
 
 ## Usage
+
 Add the script to your Webflow project and include the required attributes on your trigger and target elements.
 
 ### Installation
+
 ```html
 <script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@1/Dist/WebflowOnly/MirrorClick.min.js"></script>
 ```
 
 ### Required Attributes
+
 For a single pair:
+
 - `wt-mirrorclick-element="trigger"` - Applied to the element that will trigger the click
 - `wt-mirrorclick-element="target"` - Applied to the element that will receive the mirrored click
 
 For multiple pairs:
+
 - `wt-mirrorclick-element="trigger-1"` - Applied to the first trigger element
 - `wt-mirrorclick-element="target-1"` - Applied to the first target element
 - `wt-mirrorclick-element="trigger-2"` - Applied to the second trigger element
@@ -34,6 +42,7 @@ For multiple pairs:
 (And so on for additional pairs)
 
 ## Considerations
+
 1. **Event Propagation**: The mirrored click is a genuine click event on the target element
 2. **Error Handling**: Gracefully handles missing or incorrect target elements
 3. **Multiple Instances**: Supports multiple trigger-target pairs on the same page
@@ -43,6 +52,7 @@ For multiple pairs:
 ## Examples
 
 ### Basic Implementation
+
 ```html
 <!-- Single pair example -->
 <button wt-mirrorclick-element="trigger">Click Me</button>
@@ -50,6 +60,7 @@ For multiple pairs:
 ```
 
 ### Multiple Pairs Implementation
+
 ```html
 <!-- Multiple pairs example -->
 <button wt-mirrorclick-element="trigger-1">Trigger 1</button>
@@ -60,6 +71,7 @@ For multiple pairs:
 ```
 
 ### Common Use Cases
+
 1. Synchronized tab switching
 2. Multiple button controls
 3. Hidden element triggering

@@ -1,0 +1,123 @@
+/** @jest-environment jsdom */
+
+Object.defineProperty(document, 'readyState', { value: 'loading', configurable: true });
+
+describe('RangeSlider', () => {
+    let RangeSlider;
+    let InitializeRangeSlider;
+
+    beforeEach(() => {
+        document.body.innerHTML = '';
+        window.webtricks = [];
+        jest.resetModules();
+        ({ RangeSlider, InitializeRangeSlider } = require('../Dist/Functional/RangeSlider.js'));
+    });
+
+    function mountRangeSlider() {
+        document.body.innerHTML = `
+      <div wt-rangeslider-element="slider-wrapper">
+        <div wt-rangeslider-element="slider"
+             wt-rangeslider-min="0"
+             wt-rangeslider-max="100"
+             wt-rangeslider-steps="1">
+          <div wt-rangeslider-element="range"></div>
+          <div wt-rangeslider-element="thumb-left"></div>
+          <div wt-rangeslider-element="thumb-right"></div>
+          <input type="range" wt-rangeslider-element="input-left" />
+          <input type="range" wt-rangeslider-element="input-right" />
+        </div>
+      </div>
+    `;
+    }
+
+    test('constructor sets initial values from min/max', () => {
+        mountRangeSlider();
+        const wrapper = document.querySelector(
+            '[wt-rangeslider-element="slider-wrapper"]',
+        );
+        new RangeSlider(wrapper);
+        const left = wrapper.querySelector('[wt-rangeslider-element="input-left"]');
+        const right = wrapper.querySelector('[wt-rangeslider-element="input-right"]');
+        expect(left.value).toBe('0');
+        expect(right.value).toBe('100');
+    });
+
+    test('InitializeRangeSlider pushes instance to webtricks', () => {
+        mountRangeSlider();
+        InitializeRangeSlider();
+        expect(window.webtricks.some((e) => e.RangeSlider)).toBe(true);
+    });
+
+    describe('constraint numeric parsing (integers and decimals)', () => {
+        test('integer string handles setRange without truncation', () => {
+            mountRangeSlider();
+            const wrapper = document.querySelector(
+                '[wt-rangeslider-element="slider-wrapper"]',
+            );
+            const rs = new RangeSlider(wrapper);
+            rs.setRange('33', '77');
+            const left = wrapper.querySelector(
+                '[wt-rangeslider-element="input-left"]',
+            );
+            const right = wrapper.querySelector(
+                '[wt-rangeslider-element="input-right"]',
+            );
+            expect(left.value).toBe('33');
+            expect(right.value).toBe('77');
+        });
+
+        test('decimal string handles keep fractional precision when constraining', () => {
+            document.body.innerHTML = `
+      <div wt-rangeslider-element="slider-wrapper">
+        <div wt-rangeslider-element="slider"
+             wt-rangeslider-min="0"
+             wt-rangeslider-max="10"
+             wt-rangeslider-steps="0.1"
+             wt-rangeslider-mindifference="0.2">
+          <div wt-rangeslider-element="range"></div>
+          <div wt-rangeslider-element="thumb-left"></div>
+          <div wt-rangeslider-element="thumb-right"></div>
+          <input type="range" wt-rangeslider-element="input-left" />
+          <input type="range" wt-rangeslider-element="input-right" />
+        </div>
+      </div>
+    `;
+            const wrapper = document.querySelector(
+                '[wt-rangeslider-element="slider-wrapper"]',
+            );
+            const rs = new RangeSlider(wrapper);
+            rs.setTo('2.5');
+            rs.setFrom('2.35');
+            const left = wrapper.querySelector(
+                '[wt-rangeslider-element="input-left"]',
+            );
+            expect(left.value).toBe('2.3');
+        });
+    });
+
+    test('decimal mindifference constrains without parseInt truncation', () => {
+        document.body.innerHTML = `
+      <div wt-rangeslider-element="slider-wrapper">
+        <div wt-rangeslider-element="slider"
+             wt-rangeslider-min="0"
+             wt-rangeslider-max="10"
+             wt-rangeslider-steps="0.1"
+             wt-rangeslider-mindifference="0.3">
+          <div wt-rangeslider-element="range"></div>
+          <div wt-rangeslider-element="thumb-left"></div>
+          <div wt-rangeslider-element="thumb-right"></div>
+          <input type="range" wt-rangeslider-element="input-left" />
+          <input type="range" wt-rangeslider-element="input-right" />
+        </div>
+      </div>
+    `;
+        const wrapper = document.querySelector(
+            '[wt-rangeslider-element="slider-wrapper"]',
+        );
+        const rs = new RangeSlider(wrapper);
+        rs.setTo('5');
+        rs.setFrom('4.9');
+        const left = wrapper.querySelector('[wt-rangeslider-element="input-left"]');
+        expect(left.value).toBe('4.7');
+    });
+});

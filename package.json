@@ -1,0 +1,22 @@
+{
+  "name": "webtricks",
+  "version": "1.0.0",
+  "description": "Vanilla JavaScript utility functions",
+  "type": "module",
+  "scripts": {
+    "test": "jest --runInBand --coverage --coverageReporters=text-summary --coverageReporters=lcov --coverageReporters=json-summary"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!**/node_modules/**",
+      "!**/coverage/**",
+      "!jest.config.js"
+    ]
+  }
+}

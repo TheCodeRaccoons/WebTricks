@@ -85,3 +85,10 @@ if (/complete|interactive|loaded/.test(document.readyState)) {
 } else {
     window.addEventListener('DOMContentLoaded', InitializeFormatNumbers);
 }
+
+// Allow requiring this module in test environments without affecting browser usage
+try {
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = { NumberFormatter, InitializeFormatNumbers };
+    }
+} catch {}

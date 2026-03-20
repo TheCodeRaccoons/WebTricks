@@ -1,12 +1,15 @@
 # ShareLink
 
 ## Version
+
 Current Version: 1.0.0
 
 ## Description
+
 ShareLink is a lightweight script that enables easy social media sharing functionality. It automatically generates sharing URLs for various social media platforms and handles the sharing process through their respective APIs.
 
 ## Functionality
+
 - Supports multiple social media platforms
 - Automatic URL encoding
 - Title and description handling
@@ -15,14 +18,17 @@ ShareLink is a lightweight script that enables easy social media sharing functio
 - Error handling for unsupported platforms
 
 ## Usage
+
 Add the script to your project and include the required attributes on your sharing elements.
 
 ### Installation
+
 ```html
 <script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@1/Dist/Functional/ShareLink.min.js"></script>
 ```
 
 ### Required Attributes
+
 - `wt-share-element="platform"` - Applied to the sharing link/button, where platform is one of:
   - `facebook`
   - `twitter`
@@ -33,6 +39,7 @@ Add the script to your project and include the required attributes on your shari
   - `copy` (for copy to clipboard functionality)
 
 ## Considerations
+
 1. **URL Encoding**: Automatically handles URL encoding for special characters
 2. **Meta Data**: Uses document title for sharing descriptions
 3. **Multiple Instances**: Supports multiple share buttons on the same page
@@ -42,6 +49,7 @@ Add the script to your project and include the required attributes on your shari
 ## Examples
 
 ### Basic Implementation
+
 ```html
 <!-- Facebook share button -->
 <a wt-share-element="facebook">Share on Facebook</a>
@@ -54,6 +62,7 @@ Add the script to your project and include the required attributes on your shari
 ```
 
 ### Complete Social Media Implementation
+
 ```html
 <div class="social-share">
     <a wt-share-element="facebook">Facebook</a>
@@ -67,6 +76,7 @@ Add the script to your project and include the required attributes on your shari
 ```
 
 ### Common Use Cases
+
 1. Blog post sharing
 2. Product sharing on e-commerce sites
 3. Social media integration

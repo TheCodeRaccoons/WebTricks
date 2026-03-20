@@ -5,7 +5,7 @@ class CopyToClipboard {
         this.ctcTarget      = this.ctcContainer.querySelector(`[wt-copycb-element="target"]`) || null; 
         this.textTarget     = this.ctcTrigger.querySelector(`[wt-copycb-element="texttarget"]`) || null; 
         this.ctcDefaultTxt  = this.ctcTrigger.innerText;
-        this.textToCopy     = this.ctcTarget.innerText;
+        this.textToCopy     = this.ctcTarget ? this.ctcTarget.innerText : '';
         this.copiedTxt      = this.ctcTrigger.getAttribute("wt-copycb-message") || null;
         this.activeClass    = this.ctcTrigger.getAttribute('wt-copycb-active') || 'is-copy';
         this.timeOut        = this.ctcTrigger.getAttribute('wt-copycb-timeout') || 2000;
@@ -54,3 +54,10 @@ if (/complete|interactive|loaded/.test(document.readyState)) {
 } else {
     window.addEventListener('DOMContentLoaded', initializeCopyToClipboard);
 }
+
+// Allow requiring this module in test environments without affecting browser usage
+try {
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = { CopyToClipboard, InitializeCopyToClipboard: initializeCopyToClipboard };
+    }
+} catch {}

@@ -1,12 +1,15 @@
 # DateCountDown
 
 ## Version
+
 Current Version: 1.0.0 (Experimental)
 
 ## Description
+
 DateCountDown is a countdown timer script that displays the time remaining until a target date. It supports separate displays for years, months, days, hours, minutes, and seconds, with automatic updates every second.
 
 ## Functionality
+
 - Countdown to target date
 - Separate time unit displays
 - Real-time updates
@@ -16,17 +19,21 @@ DateCountDown is a countdown timer script that displays the time remaining until
 - Time unit separation
 
 ## Usage
+
 Add the script to your project and include the required attributes on your countdown elements.
 
 ### Installation
+
 ```html
 <script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@1/Dist/Functional/Experimental/DateCountDown.min.js"></script>
 ```
 
 ### Required Attributes
+
 - `wt-datecount-element="target-date"` - Applied to element containing the target date
 
 ### Optional Elements
+
 - `wt-datecount-element="target-year"` - Display years remaining
 - `wt-datecount-element="target-month"` - Display months remaining
 - `wt-datecount-element="target-day"` - Display days remaining
@@ -35,6 +42,7 @@ Add the script to your project and include the required attributes on your count
 - `wt-datecount-element="target-second"` - Display seconds remaining
 
 ## Considerations
+
 1. **Date Format**: Uses standard JavaScript Date parsing
 2. **Performance**: Updates every second using setInterval
 3. **Validation**: Includes date validation to prevent errors
@@ -44,6 +52,7 @@ Add the script to your project and include the required attributes on your count
 ## Examples
 
 ### Basic Implementation
+
 ```html
 <!-- Target date -->
 <div wt-datecount-element="target-date">2025-12-31</div>
@@ -56,6 +65,7 @@ Add the script to your project and include the required attributes on your count
 ```
 
 ### Full Implementation
+
 ```html
 <div class="countdown-wrapper">
     <!-- Target date -->
@@ -100,6 +110,7 @@ Add the script to your project and include the required attributes on your count
 ```
 
 ### CSS Styling Example
+
 ```css
 .countdown-unit {
     text-align: center;
@@ -119,6 +130,7 @@ Add the script to your project and include the required attributes on your count
 ```
 
 ### Common Use Cases
+
 1. Event countdown timers
 2. Launch date countdowns
 3. Sale end time displays
@@ -126,6 +138,7 @@ Add the script to your project and include the required attributes on your count
 5. Holiday countdown displays
 
 ### Best Practices
+
 1. Always validate the target date
 2. Consider timezone differences
 3. Use clear labels for time units
