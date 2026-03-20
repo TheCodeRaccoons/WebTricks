@@ -67,7 +67,62 @@ describe('RangeSliderSimple', () => {
         expect(window.webtricks.some((e) => e.RangeSliderSimple)).toBe(true);
     });
 
-    test('integer step and minDifference still constrain (parseFloat handles whole numbers)', () => {
+    describe('constraint numeric parsing (supports integers and decimals, not parseInt truncation)', () => {
+        test('integer string handles setRange without truncation', () => {
+            mountSlider();
+            const wrapper = document.querySelector(
+                '[wt-rangeslidersimple-element="slider-wrapper"]',
+            );
+            const instance = new RangeSliderSimple(wrapper);
+            const left = wrapper.querySelector(
+                '[wt-rangeslidersimple-element="input-left"]',
+            );
+            const right = wrapper.querySelector(
+                '[wt-rangeslidersimple-element="input-right"]',
+            );
+
+            instance.setRange('33', '77');
+
+            expect(left.value).toBe('33');
+            expect(right.value).toBe('77');
+        });
+
+        test('decimal string handles keep fractional precision when constraining', () => {
+            document.body.innerHTML = `
+      <div wt-rangeslidersimple-element="slider-wrapper">
+        <div wt-rangeslidersimple-element="slider"
+             wt-rangeslidersimple-min="0"
+             wt-rangeslidersimple-max="10"
+             wt-rangeslidersimple-steps="0.1"
+             wt-rangeslidersimple-mindifference="0.2">
+          <input type="range" wt-rangeslidersimple-element="input-left" />
+          <input type="range" wt-rangeslidersimple-element="input-right" />
+        </div>
+      </div>
+    `;
+            const wrapper = document.querySelector(
+                '[wt-rangeslidersimple-element="slider-wrapper"]',
+            );
+            const instance = new RangeSliderSimple(wrapper);
+
+            instance.setTo('2.5');
+            instance.setFrom('2.35');
+
+            // min(2.35, 2.5 - 0.2) = 2.3 — parseInt would wrongly use min(2, 2.3) = 2
+            expect(
+                wrapper.querySelector(
+                    '[wt-rangeslidersimple-element="input-left"]',
+                ).value,
+            ).toBe('2.3');
+            expect(
+                wrapper.querySelector(
+                    '[wt-rangeslidersimple-element="input-right"]',
+                ).value,
+            ).toBe('2.5');
+        });
+    });
+
+    test('integer step and minDifference still constrain (Number handles whole numbers)', () => {
         mountSlider();
         const wrapper = document.querySelector(
             '[wt-rangeslidersimple-element="slider-wrapper"]',

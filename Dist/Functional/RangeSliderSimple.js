@@ -47,15 +47,15 @@ var __WT_RANGE_SLIDER_SIMPLE_CORE = (function () {
 
     function constrainLeftValue(rawValue, rightValueStr, minDifference) {
         return Math.min(
-            parseFloat(rawValue),
-            parseFloat(rightValueStr) - minDifference,
+            Number(rawValue),
+            Number(rightValueStr) - minDifference,
         );
     }
 
     function constrainRightValue(rawValue, leftValueStr, minDifference) {
         return Math.max(
-            parseFloat(rawValue),
-            parseFloat(leftValueStr) + minDifference,
+            Number(rawValue),
+            Number(leftValueStr) + minDifference,
         );
     }
 
