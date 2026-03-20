@@ -26,8 +26,10 @@ The script is **self-contained** (single file, one `<script>` tag).
 One script tag. Use [jsDelivr](https://www.jsdelivr.com/) (not raw GitHub URLs) so the MIME type is JavaScript.
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@main/Dist/Functional/RangeSliderSimple.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@1/Dist/Functional/RangeSliderSimple.js"></script>
 ```
+
+Pin with a [GitHub release](https://github.com/TheCodeRaccoons/WebTricks/releases) tag or commit hash instead of `@main` when you need a fixed build.
 
 ## Required attributes
 

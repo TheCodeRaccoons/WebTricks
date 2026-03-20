@@ -82,14 +82,16 @@ Multiple Scripts: Add as many scripts as you need to your project by referencing
 **Range sliders:** each script is **self-contained** (one tag). Use **`RangeSlider.js`** for custom thumbs or **`RangeSliderSimple.js`** for native thumbs only. Use jsDelivr (not raw `githubusercontent.com`, which often serves `text/plain` and blocks execution).
 
 ```
-<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@main/Dist/Functional/RangeSlider.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@1/Dist/Functional/RangeSlider.js"></script>
 ```
 
-Native-thumb variant:
+Native-thumb variant (`RangeSliderSimple` is **1.0.0** in source; pin further with a [release tag](https://github.com/TheCodeRaccoons/WebTricks/releases) or commit hash if you need an exact file):
 
 ```
-<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@main/Dist/Functional/RangeSliderSimple.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@1/Dist/Functional/RangeSliderSimple.js"></script>
 ```
+
+Prefer **`@1`**, a **semver release tag** (e.g. `@v1.0.0`), or a **commit SHA** over **`@main`** for production embeds so the script URL does not move unexpectedly.
 
 If a page uses **both** slider types, you may include **both** scripts; they use separate attribute namespaces (`wt-rangeslider-*` vs `wt-rangeslidersimple-*`).
 

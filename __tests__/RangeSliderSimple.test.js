@@ -44,8 +44,19 @@ describe('RangeSliderSimple', () => {
         const right = wrapper.querySelector(
             '[wt-rangeslidersimple-element="input-right"]',
         );
+        const displayFrom = wrapper.querySelector(
+            '[wt-rangeslidersimple-display="from"]',
+        );
+        const displayTo = wrapper.querySelector(
+            '[wt-rangeslidersimple-display="to"]',
+        );
         expect(left.value).toBe('0');
         expect(right.value).toBe('100');
+        expect(left.min).toBe('0');
+        expect(left.max).toBe('100');
+        expect(left.step).toBe('1');
+        expect(displayFrom.textContent).toBe('0');
+        expect(displayTo.textContent).toBe('100');
         expect(instance.sliderMin).toBe(0);
         expect(instance.sliderMax).toBe(100);
     });
@@ -94,6 +105,27 @@ describe('RangeSliderSimple', () => {
             '[wt-rangeslidersimple-element="slider-wrapper"]',
         );
         const instance = new RangeSliderSimple(wrapper);
+
+        instance.setTo('5');
+        instance.setFrom('4.9');
+
+        // min(4.9, 5 - 0.3) = 4.7 — parseInt would wrongly yield 4
+        expect(
+            wrapper.querySelector('[wt-rangeslidersimple-element="input-left"]')
+                .value,
+        ).toBe('4.7');
+        expect(
+            wrapper.querySelector('[wt-rangeslidersimple-element="input-right"]')
+                .value,
+        ).toBe('5');
+    });
+
+    test('constrainRightValue keeps at least minDifference above left handle', () => {
+        mountSlider();
+        const wrapper = document.querySelector(
+            '[wt-rangeslidersimple-element="slider-wrapper"]',
+        );
+        const instance = new RangeSliderSimple(wrapper);
         const left = wrapper.querySelector(
             '[wt-rangeslidersimple-element="input-left"]',
         );
@@ -101,11 +133,29 @@ describe('RangeSliderSimple', () => {
             '[wt-rangeslidersimple-element="input-right"]',
         );
 
-        instance.setTo('5');
-        instance.setFrom('4.9');
+        instance.setFrom('60');
+        instance.setTo('30');
 
-        // min(4.9, 5 - 0.3) = 4.7 — parseInt would wrongly yield 4
-        expect(left.value).toBe('4.7');
-        expect(right.value).toBe('5');
+        // max(30, 60 + 1) = 61 with mindifference === 1
+        expect(left.value).toBe('60');
+        expect(right.value).toBe('61');
+    });
+
+    test('reset restores min and max on both inputs', () => {
+        mountSlider();
+        const wrapper = document.querySelector(
+            '[wt-rangeslidersimple-element="slider-wrapper"]',
+        );
+        const instance = new RangeSliderSimple(wrapper);
+        instance.setRange('40', '50');
+        instance.reset();
+        const left = wrapper.querySelector(
+            '[wt-rangeslidersimple-element="input-left"]',
+        );
+        const right = wrapper.querySelector(
+            '[wt-rangeslidersimple-element="input-right"]',
+        );
+        expect(left.value).toBe('0');
+        expect(right.value).toBe('100');
     });
 });

@@ -30,9 +30,13 @@ Add the script to your project and include the required attributes and elements 
 
 Self-contained: **one** script tag. Use [jsDelivr](https://www.jsdelivr.com/) (not raw GitHub URLs) so the MIME type is JavaScript.
 
+Pin to a **Git tag** (not `@main`) so embeds don’t change when the default branch moves. This module is **1.1.0** above—use that release ref when it exists:
+
 ```html
-<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@main/Dist/Functional/RangeSlider.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/TheCodeRaccoons/WebTricks@v1.1.0/Dist/Functional/RangeSlider.js"></script>
 ```
+
+If `v1.1.0` is not published on the repo yet, use another tag from [Releases](https://github.com/TheCodeRaccoons/WebTricks/releases), a **commit SHA**, or `@1` (major ref; same idea as the main README) until you ship a matching tag.
 
 ### Required Attributes
 
