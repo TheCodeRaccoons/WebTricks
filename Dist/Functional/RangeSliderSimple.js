@@ -47,15 +47,15 @@ var __WT_RANGE_SLIDER_SIMPLE_CORE = (function () {
 
     function constrainLeftValue(rawValue, rightValueStr, minDifference) {
         return Math.min(
-            parseInt(rawValue, 10),
-            parseInt(rightValueStr, 10) - minDifference,
+            parseFloat(rawValue),
+            parseFloat(rightValueStr) - minDifference,
         );
     }
 
     function constrainRightValue(rawValue, leftValueStr, minDifference) {
         return Math.max(
-            parseInt(rawValue, 10),
-            parseInt(leftValueStr, 10) + minDifference,
+            parseFloat(rawValue),
+            parseFloat(leftValueStr) + minDifference,
         );
     }
 
@@ -313,13 +313,13 @@ class RangeSliderSimple {
 
     syncTrackFillPercents() {
         if (!this.slider || !this.inputLeft || !this.inputRight) return;
-        const min = parseInt(this.inputLeft.min, 10);
-        const max = parseInt(this.inputLeft.max, 10);
+        const min = parseFloat(this.inputLeft.min);
+        const max = parseFloat(this.inputLeft.max);
         const safeMin = Number.isFinite(min) ? min : 0;
         const safeMax = Number.isFinite(max) ? max : 100;
         const span = safeMax <= safeMin ? 1 : safeMax - safeMin;
-        const leftVal = parseInt(this.inputLeft.value, 10);
-        const rightVal = parseInt(this.inputRight.value, 10);
+        const leftVal = parseFloat(this.inputLeft.value);
+        const rightVal = parseFloat(this.inputRight.value);
         const safeL = Number.isFinite(leftVal) ? leftVal : safeMin;
         const safeR = Number.isFinite(rightVal) ? rightVal : safeMax;
         const pctFrom = ((safeL - safeMin) / span) * 100;

@@ -51,15 +51,15 @@ var __WT_RANGE_SLIDER_CORE = (function () {
 
     function constrainLeftValue(rawValue, rightValueStr, minDifference) {
         return Math.min(
-            parseInt(rawValue, 10),
-            parseInt(rightValueStr, 10) - minDifference,
+            parseFloat(rawValue),
+            parseFloat(rightValueStr) - minDifference,
         );
     }
 
     function constrainRightValue(rawValue, leftValueStr, minDifference) {
         return Math.max(
-            parseInt(rawValue, 10),
-            parseInt(leftValueStr, 10) + minDifference,
+            parseFloat(rawValue),
+            parseFloat(leftValueStr) + minDifference,
         );
     }
 
@@ -440,9 +440,9 @@ class RangeSlider {
     }
 
     updateThumbPosition(input, thumb, range, side) {
-        const min = parseInt(input.min, 10);
-        const max = parseInt(input.max, 10);
-        const current = parseInt(input.value, 10);
+        const min = parseFloat(input.min);
+        const max = parseFloat(input.max);
+        const current = parseFloat(input.value);
         const percent = ((current - min) / (max - min)) * 100;
 
         if (side === 'left') {
