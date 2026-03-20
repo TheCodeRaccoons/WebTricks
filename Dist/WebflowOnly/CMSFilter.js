@@ -652,7 +652,8 @@ class CMSFilter {
 
   ShowResultCount() {
     if (!this.resultCount) return;
-    this.resultCount.innerText = this.GetResults();
+    // textContent so updates are visible to tests and matches non-layout engines (e.g. jsdom)
+    this.resultCount.textContent = String(this.GetResults());
   }
 
   GetFilters() {
