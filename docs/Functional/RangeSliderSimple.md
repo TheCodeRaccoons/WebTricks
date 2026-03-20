@@ -42,8 +42,10 @@ One script tag. Use [jsDelivr](https://www.jsdelivr.com/) (not raw GitHub URLs) 
 
 - `wt-rangeslidersimple-min` — minimum value (number; default **0**)
 - `wt-rangeslidersimple-max` — maximum value (number; default **100**)
-- `wt-rangeslidersimple-steps` — `step` on both range inputs (number; default **1**). Use any **positive** step the browser accepts for `<input type="range">` (integers or decimals, e.g. `0.1`). Invalid number strings cause initialization to throw.
+- `wt-rangeslidersimple-steps` — `step` on both range inputs (number; default **1**). Use any **positive** step the browser accepts for `<input type="range">` (integers or decimals, e.g. `0.1`).
 - `wt-rangeslidersimple-mindifference` — minimum difference between the two values, in the same units as min/max (default: same as **steps**)
+
+For **min**, **max**, **steps**, and **mindifference**, values must be valid numbers. Invalid strings are configuration errors: the constructor logs `console.error` and **does not rethrow**, so that wrapper’s slider may not fully initialize (e.g. no usable instance on `window.webtricks`).
 
 ### Display and form text
 
