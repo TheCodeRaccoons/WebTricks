@@ -74,16 +74,13 @@ describe("CMSFilter", () => {
   }
 
   /** make, bodytype, Category — hybrid (bodytype self-exclude) vs advanced */
-  function buildHybridScenarioDOM(
-    filteringMode = "hybrid",
-    hybridCategoriesAttr,
-  ) {
+  function buildHybridScenarioDOM(filteringMode = "hybrid", hybridCategoriesAttr) {
     const modeAttr = filteringMode
       ? `wt-cmsfilter-filtering="${filteringMode}"`
       : "";
     const hybridAttr =
-      hybridCategoriesAttr !== undefined
-        ? `wt-cmsfilter-hybrid-categories="${hybridCategoriesAttr}"`
+      filteringMode === "hybrid"
+        ? ` wt-cmsfilter-hybrid-categories="${hybridCategoriesAttr ?? ""}"`
         : "";
     document.body.innerHTML = `
       <form wt-cmsfilter-element="filter-form" ${modeAttr} ${hybridAttr} wt-cmsfilter-debounce="0">
@@ -207,7 +204,7 @@ describe("CMSFilter", () => {
   });
 
   test("hybrid mode narrows make like advanced but keeps all relevant body types visible for multi-select", () => {
-    buildHybridScenarioDOM("hybrid");
+    buildHybridScenarioDOM("hybrid", "bodytype");
     InitializeCMSFilter();
     const form = document.querySelector('[wt-cmsfilter-element="filter-form"]');
     const toyota = Array.from(

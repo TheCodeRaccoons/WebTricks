@@ -780,20 +780,19 @@ class CMSFilter {
   /**
    * Categories whose checkbox availability ignores that facet’s own selections (hybrid mode).
    * Set on the form: wt-cmsfilter-hybrid-categories="bodytype" or "bodytype,colour"
-   * If the attribute is omitted, defaults to ["bodytype"]. If present but empty, no categories self-exclude.
+   * Omit or leave empty for no self-exclude categories (hybrid availability matches advanced for every facet).
    */
   getHybridSelfExcludeCategories() {
     const raw = this.filterForm.getAttribute(
       "wt-cmsfilter-hybrid-categories",
     );
-    if (raw === null) {
-      return ["bodytype"];
+    if (raw === null || raw.trim() === "") {
+      return [];
     }
-    const parsed = raw
+    return raw
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    return parsed;
   }
 
   UpdateAvailableFilters() {

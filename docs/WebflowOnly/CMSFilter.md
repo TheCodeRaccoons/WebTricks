@@ -49,7 +49,7 @@ Add the script to your Webflow project and include the required attributes on yo
 
 - `wt-cmsfilter-filtering="advanced"` - Enables advanced filtering mode with dynamic availability updates (every facet’s options narrow to the current result set; selecting one **make** hides other makes).
 - `wt-cmsfilter-filtering="hybrid"` - Like advanced, but selected categories (see below) keep **all** of their checkbox options that match the current filters **except** that category’s own selections (multi-select friendly). All **other** categories narrow from the current result set like **`advanced`**.
-- `wt-cmsfilter-hybrid-categories="bodytype"` - Comma-separated `wt-cmsfilter-category` names that use hybrid self-exclude behavior (e.g. `bodytype` or `bodytype,colour`). **If omitted**, defaults to **`bodytype`**. **If present but empty**, every facet narrows like **`advanced`** (no hybrid self-exclude). Requires matching `data-*` fields on list items for each listed category.
+- `wt-cmsfilter-hybrid-categories="bodytype"` - Comma-separated `wt-cmsfilter-category` names that use hybrid self-exclude behavior (e.g. `bodytype` or `bodytype,colour`). **Required** for any facet to use hybrid self-exclude; **omit or leave empty** if every facet should narrow like **`advanced`**. Requires matching `data-*` fields on list items for each listed category.
 - `wt-cmsfilter-trigger="button"` - Changes filter trigger to button submit instead of real-time
 - `wt-cmsfilter-class="classname"` - CSS class applied to active filter elements
 - `wt-cmsfilter-resetix2="true"` - Reset IX2 interactions on filtered items
