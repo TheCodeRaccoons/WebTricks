@@ -74,12 +74,19 @@ describe("CMSFilter", () => {
   }
 
   /** make, bodytype, Category — hybrid (bodytype self-exclude) vs advanced */
-  function buildHybridScenarioDOM(filteringMode = "hybrid") {
+  function buildHybridScenarioDOM(
+    filteringMode = "hybrid",
+    hybridCategoriesAttr,
+  ) {
     const modeAttr = filteringMode
       ? `wt-cmsfilter-filtering="${filteringMode}"`
       : "";
+    const hybridAttr =
+      hybridCategoriesAttr !== undefined
+        ? `wt-cmsfilter-hybrid-categories="${hybridCategoriesAttr}"`
+        : "";
     document.body.innerHTML = `
-      <form wt-cmsfilter-element="filter-form" ${modeAttr} wt-cmsfilter-debounce="0">
+      <form wt-cmsfilter-element="filter-form" ${modeAttr} ${hybridAttr} wt-cmsfilter-debounce="0">
         <label wt-cmsfilter-category="make"><input type="checkbox"><span>Toyota</span></label>
         <label wt-cmsfilter-category="make"><input type="checkbox"><span>Honda</span></label>
         <label wt-cmsfilter-category="bodytype"><input type="checkbox"><span>SUV</span></label>
@@ -233,6 +240,32 @@ describe("CMSFilter", () => {
       "SUV",
       "Sedan",
     ]);
+  });
+
+  test("hybrid with empty wt-cmsfilter-hybrid-categories narrows all facets like advanced", () => {
+    buildHybridScenarioDOM("hybrid", "");
+    InitializeCMSFilter();
+    const form = document.querySelector('[wt-cmsfilter-element="filter-form"]');
+    const toyota = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="make"]'),
+    ).find((l) => l.textContent.includes("Toyota"));
+    const suv = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="bodytype"]'),
+    ).find((l) => l.textContent.includes("SUV"));
+    toyota.querySelector("input").checked = true;
+    suv.querySelector("input").checked = true;
+    toyota
+      .querySelector("input")
+      .dispatchEvent(new Event("change", { bubbles: true }));
+    suv.querySelector("input").dispatchEvent(new Event("change", { bubbles: true }));
+    const instance = window.webtricks[0].CMSFilter;
+    instance.ApplyFilters();
+
+    const bodyLabels = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="bodytype"]'),
+    );
+    const visibleBody = bodyLabels.filter((l) => l.style.display !== "none");
+    expect(visibleBody.map((l) => l.textContent.trim())).toEqual(["SUV"]);
   });
 
   test("advanced mode hides sibling make and hides body types not in result set", () => {

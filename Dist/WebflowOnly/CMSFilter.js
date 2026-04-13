@@ -1,13 +1,6 @@
 "use strict";
 
 class CMSFilter {
-  /**
-   * For `wt-cmsfilter-filtering="hybrid"`, availability for these categories ignores
-   * that category's active filters (e.g. body type options stay available for multi-select
-   * while other facets narrow from the full filtered set).
-   */
-  static HYBRID_SELF_EXCLUDE_CATEGORIES = ["bodytype"];
-
   constructor() {
     //CORE elements
     this.filterForm = document.querySelector(
@@ -784,6 +777,25 @@ class CMSFilter {
     });
   }
 
+  /**
+   * Categories whose checkbox availability ignores that facet’s own selections (hybrid mode).
+   * Set on the form: wt-cmsfilter-hybrid-categories="bodytype" or "bodytype,colour"
+   * If the attribute is omitted, defaults to ["bodytype"]. If present but empty, no categories self-exclude.
+   */
+  getHybridSelfExcludeCategories() {
+    const raw = this.filterForm.getAttribute(
+      "wt-cmsfilter-hybrid-categories",
+    );
+    if (raw === null) {
+      return ["bodytype"];
+    }
+    const parsed = raw
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    return parsed;
+  }
+
   UpdateAvailableFilters() {
     const filteringMode = this.filterForm.getAttribute(
       "wt-cmsfilter-filtering",
@@ -800,7 +812,7 @@ class CMSFilter {
       if (
         filteringMode === "hybrid" &&
         categoryAttr &&
-        CMSFilter.HYBRID_SELF_EXCLUDE_CATEGORIES.includes(categoryAttr)
+        this.getHybridSelfExcludeCategories().includes(categoryAttr)
       ) {
         sourceItems = this.getFilteredItemsIgnoringCategories([categoryAttr]);
       }
