@@ -12,6 +12,7 @@ CMSFilter is a powerful Webflow-specific script that provides advanced filtering
 
 - Multiple filter types (checkbox, radio, text, range)
 - Advanced filtering with dynamic availability updates
+- Hybrid filtering mode (`hybrid`): advanced-style narrowing for **make** and other facets, while **body type** options stay available for multi-select
 - Pagination support with auto-loading across pages
 - Dynamic sorting (numeric, date, alphabetical)
 - Active filter tags with individual removal
@@ -46,7 +47,8 @@ Add the script to your Webflow project and include the required attributes on yo
 
 #### Core Filter Attributes
 
-- `wt-cmsfilter-filtering="advanced"` - Enables advanced filtering mode with dynamic availability updates
+- `wt-cmsfilter-filtering="advanced"` - Enables advanced filtering mode with dynamic availability updates (every facet’s options narrow to the current result set; selecting one **make** hides other makes).
+- `wt-cmsfilter-filtering="hybrid"` - Like advanced, but **`bodytype`** keeps **all** of its checkbox options that match the current filters **except** body type (so users can multi-select e.g. Minivan and SUV while other facets react). **`make`** and all other categories narrow from the current result set like **`advanced`**. Requires matching `data-bodytype` on list items (`wt-cmsfilter-category="bodytype"`).
 - `wt-cmsfilter-trigger="button"` - Changes filter trigger to button submit instead of real-time
 - `wt-cmsfilter-class="classname"` - CSS class applied to active filter elements
 - `wt-cmsfilter-resetix2="true"` - Reset IX2 interactions on filtered items

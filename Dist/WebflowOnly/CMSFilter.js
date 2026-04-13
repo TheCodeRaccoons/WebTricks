@@ -1,6 +1,13 @@
 "use strict";
 
 class CMSFilter {
+  /**
+   * For `wt-cmsfilter-filtering="hybrid"`, availability for these categories ignores
+   * that category's active filters (e.g. body type options stay available for multi-select
+   * while other facets narrow from the full filtered set).
+   */
+  static HYBRID_SELF_EXCLUDE_CATEGORIES = ["bodytype"];
+
   constructor() {
     //CORE elements
     this.filterForm = document.querySelector(
@@ -559,88 +566,100 @@ class CMSFilter {
     });
   }
 
-  ApplyFilters() {
-    const filters = this.GetFilters();
-    this.currentPage = 1; // Reset pagination to first page
-    this.filteredItems = this.allItems.filter((item) => {
-      return Object.keys(filters).every((category) => {
-        // Fix 1: Safari-compatible array handling
-        const categoryFilters = filters[category] || [];
-        const values = Array.isArray(categoryFilters)
-          ? categoryFilters.slice()
-          : [];
-        if (values.length === 0) return true;
+  /**
+   * Whether a single list item matches the given filter map (same rules as ApplyFilters).
+   */
+  itemMatchesFilters(item, filters) {
+    return Object.keys(filters).every((category) => {
+      const categoryFilters = filters[category] || [];
+      const values = Array.isArray(categoryFilters)
+        ? categoryFilters.slice()
+        : [];
+      if (values.length === 0) return true;
 
-        // Use cached search data instead of live DOM queries
-        const searchCache = item._wtSearchCache;
-        if (!searchCache) {
-          console.warn(
-            "Search cache missing for item, falling back to live query",
-          );
-          // Fallback to original method if cache is missing
-          const categoryElement = item.querySelector(
-            `[wt-cmsfilter-category="${category}"]`,
-          );
-          let matchingText = "";
-          if (categoryElement && categoryElement.innerText) {
-            matchingText = categoryElement.innerText.toLowerCase();
-          }
-          matchingText = matchingText.replace(/(?:&nbsp;|\s)+/gi, " ");
+      const searchCache = item._wtSearchCache;
+      if (!searchCache) {
+        console.warn(
+          "Search cache missing for item, falling back to live query",
+        );
+        const categoryElement = item.querySelector(
+          `[wt-cmsfilter-category="${category}"]`,
+        );
+        let matchingText = "";
+        if (categoryElement && categoryElement.innerText) {
+          matchingText = categoryElement.innerText.toLowerCase();
         }
+        matchingText = matchingText.replace(/(?:&nbsp;|\s)+/gi, " ");
+      }
 
-        if (category === "*") {
-          // Global search using cached text
-          const globalText = searchCache ? searchCache.globalSearchText : "";
-          return (
-            values.some((value) => globalText.includes(value.toLowerCase())) ||
-            Object.values(item.dataset || {}).some((dataValue) =>
-              values.some((value) => {
-                if (dataValue && typeof dataValue.toLowerCase === "function") {
-                  return dataValue.toLowerCase().includes(value.toLowerCase());
-                }
-                return false;
-              }),
-            )
-          );
-        } else {
-          return values.some((value) => {
-            if (typeof value === "object" && value !== null) {
-              // Range filtering - use normalized dataset key
-              const datasetCategory = this.GetDataSet(category);
-              const datasetValue =
-                item.dataset && item.dataset[datasetCategory]
-                  ? item.dataset[datasetCategory]
-                  : "";
-              const itemValue = parseFloat(datasetValue);
-              if (isNaN(itemValue)) return false;
-              if (value.from !== null && value.to !== null) {
-                return itemValue >= value.from && itemValue <= value.to;
-              } else if (value.from !== null && value.to == null) {
-                return itemValue >= value.from;
-              } else if (value.from == null && value.to !== null) {
-                return itemValue <= value.to;
+      if (category === "*") {
+        const globalText = searchCache ? searchCache.globalSearchText : "";
+        return (
+          values.some((value) => globalText.includes(value.toLowerCase())) ||
+          Object.values(item.dataset || {}).some((dataValue) =>
+            values.some((value) => {
+              if (dataValue && typeof dataValue.toLowerCase === "function") {
+                return dataValue.toLowerCase().includes(value.toLowerCase());
               }
               return false;
-            } else {
-              // Text filtering using cached data
-              const datasetCategory = this.GetDataSet(category);
-              const cachedDatasetValue = searchCache
-                ? searchCache.datasetValues.get(datasetCategory) || ""
-                : "";
-              const cachedCategoryText = searchCache
-                ? searchCache.categoryTexts.get(category) || ""
-                : "";
-              const valueStr = value ? value.toString().toLowerCase() : "";
+            }),
+          )
+        );
+      }
+      return values.some((value) => {
+        if (typeof value === "object" && value !== null) {
+          const datasetCategory = this.GetDataSet(category);
+          const datasetValue =
+            item.dataset && item.dataset[datasetCategory]
+              ? item.dataset[datasetCategory]
+              : "";
+          const itemValue = parseFloat(datasetValue);
+          if (isNaN(itemValue)) return false;
+          if (value.from !== null && value.to !== null) {
+            return itemValue >= value.from && itemValue <= value.to;
+          } else if (value.from !== null && value.to == null) {
+            return itemValue >= value.from;
+          } else if (value.from == null && value.to !== null) {
+            return itemValue <= value.to;
+          }
+          return false;
+        } else {
+          const datasetCategory = this.GetDataSet(category);
+          const cachedDatasetValue = searchCache
+            ? searchCache.datasetValues.get(datasetCategory) || ""
+            : "";
+          const cachedCategoryText = searchCache
+            ? searchCache.categoryTexts.get(category) || ""
+            : "";
+          const valueStr = value ? value.toString().toLowerCase() : "";
 
-              return (
-                cachedDatasetValue.includes(valueStr) ||
-                cachedCategoryText.includes(valueStr)
-              );
-            }
-          });
+          return (
+            cachedDatasetValue.includes(valueStr) ||
+            cachedCategoryText.includes(valueStr)
+          );
         }
       });
     });
+  }
+
+  /**
+   * Items matching current filters but ignoring one or more categories (for hybrid availability).
+   */
+  getFilteredItemsIgnoringCategories(excludedCategoryAttrs) {
+    const filters = this.GetFilters();
+    const f = { ...filters };
+    excludedCategoryAttrs.forEach((cat) => {
+      f[cat] = [];
+    });
+    return this.allItems.filter((item) => this.itemMatchesFilters(item, f));
+  }
+
+  ApplyFilters() {
+    const filters = this.GetFilters();
+    this.currentPage = 1; // Reset pagination to first page
+    this.filteredItems = this.allItems.filter((item) =>
+      this.itemMatchesFilters(item, filters),
+    );
 
     this.activeFilters = filters;
     this.SortItems();
@@ -766,18 +785,29 @@ class CMSFilter {
   }
 
   UpdateAvailableFilters() {
-    if (this.filterForm.getAttribute("wt-cmsfilter-filtering") !== "advanced")
-      return;
+    const filteringMode = this.filterForm.getAttribute(
+      "wt-cmsfilter-filtering",
+    );
+    if (filteringMode !== "advanced" && filteringMode !== "hybrid") return;
+
     this.availableFilters = {};
 
     this.filterElements.forEach((element) => {
-      const category = this.GetDataSet(
-        element.getAttribute("wt-cmsfilter-category"),
-      );
+      const categoryAttr = element.getAttribute("wt-cmsfilter-category");
+      const category = this.GetDataSet(categoryAttr);
+
+      let sourceItems = this.filteredItems;
+      if (
+        filteringMode === "hybrid" &&
+        categoryAttr &&
+        CMSFilter.HYBRID_SELF_EXCLUDE_CATEGORIES.includes(categoryAttr)
+      ) {
+        sourceItems = this.getFilteredItemsIgnoringCategories([categoryAttr]);
+      }
 
       // Safari-compatible dataset access
       const availableValues = new Set(
-        this.filteredItems
+        sourceItems
           .map((item) =>
             item.dataset && item.dataset[category]
               ? item.dataset[category]
@@ -919,7 +949,10 @@ class CMSFilter {
             input.value = "";
           }
         } else if (input.type === "checkbox") {
-          if (advancedFiltering === "advanced") {
+          if (
+            advancedFiltering === "advanced" ||
+            advancedFiltering === "hybrid"
+          ) {
             input.checked = false;
           } else {
             if (categoryElement.innerText === value) {
