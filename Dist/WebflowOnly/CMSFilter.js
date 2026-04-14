@@ -852,6 +852,12 @@ class CMSFilter {
           }
         });
 
+        // Hybrid only: keep selected options visible so users can change or clear them
+        // when other facets (e.g. make) rule them out of the current result set.
+        if (filteringMode === "hybrid" && istoggle.checked) {
+          isAvailable = true;
+        }
+
         // Restore original display style or hide
         if (isAvailable) {
           // Restore original display style
