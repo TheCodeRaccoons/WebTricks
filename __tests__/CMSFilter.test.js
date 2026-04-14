@@ -73,6 +73,37 @@ describe("CMSFilter", () => {
     `;
   }
 
+  /** make, bodytype, Category — hybrid (bodytype self-exclude) vs advanced */
+  function buildHybridScenarioDOM(filteringMode = "hybrid", hybridCategoriesAttr) {
+    const modeAttr = filteringMode
+      ? `wt-cmsfilter-filtering="${filteringMode}"`
+      : "";
+    const hybridAttr =
+      filteringMode === "hybrid"
+        ? ` wt-cmsfilter-hybrid-categories="${hybridCategoriesAttr ?? ""}"`
+        : "";
+    document.body.innerHTML = `
+      <form wt-cmsfilter-element="filter-form" ${modeAttr} ${hybridAttr} wt-cmsfilter-debounce="0">
+        <label wt-cmsfilter-category="make"><input type="checkbox"><span>Toyota</span></label>
+        <label wt-cmsfilter-category="make"><input type="checkbox"><span>Honda</span></label>
+        <label wt-cmsfilter-category="bodytype"><input type="checkbox"><span>SUV</span></label>
+        <label wt-cmsfilter-category="bodytype"><input type="checkbox"><span>Sedan</span></label>
+        <label wt-cmsfilter-category="Category"><input type="checkbox"><span>Red</span></label>
+        <label wt-cmsfilter-category="Category"><input type="checkbox"><span>Blue</span></label>
+        <label wt-cmsfilter-category="*"><input type="text" /></label>
+        <select wt-cmsfilter-element="sort-options"><option value="title-asc">A</option></select>
+        <div wt-cmsfilter-element="results-count"></div>
+      </form>
+      <div id="tags-wrapper"><div wt-cmsfilter-element="tag-template"><span wt-cmsfilter-element="tag-text"></span><a href="#" wt-cmsfilter-element="tag-remove">x</a></div></div>
+      <div wt-cmsfilter-element="list">
+        <div class="item" data-title="t1" data-make="Toyota" data-bodytype="SUV" data-category="Red">T1</div>
+        <div class="item" data-title="t2" data-make="Toyota" data-bodytype="Sedan" data-category="Red">T2</div>
+        <div class="item" data-title="h1" data-make="Honda" data-bodytype="SUV" data-category="Blue">H1</div>
+      </div>
+      <div wt-cmsfilter-element="empty" style="display:none;"></div>
+    `;
+  }
+
   test("initializes and caches items, pushes instance", () => {
     buildBasicDOM();
     InitializeCMSFilter();
@@ -170,6 +201,100 @@ describe("CMSFilter", () => {
     const instance = window.webtricks[0].CMSFilter;
     const ordered = instance.filteredItems.map((i) => i.dataset.title);
     expect(ordered).toEqual(["gamma", "beta", "alpha"]);
+  });
+
+  test("hybrid mode narrows make like advanced but keeps all relevant body types visible for multi-select", () => {
+    buildHybridScenarioDOM("hybrid", "bodytype");
+    InitializeCMSFilter();
+    const form = document.querySelector('[wt-cmsfilter-element="filter-form"]');
+    const toyota = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="make"]'),
+    ).find((l) => l.textContent.includes("Toyota"));
+    const suv = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="bodytype"]'),
+    ).find((l) => l.textContent.includes("SUV"));
+    toyota.querySelector("input").checked = true;
+    suv.querySelector("input").checked = true;
+    toyota
+      .querySelector("input")
+      .dispatchEvent(new Event("change", { bubbles: true }));
+    suv.querySelector("input").dispatchEvent(new Event("change", { bubbles: true }));
+    const instance = window.webtricks[0].CMSFilter;
+    instance.ApplyFilters();
+
+    expect(instance.filteredItems.length).toBe(1);
+    const makeLabels = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="make"]'),
+    );
+    const visibleMake = makeLabels.filter((l) => l.style.display !== "none");
+    expect(visibleMake.map((l) => l.textContent.trim())).toEqual(["Toyota"]);
+
+    const bodyLabels = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="bodytype"]'),
+    );
+    const visibleBody = bodyLabels.filter((l) => l.style.display !== "none");
+    expect(visibleBody.map((l) => l.textContent.trim()).sort()).toEqual([
+      "SUV",
+      "Sedan",
+    ]);
+  });
+
+  test("hybrid with empty wt-cmsfilter-hybrid-categories narrows all facets like advanced", () => {
+    buildHybridScenarioDOM("hybrid", "");
+    InitializeCMSFilter();
+    const form = document.querySelector('[wt-cmsfilter-element="filter-form"]');
+    const toyota = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="make"]'),
+    ).find((l) => l.textContent.includes("Toyota"));
+    const suv = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="bodytype"]'),
+    ).find((l) => l.textContent.includes("SUV"));
+    toyota.querySelector("input").checked = true;
+    suv.querySelector("input").checked = true;
+    toyota
+      .querySelector("input")
+      .dispatchEvent(new Event("change", { bubbles: true }));
+    suv.querySelector("input").dispatchEvent(new Event("change", { bubbles: true }));
+    const instance = window.webtricks[0].CMSFilter;
+    instance.ApplyFilters();
+
+    const bodyLabels = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="bodytype"]'),
+    );
+    const visibleBody = bodyLabels.filter((l) => l.style.display !== "none");
+    expect(visibleBody.map((l) => l.textContent.trim())).toEqual(["SUV"]);
+  });
+
+  test("advanced mode hides sibling make and hides body types not in result set", () => {
+    buildHybridScenarioDOM("advanced");
+    InitializeCMSFilter();
+    const form = document.querySelector('[wt-cmsfilter-element="filter-form"]');
+    const toyota = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="make"]'),
+    ).find((l) => l.textContent.includes("Toyota"));
+    const suv = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="bodytype"]'),
+    ).find((l) => l.textContent.includes("SUV"));
+    toyota.querySelector("input").checked = true;
+    suv.querySelector("input").checked = true;
+    toyota
+      .querySelector("input")
+      .dispatchEvent(new Event("change", { bubbles: true }));
+    suv.querySelector("input").dispatchEvent(new Event("change", { bubbles: true }));
+    const instance = window.webtricks[0].CMSFilter;
+    instance.ApplyFilters();
+
+    const makeLabels = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="make"]'),
+    );
+    const visibleMake = makeLabels.filter((l) => l.style.display !== "none");
+    expect(visibleMake.map((l) => l.textContent.trim())).toEqual(["Toyota"]);
+
+    const bodyLabels = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="bodytype"]'),
+    );
+    const visibleBody = bodyLabels.filter((l) => l.style.display !== "none");
+    expect(visibleBody.map((l) => l.textContent.trim())).toEqual(["SUV"]);
   });
 
   test("advanced filtering hides unavailable checkboxes then restores after clearing", () => {

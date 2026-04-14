@@ -12,6 +12,7 @@ CMSFilter is a powerful Webflow-specific script that provides advanced filtering
 
 - Multiple filter types (checkbox, radio, text, range)
 - Advanced filtering with dynamic availability updates
+- Hybrid filtering mode (`hybrid` + `wt-cmsfilter-hybrid-categories`): like advanced, but listed categories keep sibling checkbox options for multi-select; other facets narrow from the current result set
 - Pagination support with auto-loading across pages
 - Dynamic sorting (numeric, date, alphabetical)
 - Active filter tags with individual removal
@@ -46,7 +47,9 @@ Add the script to your Webflow project and include the required attributes on yo
 
 #### Core Filter Attributes
 
-- `wt-cmsfilter-filtering="advanced"` - Enables advanced filtering mode with dynamic availability updates
+- `wt-cmsfilter-filtering="advanced"` - Enables advanced filtering mode with dynamic availability updates (every facet’s options narrow to the current result set; selecting one **make** hides other makes).
+- `wt-cmsfilter-filtering="hybrid"` - Like advanced, but selected categories (see below) keep **all** of their checkbox options that match the current filters **except** that category’s own selections (multi-select friendly). All **other** categories narrow from the current result set like **`advanced`**.
+- `wt-cmsfilter-hybrid-categories="bodytype"` - Comma-separated `wt-cmsfilter-category` names that use hybrid self-exclude behavior (e.g. `bodytype` or `bodytype,colour`). **Required** for any facet to use hybrid self-exclude; **omit or leave empty** if every facet should narrow like **`advanced`**. Requires matching `data-*` fields on list items for each listed category.
 - `wt-cmsfilter-trigger="button"` - Changes filter trigger to button submit instead of real-time
 - `wt-cmsfilter-class="classname"` - CSS class applied to active filter elements
 - `wt-cmsfilter-resetix2="true"` - Reset IX2 interactions on filtered items
@@ -210,6 +213,27 @@ Add the script to your Webflow project and include the required attributes on yo
 </form>
 ```
 
+### Hybrid mode (advanced + multi-select on chosen facets)
+
+Use **`hybrid`** instead of **`advanced`** on the form, and set **`wt-cmsfilter-hybrid-categories`** to a comma-separated list of `wt-cmsfilter-category` values that should **not** hide sibling options when you select one value (e.g. body type so users can pick SUV and Minivan at once). **Omit** `wt-cmsfilter-hybrid-categories` or leave it **empty** if every facet should narrow like **`advanced`**. List items need matching `data-*` fields for each category you name.
+
+```html
+<form wt-cmsfilter-element="filter-form"
+      wt-cmsfilter-filtering="hybrid"
+      wt-cmsfilter-hybrid-categories="bodytype"
+      wt-cmsfilter-debounce="300">
+    <!-- make, model, etc.: narrow like advanced -->
+    <label wt-cmsfilter-category="make"><input type="checkbox"><span>Toyota</span></label>
+    <!-- bodytype: sibling options stay available for multi-select -->
+    <label wt-cmsfilter-category="bodytype"><input type="checkbox"><span>SUV</span></label>
+    <div wt-cmsfilter-element="list">
+        <div data-make="Toyota" data-bodytype="SUV">…</div>
+    </div>
+</form>
+```
+
+Multiple categories: `wt-cmsfilter-hybrid-categories="bodytype,colour"`.
+
 ### Button-Triggered Filtering
 
 ```html
@@ -247,7 +271,7 @@ Add the script to your Webflow project and include the required attributes on yo
 
 - Use debouncing for text inputs in large collections (adjust `wt-cmsfilter-debounce` value)
 - Enable pagination for collections with 50+ items
-- Use advanced filtering mode only when needed for better performance
+- Use advanced or hybrid filtering mode only when needed for better performance
 - Implement IX2 reset (`wt-cmsfilter-resetix2="true"`) sparingly as it impacts performance
 - Consider using button-triggered filtering for complex filter sets
 
