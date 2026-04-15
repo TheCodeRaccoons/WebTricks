@@ -239,6 +239,49 @@ describe("CMSFilter", () => {
     ]);
   });
 
+  test("hybrid keeps checked body types visible when current make rules them out", () => {
+    document.body.innerHTML = `
+      <form wt-cmsfilter-element="filter-form" wt-cmsfilter-filtering="hybrid" wt-cmsfilter-hybrid-categories="bodytype" wt-cmsfilter-debounce="0">
+        <label wt-cmsfilter-category="make"><input type="checkbox"><span>Toyota</span></label>
+        <label wt-cmsfilter-category="make"><input type="checkbox"><span>Honda</span></label>
+        <label wt-cmsfilter-category="bodytype"><input type="checkbox"><span>SUV</span></label>
+        <label wt-cmsfilter-category="bodytype"><input type="checkbox"><span>Hatchback</span></label>
+        <select wt-cmsfilter-element="sort-options"><option value="title-asc">A</option></select>
+        <div wt-cmsfilter-element="results-count"></div>
+      </form>
+      <div wt-cmsfilter-element="list">
+        <div data-make="Toyota" data-bodytype="SUV">T</div>
+        <div data-make="Honda" data-bodytype="Hatchback">H</div>
+      </div>
+      <div wt-cmsfilter-element="empty" style="display:none;"></div>
+    `;
+    InitializeCMSFilter();
+    const form = document.querySelector('[wt-cmsfilter-element="filter-form"]');
+    const honda = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="make"]'),
+    ).find((l) => l.textContent.includes("Honda"));
+    const suv = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="bodytype"]'),
+    ).find((l) => l.textContent.includes("SUV"));
+    const hatch = Array.from(
+      form.querySelectorAll('label[wt-cmsfilter-category="bodytype"]'),
+    ).find((l) => l.textContent.includes("Hatchback"));
+    suv.querySelector("input").checked = true;
+    hatch.querySelector("input").checked = true;
+    honda.querySelector("input").checked = true;
+    [suv, hatch, honda].forEach((el) =>
+      el
+        .querySelector("input")
+        .dispatchEvent(new Event("change", { bubbles: true })),
+    );
+    const instance = window.webtricks[0].CMSFilter;
+    instance.ApplyFilters();
+
+    expect(instance.filteredItems.length).toBe(1);
+    expect(suv.style.display).not.toBe("none");
+    expect(hatch.style.display).not.toBe("none");
+  });
+
   test("hybrid with empty wt-cmsfilter-hybrid-categories narrows all facets like advanced", () => {
     buildHybridScenarioDOM("hybrid", "");
     InitializeCMSFilter();
